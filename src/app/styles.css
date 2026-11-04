@@ -36,7 +36,7 @@ body {
 #app {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  min-height: 100%;
   max-width: 720px;
   margin: 0 auto;
   padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom);
@@ -67,26 +67,23 @@ body {
 }
 
 .screen {
-  flex: 1;
+  flex: 1 0 auto;
   display: flex;
   flex-direction: column;
-  min-height: 0;
 }
 .practice,
 .lesson {
   display: flex;
   flex-direction: column;
-  flex: 1;
-  min-height: 0;
+  flex: 1 0 auto;
   gap: 12px;
   padding-bottom: 16px;
 }
 .panel {
   display: flex;
   flex-direction: column;
-  flex: 1;
+  flex: 1 0 auto;
   gap: 12px;
-  min-height: 0;
 }
 .stage {
   flex: 1;
@@ -645,4 +642,111 @@ button:focus-visible,
   border-radius: 10px;
   border: 2px solid var(--accent);
   margin: 4px 0 12px;
+}
+
+/* Timer */
+.timer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-bottom: 16px;
+}
+.timer h2 {
+  margin: 4px 0 0;
+}
+.scramble-line {
+  margin: 0;
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+.scramble-line .label {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-right: 6px;
+}
+.scramble-line code {
+  font-weight: 700;
+  word-spacing: 4px;
+}
+button.small {
+  min-height: 40px;
+  align-self: flex-start;
+  padding: 0 14px;
+}
+.clock {
+  min-height: 200px;
+  font-size: clamp(3rem, 18vw, 6rem);
+  font-variant-numeric: tabular-nums;
+  border-radius: 20px;
+}
+.clock.running {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.clock-help,
+.badge-line {
+  margin: 0;
+  text-align: center;
+  color: var(--muted);
+}
+.badge-line:empty {
+  display: none;
+}
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.stats div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+}
+.stats span {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.stats strong {
+  font-size: 1.3rem;
+  font-variant-numeric: tabular-nums;
+}
+.times {
+  margin: 0;
+  padding-left: 28px;
+}
+.times li {
+  padding: 2px 0;
+  font-variant-numeric: tabular-nums;
+}
+.times li span {
+  display: inline-block;
+  min-width: 80px;
+}
+.times .del {
+  min-height: 32px;
+  width: 32px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+}
+.timer-link .num {
+  background: #b5179e;
+}
+.algs summary {
+  cursor: pointer;
+  font-weight: 600;
+  min-height: 32px;
+}
+.pad.wide {
+  grid-template-columns: repeat(8, 1fr);
+  gap: 6px;
+}
+.pad.wide button {
+  min-height: 44px;
+  padding: 0;
 }

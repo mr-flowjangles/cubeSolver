@@ -10,7 +10,7 @@ The **Now:** line below names the milestone(s) being worked on, comma-separated 
 
 **Status: milestone order M1–M7 agreed 2026-11-04.**
 
-**Now:** M6
+**Now:** M7
 
 ## v1 — Definition of Done
 
@@ -18,8 +18,8 @@ v1 ships when **all** of the following are true:
 
 - [ ] Live on GitHub Pages, installable on iPhone and Android.
 - [ ] Works offline after the first visit.
-- [ ] A beginner can go from level 1 to a full solve using only the app.
-- [ ] CFOP levels are playable.
+- [x] A beginner can go from level 1 to a full solve using only the app.
+- [x] CFOP levels are playable.
 - [ ] Camera scan of a real cube leads to a guided solve.
 - [ ] All milestones below are checked.
 - [ ] `README.md` has a quickstart.
@@ -110,9 +110,9 @@ Goal: scan a real cube instead of entering it by hand.
 
 Goal: teach CFOP after the beginner method.
 
-- [ ] Cross, F2L, OLL, PLL levels.
-- [ ] CFOP move-sequence lists, each checked by the cube model.
-- [ ] Solve timer and personal bests.
+- [x] Cross, F2L, OLL, PLL levels.
+- [x] CFOP move-sequence lists, each checked by the cube model.
+- [x] Solve timer and personal bests.
 
 **Done when:** a player who finished the beginner levels can learn and practice full CFOP.
 

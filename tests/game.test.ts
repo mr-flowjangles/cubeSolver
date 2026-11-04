@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { EMPTY, RANKS, XP, isUnlocked, rankOf, recordPass } from "../src/game/rules";
+import {
+  EMPTY,
+  RANKS,
+  XP,
+  isUnlocked,
+  rankOf,
+  recordPass,
+  recordTimedSolve,
+} from "../src/game/rules";
+import { formatTime, stats } from "../src/game/times";
 
 const ORDER = ["meet", "cross", "corners", "middle", "full"];
 const run = (usedHelp = true) => ({ usedHelp, moves: 30, seconds: 60 });
@@ -103,5 +112,28 @@ describe("badges", () => {
       p = r.progress;
     }
     expect(r!.newBadges.map((b) => b.id)).toContain("all-beginner");
+  });
+});
+
+describe("timer", () => {
+  const t = (seconds: number) => ({ seconds, scramble: "", date: "2026-11-04" });
+  it("best and average of 5 (drop best and worst)", () => {
+    expect(stats([])).toEqual({ best: undefined, ao5: undefined, count: 0 });
+    const s = stats([t(50), t(40), t(30), t(60), t(45), t(35)]);
+    expect(s.best).toBe(30);
+    // last 5: 40 30 60 45 35 → drop 30 and 60 → (35+40+45)/3 = 40
+    expect(s.ao5).toBeCloseTo(40);
+  });
+  it("formats times like a speedcubing timer", () => {
+    expect(formatTime(7.5)).toBe("7.50");
+    expect(formatTime(65.25)).toBe("1:05.25");
+    expect(formatTime(undefined)).toBe("—");
+  });
+  it("time badges", () => {
+    const a = recordTimedSolve(EMPTY, 45, "2026-11-04");
+    expect(a.newBadges.map((b) => b.id)).toEqual(["sub-60"]);
+    const b = recordTimedSolve(a.progress, 25, "2026-11-04");
+    expect(b.newBadges.map((x) => x.id)).toEqual(["sub-30"]);
+    expect(b.xpGained).toBe(0);
   });
 });

@@ -17,10 +17,11 @@ import {
   solved,
   toString,
 } from "../cube";
-import { BEGINNER_LEVELS } from "../lessons/beginner";
+import { type GuideStep, METHODS } from "../lessons/index";
+import { loadProgress } from "../game/storage";
 import { CubeView } from "../render/cubeView";
 import { ADA_SHAPE, shapeSvg } from "../render/shapes";
-import { type SolveStep, type StageId, solveBeginner } from "../solver/beginner";
+import { solveBeginner } from "../solver/beginner";
 import { mountScan } from "./scan";
 import { loadSettings } from "./settings";
 import type { Screen } from "./shell";
@@ -187,19 +188,18 @@ function mountEnter(root: HTMLElement, fromScan = false): Screen {
   return { dispose() {} };
 }
 
-const STAGE_TITLE: Record<StageId, string> = {
-  hold: "Get ready",
-  ...(Object.fromEntries(
-    BEGINNER_LEVELS.filter((l) => l.stage).map((l) => [l.stage, l.title]),
-  ) as Record<Exclude<StageId, "hold">, string>),
-};
+/** Guide with the method the player has learned: CFOP once they've passed F2L pairs. */
+function guideMethod() {
+  return (loadProgress().levels["cfopF2l"]?.passes ?? 0) > 0 ? METHODS.cfop : METHODS.beginner;
+}
 
 function mountGuide(root: HTMLElement): Screen {
+  const method = guideMethod();
   let start: CubeState;
-  let steps: SolveStep[];
+  let steps: GuideStep[];
   try {
     start = fromString(loadEntered().join(""));
-    steps = solveBeginner(start);
+    steps = method.solve(start);
   } catch {
     location.hash = "#/solve";
     return { dispose() {} };
@@ -223,7 +223,7 @@ function mountGuide(root: HTMLElement): Screen {
         <button id="next" class="primary">Next move ▶</button>
         <button id="step">Whole step</button>
       </div>
-      <p class="hint-line">Do each move on your cube as it's shown. <a href="#/solve">Edit colors</a></p>
+      <p class="hint-line">${method.name}. Do each move on your cube as it's shown. <a href="#/solve">Edit colors</a></p>
     </main>`;
 
   const view = new CubeView(root.querySelector(".stage")!, state, { ada: loadSettings().ada });
@@ -247,7 +247,7 @@ function mountGuide(root: HTMLElement): Screen {
     }
     const { si, mi } = moves[at];
     const step = steps[si];
-    nameEl.textContent = `${STAGE_TITLE[step.stage]} · move ${at + 1} of ${moves.length}`;
+    nameEl.textContent = `${method.stageTitle[step.stage]} · move ${at + 1} of ${moves.length}`;
     sayEl.textContent = step.say;
     movesEl.innerHTML = step.moves
       .map((m, k) => `<span class="${k < mi ? "done" : k === mi ? "now" : ""}">${m}</span>`)

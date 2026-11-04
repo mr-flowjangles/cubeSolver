@@ -2,12 +2,43 @@
 
 import { BADGES, isUnlocked, rankOf } from "../game/rules";
 import { loadProgress } from "../game/storage";
-import { BEGINNER_LEVELS } from "../lessons/beginner";
+import { BEGINNER_LEVELS, type Level } from "../lessons/beginner";
+import { CFOP_LEVELS } from "../lessons/cfop";
+import { LEVEL_IDS } from "../lessons/index";
 import type { Screen } from "./shell";
 
 export function mountHome(root: HTMLElement): Screen {
   const p = loadProgress();
-  const order = BEGINNER_LEVELS.map((l) => l.id);
+  const order = LEVEL_IDS;
+  const list = (levels: Level[]) => `
+      <ol class="levels">
+        ${levels
+          .map((l) => {
+            const rec = p.levels[l.id];
+            const open = isUnlocked(p, order, l.id);
+            const state = rec?.passes ? "done" : open ? "open" : "locked";
+            const mark =
+              state === "done"
+                ? rec!.noHelp
+                  ? "★"
+                  : "✓"
+                : state === "locked"
+                  ? "🔒"
+                  : String(l.number);
+            const sub =
+              state === "done"
+                ? `Passed ${rec!.passes}×${rec!.noHelp ? " · on your own" : ""}`
+                : state === "locked"
+                  ? "Pass the level before to unlock"
+                  : l.goal;
+            return `
+          <li><a class="level ${state}" href="#/level/${l.id}" ${state === "locked" ? 'aria-disabled="true"' : ""}>
+            <span class="num">${mark}</span>
+            <span class="text"><strong>${l.title}</strong><small>${sub}</small></span>
+          </a></li>`;
+          })
+          .join("")}
+      </ol>`;
   const rank = rankOf(p.xp);
   const badgeCount = Object.keys(p.badges).length;
 
@@ -32,32 +63,13 @@ export function mountHome(root: HTMLElement): Screen {
         <span class="text"><strong>Solve my cube</strong><small>Enter your scrambled cube and get guided, move by move.</small></span>
       </a>
       <h2>Beginner method</h2>
-      <ol class="levels">
-        ${BEGINNER_LEVELS.map((l) => {
-          const rec = p.levels[l.id];
-          const open = isUnlocked(p, order, l.id);
-          const state = rec?.passes ? "done" : open ? "open" : "locked";
-          const mark =
-            state === "done"
-              ? rec!.noHelp
-                ? "★"
-                : "✓"
-              : state === "locked"
-                ? "🔒"
-                : String(l.number);
-          return `
-          <li><a class="level ${state}" href="#/level/${l.id}" ${state === "locked" ? 'aria-disabled="true"' : ""}>
-            <span class="num">${mark}</span>
-            <span class="text"><strong>${l.title}</strong><small>${
-              state === "done"
-                ? `Passed ${rec!.passes}×${rec!.noHelp ? " · on your own" : ""}`
-                : state === "locked"
-                  ? "Pass the level before to unlock"
-                  : l.goal
-            }</small></span>
-          </a></li>`;
-        }).join("")}
-      </ol>
+      ${list(BEGINNER_LEVELS)}
+      <h2>CFOP — speedcubing</h2>
+      ${list(CFOP_LEVELS)}
+      <a class="level timer-link" href="#/timer">
+        <span class="num">⏱</span>
+        <span class="text"><strong>Timer</strong><small>Time your real-cube solves. Best and average of 5.</small></span>
+      </a>
       <a class="level free" href="#/play">
         <span class="num">∞</span>
         <span class="text"><strong>Free play</strong><small>Turn and scramble the cube however you like.</small></span>

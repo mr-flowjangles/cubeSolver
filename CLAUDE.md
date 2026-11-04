@@ -8,7 +8,7 @@ Commit identity: Rob Rose <robmrose@me.com>
 
 ## Current state
 
-**Building.** M1–M5 shipped, live at https://mr-flowjangles.github.io/cubeSolver/. Test hooks: `?moves=R%20U&instant=1#/play`, `?ada=1`, `?autoshow=1#/level/<id>`, `?cube=<54 letters>#/solve`, `?cube=…&finish=1#/solve/guide`, `?autoscan=1#/solve/scan` (with Chrome's fake camera flags).
+**Building.** M1–M6 shipped, live at https://mr-flowjangles.github.io/cubeSolver/. Test hooks: `?moves=R%20U&instant=1#/play`, `?ada=1`, `?autoshow=1#/level/<id>`, `?unlock=1#/level/<id>`, `?cube=<54 letters>#/solve`, `?cube=…&finish=1#/solve/guide`, `?autoscan=1#/solve/scan` (with Chrome's fake camera flags).
 
 ## How to read this repo
 
@@ -45,7 +45,9 @@ Commit identity: Rob Rose <robmrose@me.com>
 
 <!-- One line per term: a dash, the term in bold, an em dash, then the plain-words meaning. `make catalog` puts these on Mission Control's Glossary tab. -->
 
+- **4-look last layer** — the usual first way to finish CFOP: OLL in two steps, then PLL in two steps, 15 sequences in all.
 - **ADA support** — a setting, off by default, that adds a shape to each sticker color for colorblind players.
+- **Average of 5** — speedcubing average: your last 5 times, drop the best and worst, average the other 3.
 - **Badge** — an award for a milestone, e.g. First Solve. 13 in all; listed on the Badges screen.
 - **Beginner method** — the standard first way to solve a cube, one layer at a time, about 7 stages.
 - **CFOP** — the most common speedcubing method, named for its four steps: Cross, F2L, OLL, PLL.
@@ -60,6 +62,7 @@ Commit identity: Rob Rose <robmrose@me.com>
 - **Guided solve** — after entering your cube, the app shows each move to make, one at a time, grouped by stage.
 - **Hint** — lesson button that says the next step in words and moves.
 - **Level** — one lesson; passing it is the goal. Beginner levels are numbered 0–8. Each unlocks when the one before is passed.
+- **M turn** — turning the middle layer between L and R, in the same direction as L.
 - **OLL** — "orient last layer": third CFOP step, making the top face one color. 57 cases.
 - **PLL** — "permute last layer": final CFOP step, moving top pieces into place. 21 cases.
 - **PWA** — progressive web app: a website that installs to the home screen and works offline.
@@ -71,6 +74,7 @@ Commit identity: Rob Rose <robmrose@me.com>
 - **Show me** — lesson button that plays the next step on the cube.
 - **Solve my cube** — enter your own scrambled cube and get a guided solve.
 - **Stage** — one step of a solving method, e.g. White cross. Each beginner level teaches one stage.
+- **Timer** — screen for timing real-cube solves; keeps your best time and average of 5.
 - **XP** — experience points earned by passing levels.
 
 ## Subagents — when to delegate
