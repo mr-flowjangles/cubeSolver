@@ -1,5 +1,34 @@
 # v0.8
 
+## v0.8.5 — Show updates right away (2026-11-04)
+
+### Problem
+
+- After v0.8.4 went live, Rob still saw the old White cross text.
+- The offline copy updated in the background but the open page kept the old version until the next visit.
+
+### Solution
+
+- Reload the page once when a new version takes over.
+
+### New
+
+- None.
+
+### Changed
+
+- `src/main.ts`: reload on service worker change, skipped on first install.
+
+### Fixed
+
+- New versions show without closing and reopening the app.
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `src/main.ts` | Reload when a new version takes over |
+
 ## v0.8.4 — Guided white cross (2026-11-04)
 
 ### Problem
