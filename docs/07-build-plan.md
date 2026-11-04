@@ -135,13 +135,13 @@ Goal: polished and public.
 
 Goal: every level teaches step by step (see `02-levels.md` → Every level is a tutorial). Must land before M7's launch.
 
-- [ ] Lesson engine: Show it → Walk through it → Then try it, as data per level.
-- [ ] Walk-through: name each move, light the piece and its target, glow the button, undo wrong turns with a correction.
+- [x] Lesson engine: Show it → Walk through it → Then try it, as data per level.
+- [x] Walk-through: name each move, light the piece and its target, glow the button, undo wrong turns with a correction.
 - [ ] Plain-words reason for every move shown.
-- [ ] White cross rebuilt with the daisy (two parts: daisy, then cross).
+- [x] White cross rebuilt with the daisy (two parts: daisy, then cross).
 - [ ] Every beginner level rebuilt in the three parts.
 - [ ] Every CFOP level rebuilt in the three parts.
-- [ ] Practice cubes start easy (one piece left), then get harder.
-- [ ] Tests: each level's walk-through ends with the stage done.
+- [x] Practice cubes start easy (one piece left), then get harder.
+- [x] Tests: each level's walk-through ends with the stage done.
 
 **Done when:** a first-time player can finish every level without guessing, and a headless walk-through passes every level.

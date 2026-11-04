@@ -142,6 +142,14 @@ export class CubeView {
     });
   }
 
+  /** Light up these stickers (a piece and the spot it's going) and dim the rest; null clears it. */
+  spotlight(lit: readonly number[] | null) {
+    const on = new Set(lit ?? []);
+    this.stickers.forEach((m, i) =>
+      m.material.color.setHex(!lit || on.has(i) ? 0xffffff : 0x5a5a5a),
+    );
+  }
+
   /** Look from slightly above (default) or below, e.g. to see a white cross on the bottom. */
   lookFrom(side: "above" | "below") {
     this.setHome(new THREE.Vector3(5.2, side === "above" ? 4.4 : -4.4, 7.2));

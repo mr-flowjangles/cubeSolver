@@ -822,3 +822,45 @@ button.small {
   border: 2px solid var(--accent);
   font-weight: 600;
 }
+
+/* Tutorial parts: Show it / Walk through it / Try it */
+.phases {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+.phases button {
+  min-height: 44px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.phases button.current {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.phase-help {
+  margin: 0;
+  color: var(--muted);
+}
+.guide {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+}
+.guide p {
+  margin: 2px 0;
+}
+.guide-part {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.guide-say {
+  font-weight: 700;
+}
+.guide-move b {
+  display: inline-block;
+  min-width: 2.2em;
+  font-size: 1.1rem;
+}

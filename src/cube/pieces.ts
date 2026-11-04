@@ -68,3 +68,18 @@ export function slotHasRightPiece(state: CubeState, s: Slot): boolean {
 export function faceOfSticker(i: number): Face {
   return FACE_OF_STICKER(i);
 }
+
+/** The slot holding the piece with these colors (any order). */
+export function findPiece(state: CubeState, colors: readonly Face[]): Slot {
+  const want = [...colors].sort().join("");
+  const all = [...EDGE_SLOTS, ...CORNER_SLOTS];
+  const found = all.find(
+    (s) =>
+      s.stickers
+        .map((i) => state[i])
+        .sort()
+        .join("") === want,
+  );
+  if (!found) throw new Error(`No piece ${colors.join("")}`);
+  return found;
+}
