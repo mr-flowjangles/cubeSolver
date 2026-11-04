@@ -1,7 +1,7 @@
 // Sticker colors and the ADA support shapes (one shape per color).
 // Standard color scheme: white top, green front, red right.
 
-import type { Face } from "../cube";
+import type { Face } from "./state";
 
 export const STICKER_COLOR: Record<Face, string> = {
   U: "#ffffff",

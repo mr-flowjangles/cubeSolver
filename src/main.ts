@@ -1,4 +1,4 @@
 import "./app/styles.css";
-import { mountPractice } from "./app/practice";
+import { mountShell } from "./app/shell";
 
-mountPractice(document.getElementById("app")!);
+mountShell(document.getElementById("app")!);

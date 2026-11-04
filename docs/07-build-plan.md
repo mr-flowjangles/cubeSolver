@@ -10,7 +10,7 @@ The **Now:** line below names the milestone(s) being worked on, comma-separated 
 
 **Status: milestone order M1–M7 agreed 2026-11-04.**
 
-**Now:** M2
+**Now:** M3
 
 ## v1 — Definition of Done
 
@@ -62,9 +62,9 @@ Goal: a 3D cube you can turn, live on GitHub Pages as an installable PWA.
 
 Goal: the beginner method, taught one stage per level.
 
-- [ ] Beginner solver, stage by stage, tested on many random scrambles.
-- [ ] Level content for each beginner stage.
-- [ ] Lesson screen: explain, show moves, practice, pass check.
+- [x] Beginner solver, stage by stage, tested on many random scrambles.
+- [x] Level content for each beginner stage.
+- [x] Lesson screen: explain, show moves, practice, pass check.
 
 **Done when:** a player can learn a full beginner solve in the app.
 

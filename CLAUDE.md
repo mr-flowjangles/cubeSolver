@@ -8,7 +8,7 @@ Commit identity: Rob Rose <robmrose@me.com>
 
 ## Current state
 
-**Building.** M1 shipped: 3D cube, live at https://mr-flowjangles.github.io/cubeSolver/. Test hook: `?moves=R%20U&instant=1&ada=1`.
+**Building.** M1–M2 shipped, live at https://mr-flowjangles.github.io/cubeSolver/. Test hooks: `?moves=R%20U&instant=1#/play`, `?ada=1`, `?autoshow=1#/level/<id>`.
 
 ## How to read this repo
 
@@ -51,11 +51,17 @@ Commit identity: Rob Rose <robmrose@me.com>
 - **Cross** — first CFOP step: four edge pieces placed to make a plus sign on one face.
 - **Cube state** — the color of all 54 stickers; the one piece of data every part of the app passes around.
 - **F2L** — "first two layers": second CFOP step, solving the bottom two layers in pairs.
-- **Move notation** — standard letters for turns: R, L, U, D, F, B; an apostrophe means counter-clockwise, a 2 means a half turn.
+- **Move notation** — standard letters for turns: R, L, U, D, F, B; an apostrophe means counter-clockwise, a 2 means a half turn; y turns the whole cube.
+- **Free play** — the screen where you turn and scramble the cube with no lesson.
+- **Hint** — lesson button that says the next step in words and moves.
+- **Level** — one lesson; passing it is the goal. Beginner levels are numbered 0–8.
 - **OLL** — "orient last layer": third CFOP step, making the top face one color. 57 cases.
 - **PLL** — "permute last layer": final CFOP step, moving top pieces into place. 21 cases.
 - **PWA** — progressive web app: a website that installs to the home screen and works offline.
+- **Practice cube** — the cube a level starts you on: a random scramble with every earlier stage already done.
 - **Scramble** — a random list of moves used to mix up a cube.
+- **Show me** — lesson button that plays the next step on the cube.
+- **Stage** — one step of a solving method, e.g. White cross. Each beginner level teaches one stage.
 - **XP** — experience points earned by passing levels.
 
 ## Subagents — when to delegate
