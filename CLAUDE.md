@@ -8,7 +8,7 @@ Commit identity: Rob Rose <robmrose@me.com>
 
 ## Current state
 
-**Building.** M1–M2 shipped, live at https://mr-flowjangles.github.io/cubeSolver/. Test hooks: `?moves=R%20U&instant=1#/play`, `?ada=1`, `?autoshow=1#/level/<id>`.
+**Building.** M1–M3 shipped, live at https://mr-flowjangles.github.io/cubeSolver/. Test hooks: `?moves=R%20U&instant=1#/play`, `?ada=1`, `?autoshow=1#/level/<id>`.
 
 ## How to read this repo
 
@@ -46,6 +46,7 @@ Commit identity: Rob Rose <robmrose@me.com>
 <!-- One line per term: a dash, the term in bold, an em dash, then the plain-words meaning. `make catalog` puts these on Mission Control's Glossary tab. -->
 
 - **ADA support** — a setting, off by default, that adds a shape to each sticker color for colorblind players.
+- **Badge** — an award for a milestone, e.g. First Solve. 13 in all; listed on the Badges screen.
 - **Beginner method** — the standard first way to solve a cube, one layer at a time, about 7 stages.
 - **CFOP** — the most common speedcubing method, named for its four steps: Cross, F2L, OLL, PLL.
 - **Cross** — first CFOP step: four edge pieces placed to make a plus sign on one face.
@@ -54,12 +55,15 @@ Commit identity: Rob Rose <robmrose@me.com>
 - **Move notation** — standard letters for turns: R, L, U, D, F, B; an apostrophe means counter-clockwise, a 2 means a half turn; y turns the whole cube.
 - **Free play** — the screen where you turn and scramble the cube with no lesson.
 - **Hint** — lesson button that says the next step in words and moves.
-- **Level** — one lesson; passing it is the goal. Beginner levels are numbered 0–8.
+- **Level** — one lesson; passing it is the goal. Beginner levels are numbered 0–8. Each unlocks when the one before is passed.
 - **OLL** — "orient last layer": third CFOP step, making the top face one color. 57 cases.
 - **PLL** — "permute last layer": final CFOP step, moving top pieces into place. 21 cases.
 - **PWA** — progressive web app: a website that installs to the home screen and works offline.
+- **On your own** — passing a level without pressing Hint or Show me. Earns bonus XP and a ★ on the level.
 - **Practice cube** — the cube a level starts you on: a random scramble with every earlier stage already done.
+- **Rank** — a title earned by XP, from Newcomer to Speedcuber.
 - **Scramble** — a random list of moves used to mix up a cube.
+- **Streak** — days in a row with at least one level passed.
 - **Show me** — lesson button that plays the next step on the cube.
 - **Stage** — one step of a solving method, e.g. White cross. Each beginner level teaches one stage.
 - **XP** — experience points earned by passing levels.
