@@ -1,5 +1,39 @@
 # v0.8
 
+## v0.8.3 — Tutorial plan (2026-11-04)
+
+### Problem
+
+- Levels drop the player on a scrambled cube to figure out. That is a test, not a tutorial.
+
+### Solution
+
+- Write down the rule and plan the rebuild before any code changes.
+
+### New
+
+- **`02-levels.md` → Every level is a tutorial.** Show it, walk through it, then try it; rules that follow; daisy for the white cross.
+- **Build plan M8 — Guided lessons.** Rebuild every level; must land before launch.
+- **v1 done list.** Every level walks the player through.
+- **Glossary.** Daisy.
+
+### Changed
+
+- **`CLAUDE.md`.** Tutorial rule added to working norms.
+- **Now:** M8.
+
+### Fixed
+
+- None (the rebuild is M8).
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `docs/02-levels.md`, `docs/07-build-plan.md` | Tutorial rule, M8 |
+| `CLAUDE.md`, `site/catalog.json` | Norm, glossary |
+| `Versions/v0/v0.8/release-notes.md` | This entry |
+
 ## v0.8.2 — Clear controls (2026-11-04)
 
 ### Problem

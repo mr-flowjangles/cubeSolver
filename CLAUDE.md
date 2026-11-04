@@ -20,6 +20,8 @@ Commit identity: Rob Rose <robmrose@me.com>
 
 ## Working norms for this project
 
+- **This is a tutorial (Rob, 2026-11-04).** Every level shows the step, walks the player through it move by move, then lets them try. Never drop a player on a cube to figure out. Details: `docs/02-levels.md` → Every level is a tutorial.
+
 - **Standing go-ahead (Rob, 2026-11-04):** build M1–M7 without asking. For each milestone: commit, push, open the PR, merge to `main`, report after. Claude also decides the level list, XP/badge rules, and camera color reading, recorded in `docs/` for Rob to review.
 
 - **Design before code.** Decisions are aligned in conversation, recorded in `docs/`, then implemented. Don't write code that contradicts a doc — update the doc first.
@@ -58,6 +60,7 @@ Commit identity: Rob Rose <robmrose@me.com>
 - **Camera scan** — pointing the phone camera at each face in turn so the app reads the cube's colors.
 - **Flat cube map** — all six faces laid out flat in a cross shape; you tap stickers to copy your cube's colors.
 - **Framing guide** — the 3×3 grid drawn over the camera view; line one face up inside it.
+- **Daisy** — beginner way to start the white cross: put the 4 white edges around the yellow center on top, then turn each one down to the bottom.
 - **Free play** — the screen where you turn and scramble the cube with no lesson.
 - **Guided solve** — after entering your cube, the app shows each move to make, one at a time, grouped by stage.
 - **Hint** — lesson button that says the next step in words and moves.

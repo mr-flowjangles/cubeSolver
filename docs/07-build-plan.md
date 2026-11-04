@@ -10,7 +10,7 @@ The **Now:** line below names the milestone(s) being worked on, comma-separated 
 
 **Status: milestone order M1–M7 agreed 2026-11-04.**
 
-**Now:** M7
+**Now:** M8
 
 ## v1 — Definition of Done
 
@@ -21,6 +21,7 @@ v1 ships when **all** of the following are true:
 - [x] A beginner can go from level 1 to a full solve using only the app.
 - [x] CFOP levels are playable.
 - [ ] Camera scan of a real cube leads to a guided solve.
+- [ ] Every level walks the player through: show it, walk through it, then try it.
 - [ ] All milestones below are checked.
 - [x] `README.md` has a quickstart.
 
@@ -127,3 +128,20 @@ Goal: polished and public.
 - [ ] v1 Definition of Done all checked.
 
 **Done when:** v1 Definition of Done is fully checked.
+
+---
+
+## M8 — Guided lessons
+
+Goal: every level teaches step by step (see `02-levels.md` → Every level is a tutorial). Must land before M7's launch.
+
+- [ ] Lesson engine: Show it → Walk through it → Then try it, as data per level.
+- [ ] Walk-through: name each move, light the piece and its target, glow the button, undo wrong turns with a correction.
+- [ ] Plain-words reason for every move shown.
+- [ ] White cross rebuilt with the daisy (two parts: daisy, then cross).
+- [ ] Every beginner level rebuilt in the three parts.
+- [ ] Every CFOP level rebuilt in the three parts.
+- [ ] Practice cubes start easy (one piece left), then get harder.
+- [ ] Tests: each level's walk-through ends with the stage done.
+
+**Done when:** a first-time player can finish every level without guessing, and a headless walk-through passes every level.
