@@ -1,5 +1,35 @@
 # v0.7
 
+## v0.7.1 — CI test time limit (2026-11-04)
+
+### Problem
+
+- v0.7.0 merged, but its CI run failed, so it never deployed.
+- One level test took 5.8 s on GitHub's machine; the limit is 5 s.
+
+### Solution
+
+- Give the per-level practice-cube tests a 60 s limit.
+
+### New
+
+- None.
+
+### Changed
+
+- **`tests/lessons.test.ts`.** 60 s limit on the per-level test.
+
+### Fixed
+
+- CI failure that blocked the v0.7.0 deploy.
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `tests/lessons.test.ts` | Longer time limit |
+| `Versions/v0/v0.7/release-notes.md` | This entry |
+
 ## v0.7.0 — CFOP levels (2026-11-04)
 
 ### Problem
