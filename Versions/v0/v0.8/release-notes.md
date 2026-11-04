@@ -1,5 +1,49 @@
 # v0.8
 
+## v0.8.2 — Clear controls (2026-11-04)
+
+### Problem
+
+- The turn buttons seemed to have no rhyme or reason.
+- It wasn't clear what a whole-cube turn does.
+- Dragging the view to the back left R on the screen's left, so the buttons no longer matched what you saw.
+
+### Solution
+
+- Buttons grouped by side, each with its letter, side name and arrow.
+- Fixed side tags next to the cube.
+- The view springs back to the front; a See back button for the back.
+- Based on research into how the main tutorials and cube viewers do it.
+
+### New
+
+- **Grouped buttons.** Top, Right, Front, Bottom, Left, Back, Whole cube; each shows letter, side and arrow (e.g. "R — Right ↑").
+- **Side tags** next to the cube: FRONT · F, TOP · U (or BOTTOM · D), RIGHT · R. They stay put while the colors turn.
+- **See back** button; any turn returns to the front first.
+- **View limits.** Drag about 40° each way; springs back to the front on release.
+
+### Changed
+
+- **Learn the controls** explanation: letters are sides, front is whatever faces you, letters are places not colors.
+- **CFOP levels** show letters only, plus a Middle and two-layer turns group.
+- **Pinch zoom** off; drag smoothing off so the view springs back cleanly.
+- **Docs.** Controls section in `02-levels.md`; 2 Glossary terms.
+
+### Fixed
+
+- Buttons stopped matching the screen after dragging the view.
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `src/app/cubePanel.ts` | Grouped, labeled buttons; See back |
+| `src/render/cubeView.ts` | Side tags, view limits, spring back, see back |
+| `src/app/lesson.ts`, `src/app/styles.css` | Button groups per method, styles |
+| `src/lessons/beginner.ts` | New level 0 explanation |
+| `docs/02-levels.md`, `CLAUDE.md`, `site/catalog.json` | Controls, glossary |
+| `Versions/v0/v0.8/release-notes.md` | This entry |
+
 ## v0.8.1 — Learn the controls (2026-11-04)
 
 ### Problem

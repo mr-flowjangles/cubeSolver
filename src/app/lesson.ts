@@ -7,7 +7,7 @@ import { type Level, NOTATION_DRILL, NOTATION_STEPS } from "../lessons/beginner"
 import { ALL_LEVELS, BEGINNER_IDS, type GuideStep, LEVEL_IDS, METHODS } from "../lessons/index";
 import { practicePosition } from "../lessons/position";
 import { solvePll } from "../solver/cfop";
-import { CFOP_PAD, type CubePanel, mountCubePanel } from "./cubePanel";
+import { CFOP_GROUPS, type CubePanel, mountCubePanel } from "./cubePanel";
 import type { Screen } from "./shell";
 
 const algList = (level: Level) =>
@@ -120,7 +120,8 @@ export function mountLesson(root: HTMLElement, id: string): Screen {
   };
 
   const panel = mountCubePanel(root.querySelector(".panel")!, practicePosition(level), {
-    pad: level.method === "cfop" ? CFOP_PAD : undefined,
+    groups: level.method === "cfop" ? CFOP_GROUPS : undefined,
+    words: level.method !== "cfop",
     onMove: (m, p) => {
       if (isDrill) {
         if (m === NOTATION_DRILL[drill]) {

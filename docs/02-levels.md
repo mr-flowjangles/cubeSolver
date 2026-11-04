@@ -47,6 +47,16 @@
 - Shows best time and average of 5 (last 5, drop best and worst).
 - Under 60 s and under 30 s earn badges; no XP, since times can't be checked.
 
+## Controls
+
+- Buttons are grouped by side: Top, Right, Front, Bottom, Left, Back, Whole cube.
+- Each button shows the standard letter (what every cube guide uses), the side's name, and an arrow for which way the front edge moves.
+- CFOP levels show letters only, plus Middle and two-layer turns (M, r, f) and x.
+- FRONT · F, TOP · U and RIGHT · R tags float next to the cube and never turn: letters mean places, not colors.
+- Dragging the view is limited to about 40° and springs back to the front on release.
+- **See back** swings round to show the back; any turn swings back to the front first.
+- Based on a research pass of ruwix, J Perm, the official Rubik's guide and the cubing.js viewer.
+
 ## How a level works
 
 - Practice cube: a random scramble with every earlier stage already done.
