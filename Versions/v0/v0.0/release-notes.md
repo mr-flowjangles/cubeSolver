@@ -2,25 +2,19 @@
 
 ## v0.0.0 — Initial Design (2026-11-04)
 
-<!--
-TODO: Replace 2026-11-04 with the bootstrap commit date (YYYY-MM-DD).
-This file is the bootstrap version's release notes — fill it in before the first commit.
-Subsequent versions are scaffolded by `./scripts/new-version.sh`, which prepends a new H2 block above this one.
--->
-
 ### Problem
 
-<!-- One paragraph: what problem does this project solve? Mirror or condense the mission statement. -->
+- Start a public, game-style Rubik's cube tutorial app.
 
 ### Solution
 
-<!-- What does this initial commit lock in? Typically: design docs, scaffold, ceremony — no application code yet. -->
+- Starter-pack scaffold and toolchain. No app code yet.
 
 ### New
 
 - **Project scaffold.** README, CLAUDE.md, Makefile, Dockerfile stub, `.gitignore` / `.dockerignore`, `infra/terraform/` placeholder, `scripts/new-version.sh` versioning ceremony, `Versions/v0/v0.0/`.
 - **Docs skeleton.** `mission.md`, `00-overview.md`, `01-architecture.md`, `07-build-plan.md`, `99-open-questions.md`.
-- *(add the architectural decisions and locked-in choices from this commit.)*
+- **Toolchain.** `package.json` with Vite, TypeScript, Three.js, Vitest, Prettier; `tsconfig.json`; Makefile wired to npm.
 
 ### Files Changed
 
@@ -29,7 +23,7 @@ Subsequent versions are scaffolded by `./scripts/new-version.sh`, which prepends
 | `README.md` | New — project status and pointers |
 | `CLAUDE.md` | New — repo-level context for Claude sessions |
 | `Makefile` | New — dev targets and versioning ceremony |
-| `Dockerfile` | New — runtime image stub |
+| `Dockerfile` | New — stub |
 | `.gitignore` | New |
 | `.dockerignore` | New |
 | `docs/mission.md` | New — what + who + constraints |
@@ -40,3 +34,5 @@ Subsequent versions are scaffolded by `./scripts/new-version.sh`, which prepends
 | `scripts/new-version.sh` | New — versioning ceremony script |
 | `infra/terraform/README.md` | New — AWS deployment placeholder |
 | `Versions/v0/v0.0/release-notes.md` | New — this file |
+| `package.json`, `package-lock.json`, `tsconfig.json`, `.prettierignore` | New — Node/TypeScript toolchain |
+| `src/main.ts` | New — empty entry point |

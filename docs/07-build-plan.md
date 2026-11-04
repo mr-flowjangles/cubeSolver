@@ -8,16 +8,21 @@ The convention is `## M<N> — {Title}` so `make version-M<N>` can auto-resolve 
 
 The **Now:** line below names the milestone(s) being worked on, comma-separated when there is more than one. Mission Control's phase pill and banner read it (`make catalog`).
 
-**Now:** M0
+**Status: milestone order M1–M7 agreed 2026-11-04.**
+
+**Now:** M1
 
 ## v1 — Definition of Done
 
 v1 ships when **all** of the following are true:
 
-- [ ] Docker image builds reproducibly (`make image`).
-- [ ] *(add the project-specific outcomes that mean v1 is real.)*
+- [ ] Live on GitHub Pages, installable on iPhone and Android.
+- [ ] Works offline after the first visit.
+- [ ] A beginner can go from level 1 to a full solve using only the app.
+- [ ] CFOP levels are playable.
+- [ ] Camera scan of a real cube leads to a guided solve.
 - [ ] All milestones below are checked.
-- [ ] `README.md` has a quickstart that a new operator can follow.
+- [ ] `README.md` has a quickstart.
 
 ---
 
@@ -25,36 +30,100 @@ v1 ships when **all** of the following are true:
 
 Goal: project skeleton and dev environment ready, no feature code yet.
 
-- [ ] Initialize git repo, add `.gitignore` and `README.md`, make initial commit of design docs.
-- [ ] Replace `cubesolver`, `Cube Solver`, `Game-style Rubik's cube tutorial PWA — beginner to CFOP, with camera scan to solve your own cube.`, `2026-11-04` placeholders across the repo.
-- [ ] Add language manifest (`pyproject.toml` / `package.json` / etc.) with deps pinned and dev extras.
-- [ ] Wire up `make setup` / `make test` / `make lint` / `make format` to your toolchain (replace the stubs in `Makefile`).
-- [ ] Verify `make ci` passes on an empty test suite.
-- [ ] Replace the `Dockerfile` stub with a real multi-stage build; verify `make image` builds and `make smoke` runs.
-- [ ] Verify versioning ceremony: `./scripts/new-version.sh --dry-run "Smoke Test"` prints the plan without side effects.
-- [ ] Fill in `docs/mission.md` and `docs/00-overview.md`.
-- [ ] Sketch `docs/01-architecture.md` — at minimum, identify the contract artifact.
-- [ ] Fill in `Versions/v0/v0.0.0/release-notes.md` for the bootstrap commit.
+- [x] Initialize git repo, add `.gitignore` and `README.md`, make initial commit of design docs.
+- [x] Replace placeholders across the repo.
+- [x] Add `package.json` (Vite, TypeScript, Three.js, Vitest, Prettier).
+- [x] Wire up `make setup` / `make test` / `make lint` / `make format`.
+- [x] Verify `make ci` passes on an empty test suite.
+- [x] Docker image for local testing: `make image`, `make smoke` passes.
+- [x] Verify versioning ceremony: `./scripts/new-version.sh --dry-run "Smoke Test"`.
+- [x] Fill in `docs/mission.md` and `docs/00-overview.md`.
+- [x] Sketch `docs/01-architecture.md`.
+- [x] Fill in `Versions/v0/v0.0/release-notes.md` for the bootstrap commit.
 
-**Done when:** project builds, tests run (none yet), Docker image builds + smoke-tests, versioning ceremony runs cleanly, mission/overview/architecture have v1 content.
-
----
-
-## M1 — {{first real milestone}}
-
-Goal: ...
-
-- [ ] ...
-
-**Done when:** ...
+**Done when:** project builds, tests run, versioning ceremony runs cleanly, mission/overview/architecture have v1 content.
 
 ---
 
-<!--
-Add subsequent milestones as the design firms up. Each milestone:
-- Has a one-sentence goal.
-- Has an ordered, checkable task list.
-- Ends with a "Done when:" criterion that is binary.
-- Use the `## M<N> — {Title}` heading format so `make version-M<N>` resolves.
-- Mark a task blocked with `*(blocked: reason)*` in its text; Mission Control shows it apart from merely unticked.
--->
+## M1 — Cube and live site
+
+Goal: a 3D cube you can turn, live on GitHub Pages as an installable PWA.
+
+- [ ] Cube model: cube state, all moves, scramble. Fully tested.
+- [ ] 3D cube: draw, animate moves, spin the view.
+- [ ] PWA setup: offline, home-screen install.
+- [ ] GitHub Pages deploy on every push to `main`.
+
+**Done when:** the live site shows a cube you can turn and scramble, on a phone, offline.
+
+---
+
+## M2 — Beginner levels
+
+Goal: the beginner method, taught one stage per level.
+
+- [ ] Beginner solver, stage by stage, tested on many random scrambles.
+- [ ] Level content for each beginner stage.
+- [ ] Lesson screen: explain, show moves, practice, pass check.
+
+**Done when:** a player can learn a full beginner solve in the app.
+
+---
+
+## M3 — Game layer
+
+Goal: XP, badges, locked levels, saved progress.
+
+- [ ] XP and badge rules.
+- [ ] Unlocks: later levels locked until earlier ones are passed.
+- [ ] Progress saved on the device.
+
+**Done when:** progress, XP, and badges survive closing and reopening the app.
+
+---
+
+## M4 — Solve my cube
+
+Goal: enter a real cube and get guided through solving it.
+
+- [ ] Tap-to-fix cube map (also used after camera scan).
+- [ ] Check that an entered cube is possible to solve.
+- [ ] Guided solve: one move at a time, grouped by stage.
+
+**Done when:** a cube entered by hand is solved by following the guide.
+
+---
+
+## M5 — Camera scan
+
+Goal: scan a real cube instead of entering it by hand.
+
+- [ ] Camera capture, one face at a time, with a framing guide.
+- [ ] Read sticker colors.
+- [ ] Hand off to the check-and-fix screen.
+
+**Done when:** a real cube scanned on iPhone and Android leads to a correct guided solve.
+
+---
+
+## M6 — CFOP levels
+
+Goal: teach CFOP after the beginner method.
+
+- [ ] Cross, F2L, OLL, PLL levels.
+- [ ] CFOP move-sequence lists, each checked by the cube model.
+- [ ] Solve timer and personal bests.
+
+**Done when:** a player who finished the beginner levels can learn and practice full CFOP.
+
+---
+
+## M7 — Launch
+
+Goal: polished and public.
+
+- [ ] Test on real iPhone and Android devices.
+- [ ] README quickstart.
+- [ ] v1 Definition of Done all checked.
+
+**Done when:** v1 Definition of Done is fully checked.
