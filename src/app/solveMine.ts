@@ -21,6 +21,7 @@ import { BEGINNER_LEVELS } from "../lessons/beginner";
 import { CubeView } from "../render/cubeView";
 import { ADA_SHAPE, shapeSvg } from "../render/shapes";
 import { type SolveStep, type StageId, solveBeginner } from "../solver/beginner";
+import { mountScan } from "./scan";
 import { loadSettings } from "./settings";
 import type { Screen } from "./shell";
 
@@ -41,7 +42,7 @@ function loadEntered(): Cell[] {
     .map((c, i) => (i % 9 === 4 ? (c as Face) : BLANK));
 }
 
-function saveEntered(cells: Cell[]) {
+export function saveEntered(cells: Cell[]) {
   try {
     sessionStorage.setItem(KEY, cells.join(""));
   } catch {
@@ -49,7 +50,7 @@ function saveEntered(cells: Cell[]) {
   }
 }
 
-const FACE_HINT: Record<Face, string> = {
+export const FACE_HINT: Record<Face, string> = {
   U: "Top — white center, green side toward you",
   F: "Front — green center, white on top",
   R: "Right — red center, white on top",
@@ -70,10 +71,12 @@ function stickerHtml(cell: Cell, i: number, ada: boolean) {
 }
 
 export function mountSolveMine(root: HTMLElement, mode: string | undefined): Screen {
-  return mode === "guide" ? mountGuide(root) : mountEnter(root);
+  if (mode === "guide") return mountGuide(root);
+  if (mode === "scan") return mountScan(root);
+  return mountEnter(root, mode === "check");
 }
 
-function mountEnter(root: HTMLElement): Screen {
+function mountEnter(root: HTMLElement, fromScan = false): Screen {
   const ada = loadSettings().ada;
   let cells = loadEntered();
   let brush: Face = "U";
@@ -88,6 +91,12 @@ function mountEnter(root: HTMLElement): Screen {
   root.innerHTML = `
     <main class="solve-mine">
       <h2>Solve my cube</h2>
+      ${
+        fromScan
+          ? `<p class="check-note">Scanned! <strong>Compare each face with your cube</strong> and tap to fix any wrong color. Red and orange are the usual mix-up.</p>`
+          : `<a class="button primary scan-link" href="#/solve/scan">📷 Scan with camera</a>
+      <p class="or">or tap the colors in:</p>`
+      }
       <ol class="how">
         <li>Hold your cube with <strong>white on top</strong> and <strong>green in front</strong>.</li>
         <li>Pick a color, then tap stickers to match your cube.</li>

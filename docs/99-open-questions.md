@@ -39,8 +39,9 @@ Format for each entry:
 
 ## How does the camera read colors?
 
-**Status:** open
+**Status:** resolved 2026-11-04
 **Resolution trigger:** before M5.
+**Decision:** in `04-camera-scan.md`. Decided by Claude under the standing go-ahead; Rob to review.
 **Notes:** red vs. orange is the hard case under indoor light.
 
 ## Should the solve path give the shortest solution, or the beginner-method one?
