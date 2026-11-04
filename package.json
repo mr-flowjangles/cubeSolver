@@ -1,0 +1,25 @@
+{
+  "name": "cubesolver",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Game-style Rubik's cube tutorial PWA — beginner to CFOP, with camera scan to solve your own cube.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 4026 --strictPort",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --port 4026 --strictPort",
+    "test": "vitest run --passWithNoTests",
+    "lint": "tsc --noEmit && prettier --check .",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "three": "^0.187.0"
+  },
+  "devDependencies": {
+    "@types/three": "^0.187.0",
+    "prettier": "^3.9.10",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5",
+    "vitest": "^5.1.0"
+  }
+}

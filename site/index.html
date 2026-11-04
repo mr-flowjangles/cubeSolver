@@ -1,0 +1,897 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mission Control — Cube Solver</title>
+<style>
+:root{
+  --bg:#fbfbfa; --bg-2:#fff; --bg-3:#f4f4f2; --fg:#1c1b19; --fg-2:#57534e; --fg-3:#8a8580;
+  --line:#e6e4e0; --line-2:#d4d0ca;
+  --accent:#1f6feb; --accent-soft:#e8f0fe;
+  --up:#12833b; --up-soft:#e6f4ea; --down:#c0392b; --down-soft:#fdeceb;
+  --plan:#8a8580; --plan-soft:#f0efec; --star:#7c3aed; --star-soft:#f3edff;
+  --warn:#b45309; --warn-soft:#fef3e2;
+  --radius:10px; --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#131211; --bg-2:#1b1a18; --bg-3:#232120; --fg:#f0eeea; --fg-2:#b3aca4; --fg-3:#7f7871;
+    --line:#2e2b29; --line-2:#403c39; --accent:#589bff; --accent-soft:#16243a;
+    --up:#4ade80; --up-soft:#12251a; --down:#f87171; --down-soft:#2c1614;
+    --plan:#7f7871; --plan-soft:#232120; --star:#c4a3ff; --star-soft:#241b38;
+    --warn:#fbbf24; --warn-soft:#2b2110;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#131211; --bg-2:#1b1a18; --bg-3:#232120; --fg:#f0eeea; --fg-2:#b3aca4; --fg-3:#7f7871;
+  --line:#2e2b29; --line-2:#403c39; --accent:#589bff; --accent-soft:#16243a;
+  --up:#4ade80; --up-soft:#12251a; --down:#f87171; --down-soft:#2c1614;
+  --plan:#7f7871; --plan-soft:#232120; --star:#c4a3ff; --star-soft:#241b38;
+  --warn:#fbbf24; --warn-soft:#2b2110;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--fg);
+  font:16px/1.65 ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;
+  overflow-x:hidden}
+code{font-family:var(--mono);font-size:.87em;background:var(--bg-3);padding:.12em .38em;border-radius:4px;border:1px solid var(--line)}
+a{color:var(--accent)}
+em{color:var(--fg-3);font-style:italic}
+.dim{color:var(--fg-3);font-weight:400;font-size:.88em}
+
+.banner{background:var(--warn-soft);color:var(--warn);border-bottom:1px solid var(--line);
+  text-align:center;padding:.5rem 1rem;font-size:.8rem;font-weight:600;letter-spacing:.02em}
+
+header{border-bottom:1px solid var(--line);background:var(--bg-2)}
+.head-in{max-width:1080px;margin:0 auto;padding:1.8rem 1.5rem 1.5rem}
+h1{font-size:clamp(1.5rem,3.4vw,2rem);font-weight:640;letter-spacing:-.022em;line-height:1.15}
+.eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:.5rem}
+.meta{margin-top:.95rem;display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
+.pill{font-size:.71rem;font-weight:600;padding:.25rem .6rem;border-radius:999px;
+  background:var(--bg-3);color:var(--fg-2);border:1px solid var(--line);letter-spacing:.03em;text-transform:uppercase}
+.pill.on{background:var(--accent-soft);color:var(--accent);border-color:transparent}
+.pill.warn{background:var(--warn-soft);color:var(--warn);border-color:transparent}
+
+nav{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);
+  backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--line)}
+.nav-in{max-width:1080px;margin:0 auto;padding:0 1.5rem;display:flex;align-items:center;gap:.25rem;overflow-x:auto;scrollbar-width:none}
+.nav-in::-webkit-scrollbar{display:none}
+nav button.tab{padding:.8rem .6rem;font-size:.82rem;font-weight:500;color:var(--fg-2);
+  white-space:nowrap;border-bottom:2px solid transparent;background:none;border-top:0;border-left:0;border-right:0;
+  cursor:pointer;font-family:inherit}
+nav button.tab:hover{color:var(--fg)}
+nav button.tab.on{color:var(--fg);border-bottom-color:var(--accent)}
+.theme-btn{margin-left:auto;background:none;border:1px solid var(--line);color:var(--fg-2);
+  border-radius:6px;padding:.3rem .55rem;cursor:pointer;font-size:.9rem;line-height:1;flex-shrink:0}
+.theme-btn:hover{color:var(--fg);border-color:var(--line-2)}
+
+main{max-width:1080px;margin:0 auto;padding:0 1.5rem 6rem}
+section{padding-top:2.2rem}
+.pane{display:none}
+.pane.on{display:block}
+h2{font-size:1.42rem;font-weight:620;letter-spacing:-.014em}
+h3{font-size:1.02rem;font-weight:620}
+.lede{color:var(--fg-2);max-width:70ch;margin-top:.6rem}
+.sec-body{margin-top:1.5rem;display:flex;flex-direction:column;gap:1.05rem}
+.sec-body p{max-width:72ch}
+.sec-body h4{font-size:.98rem;font-weight:620;color:var(--fg-2);margin:.6rem 0 -.3rem}
+p{color:var(--fg-2)}
+p strong{color:var(--fg)}
+ul.plain{list-style:none;display:flex;flex-direction:column;gap:.6rem;max-width:72ch}
+ul.plain li{padding-left:1.1rem;position:relative;color:var(--fg-2)}
+ul.plain li::before{content:"";position:absolute;left:0;top:.62em;width:5px;height:5px;border-radius:50%;background:var(--line-2)}
+ul.plain li strong{color:var(--fg)}
+
+/* ---------- design tab rail ---------- */
+.design{display:grid;grid-template-columns:210px 1fr;gap:2.5rem;padding-top:2.2rem;align-items:start}
+.rail{position:sticky;top:4rem;display:flex;flex-direction:column;gap:1px;max-height:calc(100vh - 5rem);overflow-y:auto}
+.rail button{text-align:left;background:none;border:0;border-left:2px solid var(--line);
+  padding:.5rem .8rem;font:inherit;font-size:.85rem;color:var(--fg-2);cursor:pointer;line-height:1.35}
+.rail button:hover{color:var(--fg);background:var(--bg-2)}
+.rail button.on{color:var(--fg);border-left-color:var(--accent);font-weight:600;background:var(--bg-2)}
+.design section{padding-top:0}
+@media(max-width:780px){
+  .design{grid-template-columns:1fr;gap:1.2rem}
+  .rail{position:static;flex-direction:row;overflow-x:auto;scrollbar-width:none;gap:.3rem}
+  .rail::-webkit-scrollbar{display:none}
+  .rail button{border-left:0;border-bottom:2px solid var(--line);white-space:nowrap;padding:.45rem .6rem}
+  .rail button.on{border-bottom-color:var(--accent)}
+  .rail .toc{display:none}
+  .rail{max-height:none}
+}
+
+
+/* ---------- status board ---------- */
+.dash-head{display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.dash-ctl{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap}
+.btn{background:var(--bg-2);border:1px solid var(--line-2);color:var(--fg);border-radius:7px;
+  padding:.42rem .8rem;font-size:.83rem;font-weight:550;cursor:pointer;font-family:inherit}
+.btn:hover{background:var(--bg-3)}
+.btn:disabled{opacity:.5;cursor:default}
+.checked{font-size:.78rem;color:var(--fg-3)}
+.legend{display:flex;gap:1rem;flex-wrap:wrap;margin-top:1.1rem;font-size:.78rem;color:var(--fg-3)}
+.legend span{display:flex;align-items:center;gap:.4rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.85rem;margin-top:1rem}
+.card{background:var(--bg-2);border:1px solid var(--line);border-radius:var(--radius);
+  padding:.95rem 1rem;display:flex;flex-direction:column;gap:.5rem}
+.card.is-up{border-color:color-mix(in srgb,var(--up) 45%,var(--line))}
+.card-top{display:flex;align-items:center;gap:.55rem}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--plan);flex-shrink:0}
+.dot.up{background:var(--up);box-shadow:0 0 0 3px var(--up-soft)}
+.dot.down{background:var(--down);box-shadow:0 0 0 3px var(--down-soft)}
+.dot.checking{background:var(--accent);animation:pulse 1s ease-in-out infinite}
+.dot.unknown{background:var(--fg-3);opacity:.5}
+.dot.external{background:var(--star);opacity:.7}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.card-name{font-weight:600;font-size:.93rem;line-height:1.3}
+.card-state{margin-left:auto;font-size:.66rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+  padding:.15rem .45rem;border-radius:4px;background:var(--plan-soft);color:var(--plan);flex-shrink:0}
+.card-state.up{background:var(--up-soft);color:var(--up)}
+.card-state.down{background:var(--down-soft);color:var(--down)}
+.card-state.unknown{background:var(--bg-3);color:var(--fg-3)}
+.card-state.external{background:var(--star-soft);color:var(--star)}
+.card-role{font-size:.83rem;color:var(--fg-2);line-height:1.5}
+.card-note{font-size:.76rem;color:var(--fg-2);line-height:1.45;border-left:2px solid var(--line-2);padding-left:.6rem}
+.card-foot{margin-top:auto;padding-top:.5rem;border-top:1px solid var(--line);
+  display:flex;justify-content:space-between;gap:.5rem;font-size:.72rem;color:var(--fg-3)}
+.card-foot code{background:none;border:none;padding:0;color:var(--fg-3)}
+.callout{margin-top:1.4rem;background:var(--bg-2);border:1px solid var(--line);border-left:3px solid var(--accent);
+  border-radius:var(--radius);padding:.9rem 1.1rem;font-size:.87rem;color:var(--fg-2);line-height:1.6;max-width:74ch}
+.callout strong{color:var(--fg)}
+.callout.warn{border-left-color:var(--warn)}
+.callout ul{margin:.4rem 0 0 1.1rem;padding:0}
+
+/* ---------- design tab: the docs themselves ---------- */
+.doc{min-width:0;max-width:80ch}
+.doc-src{font-size:.8rem;color:var(--fg-3);margin-bottom:1.4rem}
+.doc h1{font-size:1.85rem;font-weight:650;letter-spacing:-.02em;line-height:1.2;margin-bottom:1rem}
+.doc h2{font-size:1.3rem;font-weight:620;letter-spacing:-.012em;margin:2.6rem 0 .7rem;padding-top:1.1rem;border-top:1px solid var(--line)}
+.doc h3{font-size:1.05rem;font-weight:620;margin:1.9rem 0 .5rem}
+.doc h4{font-size:.95rem;font-weight:620;margin:1.5rem 0 .4rem}
+.doc h1,.doc h2,.doc h3,.doc h4{scroll-margin-top:5rem}
+.doc p,.doc ul,.doc ol,.doc pre,.doc blockquote,.doc .doc-table{margin-bottom:1rem}
+.doc ul,.doc ol{padding-left:1.4rem}
+.doc li{margin:.3rem 0}
+.doc li>p{margin:0}
+.doc strong{color:var(--fg)}
+.doc pre{background:var(--bg-3);border:1px solid var(--line);border-radius:8px;padding:.9rem 1rem;
+  overflow-x:auto;font-size:.82rem;line-height:1.55}
+.doc pre code{background:none;border:0;padding:0;font-size:inherit}
+.doc blockquote{border-left:3px solid var(--line-2);padding:.1rem 0 .1rem 1rem;color:var(--fg-2)}
+.doc hr{border:0;border-top:1px solid var(--line);margin:2rem 0}
+.doc-table{overflow-x:auto}
+.doc table{border-collapse:collapse;font-size:.87rem;min-width:100%}
+.doc th,.doc td{border-bottom:1px solid var(--line);padding:.45rem .75rem;text-align:left;vertical-align:top}
+.doc th{background:var(--bg-3);font-weight:600}
+/* Diagrams sit on their own white surface in both themes: Graphviz writes literal ink
+   colours, so on a dark ground the text would vanish, and invert() mangles the colours
+   the diagrams use to mean something. Never upscaled: natural size or smaller. */
+figure.diagram{margin:1.4rem 0}
+figure.diagram img,.doc img{display:block;width:auto;max-width:100%;height:auto;margin:1.4rem auto;
+  background:#fff;border:1px solid var(--line);border-radius:10px;padding:1.25rem;box-sizing:border-box}
+@media(max-width:600px){.doc img{padding:.6rem}}
+.rail .toc{display:flex;flex-direction:column;margin:.15rem 0 .6rem .8rem}
+.rail .toc[hidden]{display:none}
+.rail .toc a{font-size:.78rem;line-height:1.35;color:var(--fg-3);text-decoration:none;padding:.22rem .6rem;border-left:1px solid var(--line)}
+.rail .toc a:hover{color:var(--fg)}
+.rail .toc code{font-size:.9em;padding:0 .2em}
+
+/* ---------- build progress ---------- */
+.prog-bar{display:flex;height:8px;border-radius:99px;overflow:hidden;background:var(--plan-soft);
+  border:1px solid var(--line);margin-top:1.1rem}
+.prog-bar i{display:block;height:100%}
+.prog-bar i.done{background:var(--up)}
+.prog-bar i.active{background:var(--accent)}
+.prog-sum{margin-top:.7rem;font-size:.83rem;color:var(--fg-2)}
+.prog-sum strong{color:var(--fg)}
+.ms-list{display:flex;flex-direction:column;gap:1px;margin-top:1.4rem}
+.ms{display:grid;grid-template-columns:auto 3rem 1fr auto;align-items:center;gap:.75rem;
+  padding:.6rem .7rem;border-radius:7px}
+.ms:hover{background:var(--bg-2)}
+.ms.is-active{background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent)}
+.ms-mark{width:16px;height:16px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;
+  font-size:.6rem;font-weight:800;color:var(--bg-2);background:var(--plan-soft);border:1px solid var(--line-2)}
+.ms.is-done .ms-mark{background:var(--up);border-color:var(--up);color:#fff}
+.ms.is-active .ms-mark{background:var(--accent);border-color:var(--accent);color:#fff}
+.ms-id{font-size:.76rem;font-weight:700;color:var(--fg-3);font-variant-numeric:tabular-nums}
+.ms.is-done .ms-id,.ms.is-active .ms-id{color:var(--fg-2)}
+.ms-title{font-size:.9rem;color:var(--fg-2);line-height:1.35}
+.ms.is-done .ms-title,.ms.is-active .ms-title{color:var(--fg);font-weight:550}
+.ms-tasks{font-size:.72rem;color:var(--fg-3);font-variant-numeric:tabular-nums;white-space:nowrap}
+.ms-when{grid-column:3/-1;font-size:.78rem;color:var(--fg-3);line-height:1.5;margin-top:.3rem;max-width:72ch}
+.ms-block{grid-column:3/-1;font-size:.76rem;color:var(--warn);line-height:1.5;margin-top:.25rem}
+.ms.has-left{cursor:pointer}
+.ms-id::before{content:'';display:inline-block;width:.8em}
+.ms.has-left .ms-id::before{content:'▸';transition:transform .15s}
+.ms.has-left.open .ms-id::before{transform:rotate(90deg)}
+.ms-left{grid-column:3/-1;display:none;margin:.5rem 0 .2rem;padding:0;list-style:none;font-size:.8rem;
+  color:var(--fg-2);line-height:1.5;max-width:80ch}
+.ms-left li{margin:.3rem 0;display:flex;gap:.5rem;align-items:flex-start}
+.ms-left input{margin:.25rem 0 0;flex-shrink:0;pointer-events:none}
+.ms-left li.done span{color:var(--fg-3)}
+.ms.open .ms-left{display:block}
+@media (max-width:560px){
+  .ms{grid-template-columns:auto 3rem 1fr;row-gap:.2rem}
+  .ms-tasks{grid-column:2/-1}
+  .ms-when,.ms-block,.ms-left{grid-column:1/-1}
+}
+.bp-tasks{white-space:nowrap}
+.bp-tasks a{font-family:var(--mono,ui-monospace,monospace);font-size:.78em;color:var(--fg-3,#6b7280);text-decoration:none;border:1px solid var(--line-2,#d1d5db);border-radius:4px;padding:0 .3em;margin-left:.2em}
+.bp-tasks a:hover{color:var(--fg-2)}
+.dod{margin-top:2.4rem}
+.dod-list{margin-top:.9rem;display:flex;flex-direction:column;gap:1px}
+.dod-row{display:grid;grid-template-columns:auto 1fr;gap:.65rem;align-items:baseline;padding:.5rem .7rem;border-radius:7px;font-size:.86rem}
+.dod-row:nth-child(odd){background:var(--bg-2)}
+.dod-box{width:13px;height:13px;border-radius:3px;border:1.5px solid var(--line-2);flex-shrink:0;
+  display:grid;place-items:center;font-size:.6rem;font-weight:800;color:#fff}
+.dod-row.on .dod-box{background:var(--up);border-color:var(--up)}
+.dod-row span{color:var(--fg-2);line-height:1.45}
+
+/* ---------- decisions ---------- */
+.dec-list{margin-top:1.3rem;display:flex;flex-direction:column;gap:.55rem}
+.dec{border:1px solid var(--line);border-radius:var(--radius);background:var(--bg-2);padding:1rem 1.1rem}
+.dec-top{display:flex;gap:.6rem;align-items:baseline;flex-wrap:wrap}
+.dec-q{font-weight:600;font-size:.94rem;line-height:1.4;flex:1 1 300px}
+.dec-state{font-size:.62rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+  padding:.12rem .42rem;border-radius:4px;white-space:nowrap}
+.dec-state.open{background:var(--warn-soft);color:var(--warn)}
+.dec-state.resolved{background:var(--up-soft);color:var(--up)}
+.dec-state.deferred{background:var(--bg-3);color:var(--fg-3);border:1px dashed var(--line-2)}
+.dec-row{margin-top:.6rem;font-size:.83rem;color:var(--fg-2);line-height:1.6;max-width:76ch}
+.dec-row b{color:var(--fg);font-weight:600}
+
+footer{border-top:1px solid var(--line);margin-top:3rem}
+.foot-in{max-width:1080px;margin:0 auto;padding:1.4rem 1.5rem 3rem;font-size:.78rem;color:var(--fg-3)}
+.loading{padding:4rem 0;color:var(--fg-3);font-size:.9rem}
+/* A glossary term, wherever it appears in prose. Marked rather than linked: a
+   reader who already knows the word should not have the sentence broken up for
+   them, and a reader who doesn't gets the definition without leaving the page.
+   Only the first mention in a block is marked — marking every common term
+   would underline half the document and teach nobody anything. */
+.gt{border-bottom:1px dotted var(--line-2);cursor:help;position:relative}
+.gt:hover{border-bottom-color:var(--accent)}
+.gt::after{
+  content:attr(data-def);position:absolute;left:0;top:calc(100% + .45rem);z-index:40;
+  width:max-content;max-width:min(30rem,70vw);padding:.6rem .75rem;
+  background:var(--bg-2);color:var(--fg-2);border:1px solid var(--line-2);
+  border-radius:var(--radius);box-shadow:0 8px 24px rgba(0,0,0,.14);
+  font-size:.82rem;line-height:1.5;font-weight:400;white-space:normal;text-align:left;
+  opacity:0;visibility:hidden;transition:opacity .12s ease .18s,visibility 0s linear .3s;
+  pointer-events:none}
+.gt:hover::after,.gt:focus-visible::after{opacity:1;visibility:visible;transition-delay:.18s,0s}
+.gt[data-never]::before{
+  content:attr(data-never);position:absolute;left:0;top:calc(100% + .45rem);z-index:41;
+  transform:translateY(100%);width:max-content;max-width:min(30rem,70vw);
+  padding:.35rem .75rem .55rem;color:var(--down);font-size:.74rem;font-weight:600;
+  letter-spacing:.02em;opacity:0;visibility:hidden;pointer-events:none;
+  transition:opacity .12s ease .18s,visibility 0s linear .3s}
+.gt:hover::before,.gt:focus-visible::before{opacity:1;visibility:visible;transition-delay:.18s,0s}
+
+/* ---------- glossary ----------
+   Generated from CLAUDE.md's Domain vocabulary by `make catalog`. The banned
+   synonyms are shown, not hidden in prose: a rule nobody can see is a rule
+   nobody applies. */
+.gloss-search{width:100%;max-width:26rem;padding:.5rem .7rem;border:1px solid var(--line);
+  border-radius:var(--radius);background:var(--bg-2);color:var(--fg);font:inherit;font-size:.9rem;
+  margin-top:1.2rem}
+.gloss-search:focus{outline:none;border-color:var(--accent)}
+.gloss{margin-top:1.4rem;display:flex;flex-direction:column;gap:.1rem}
+.gterm{border-top:1px solid var(--line);padding:1rem 0;display:grid;
+  grid-template-columns:13rem 1fr;gap:1.2rem;align-items:start}
+.gterm:last-child{border-bottom:1px solid var(--line)}
+.gterm dt{font-weight:640;font-size:.97rem}
+.gterm dd{margin:0;color:var(--fg-2);font-size:.92rem;max-width:68ch}
+.gnever{margin-top:.5rem;display:flex;gap:.35rem;flex-wrap:wrap;align-items:baseline}
+.gnever .lab{font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--down)}
+.gnever code{background:var(--down-soft);border-color:transparent;color:var(--down);
+  text-decoration:line-through}
+.gparts{margin-top:.7rem;display:flex;flex-direction:column;gap:.45rem;
+  border-left:2px solid var(--line);padding-left:.9rem}
+.gparts b{color:var(--fg);font-weight:620}
+.gloss-empty{color:var(--fg-3);padding:1.4rem 0;font-size:.9rem}
+@media(max-width:700px){.gterm{grid-template-columns:1fr;gap:.35rem}}
+</style>
+</head>
+<body>
+<!-- Filled from catalog.project.banner, which sync-catalog.py counts off the
+     build plan. Do not type a build-state sentence in here: the page has no way
+     to know when one stops being true. -->
+<div class="banner" id="banner" hidden></div>
+
+<header>
+  <div class="head-in">
+    <div class="eyebrow">Mission Control</div>
+    <h1 id="proj-name">Cube Solver</h1>
+    <div class="meta" id="proj-meta"></div>
+  </div>
+</header>
+
+<nav><div class="nav-in" id="nav">
+  <button class="theme-btn" id="theme" title="Toggle theme">◐</button>
+</div></nav>
+
+<main>
+  <div class="pane" id="pane-home"><div id="home-body"></div></div>
+
+  <div class="pane" id="pane-status">
+    <section>
+      <div class="dash-head">
+        <div>
+          <h2>Status</h2>
+          <p class="lede">What is actually running on this machine. What is <em>unbuilt</em> is <a href="#build">Build progress</a>, not this page.</p>
+        </div>
+        <div class="dash-ctl">
+          <span class="checked" id="checked">not yet checked</span>
+          <button class="btn" id="refresh">Check now</button>
+        </div>
+      </div>
+      <div class="legend">
+        <span><i class="dot up"></i> Running</span>
+        <span><i class="dot down"></i> Should be running, not responding</span>
+        <span><i class="dot unknown"></i> Nothing was able to ask — no endpoint to probe</span>
+        <span><i class="dot external"></i> A dependency we don't own</span>
+      </div>
+      <div class="grid" id="services"></div>
+    </section>
+  </div>
+
+  <div class="pane" id="pane-build">
+    <section>
+      <h2>Build progress</h2>
+      <p class="lede">Every milestone in build order, and exactly where we are. Generated from <code>docs/07-build-plan.md</code> — this page cannot claim a milestone the plan hasn't ticked.</p>
+      <div class="prog-bar" id="prog-bar"></div>
+      <div class="prog-sum" id="prog-sum"></div>
+      <div class="ms-list" id="milestones"></div>
+      <div class="dod">
+        <h3>v1 — Definition of Done</h3>
+        <p class="lede">v1 ships when all of these are true.</p>
+        <div class="dod-list" id="dod"></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="pane" id="pane-decisions">
+    <section>
+      <h2>Open decisions</h2>
+      <p class="lede">Deliberately deferred, with what would force each one to become urgent. Generated from <code>docs/99-open-questions.md</code>. A design doc that only records what was decided is a design doc that quietly loses its own uncertainty.</p>
+      <div class="dec-list" id="decisions"></div>
+    </section>
+  </div>
+
+  <div class="pane" id="pane-design">
+    <div class="design">
+      <nav class="rail" id="design-rail" aria-label="Design docs"></nav>
+      <article class="doc" id="design-doc"></article>
+    </div>
+  </div>
+
+  <div class="pane" id="pane-glossary">
+    <section>
+      <h2>Glossary</h2>
+      <p class="lede">The words this project uses, and the ones it refuses. Generated from
+        the <strong>Domain vocabulary</strong> section of <code>CLAUDE.md</code> by
+        <code>make catalog</code> &mdash; change the vocabulary there, not here. A term that
+        isn't in this list doesn't have a name yet; give it one before using it.</p>
+      <input class="gloss-search" id="gloss-q" placeholder="Filter terms&hellip;">
+      <dl class="gloss" id="gloss"></dl>
+    </section>
+  </div>
+</main>
+
+<footer><div class="foot-in" id="foot"></div></footer>
+<script>
+const $ = s => document.querySelector(s);
+const el = (t, c, txt) => { const n = document.createElement(t); if (c) n.className = c; if (txt != null) n.textContent = txt; return n; };
+
+/* Escape first, then convert. Any field lifted verbatim out of a markdown
+   document has to go through this, or the reader is shown the source of the
+   document instead of the document. */
+function md(s) {
+  return String(s ?? '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, '<em>$1</em>');
+}
+
+let CATALOG = null;
+
+/* ---------------- theme ---------------- */
+(function theme() {
+  const saved = (() => { try { return localStorage.getItem('mc-theme'); } catch { return null; } })();
+  if (saved) document.documentElement.dataset.theme = saved;
+  $('#theme').onclick = () => {
+    const cur = document.documentElement.dataset.theme
+      || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem('mc-theme', next); } catch {}
+  };
+})();
+
+/* ---------------- status board ----------------
+   Three kinds of thing, and only `http` is probeable.
+
+   `http`  — actually fetched: `probe` is a URL this page can read (its own
+             files, or a service that allows this page's origin). A card with
+             `counts` names a number in the probe's JSON reply and shows it instead:
+             green while above zero, grey at zero — nothing running is not a fault.
+   `image` — a container that runs once and exits. A browser cannot learn
+             anything about an image, so it renders `unknown`, never red. The
+             temptation is to show a red dot for "not built"; a red dot means
+             "should be up and isn't", and using it for "there is nothing to
+             ask" sends people restarting things that were never running.
+   `dependency` — something we don't own. Listed because a run fails without
+             it, and a status board that omits its own hard dependency is a
+             sales page. */
+async function probe(svc) {
+  if (svc.kind !== 'http') return svc.kind === 'dependency' ? 'external' : 'unknown';
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 2500);
+  try {
+    const r = await fetch(svc.probe, { signal: ctrl.signal, cache: 'no-store' });
+    if (r.ok && svc.counts) {
+      // A card that counts: green while any are running, grey when none are.
+      const n = (await r.json())[svc.counts];
+      svc.label = n ? `${n} ${svc.counts}` : 'idle';
+      return n ? 'up' : 'unknown';
+    }
+    return r.ok ? 'up' : 'down';
+  } catch { return 'down'; } finally { clearTimeout(t); }
+}
+
+const STATE_LABEL = { up: 'running', down: 'not responding', unknown: 'unknown', external: 'external', checking: 'checking' };
+
+function serviceCard(svc, state) {
+  const c = el('div', 'card' + (state === 'up' ? ' is-up' : ''));
+  const top = el('div', 'card-top');
+  top.append(el('i', 'dot ' + state));
+  top.append(el('div', 'card-name', svc.name));
+  const st = el('span', 'card-state ' + state, (state !== 'checking' && svc.label) || STATE_LABEL[state] || state);
+  top.append(st);
+  c.append(top);
+  c.append(el('div', 'card-role', svc.role));
+  if (svc.note) { const n = el('div', 'card-note'); n.innerHTML = md(svc.note); c.append(n); }
+  if (svc.links) {
+    const l = el('div', 'card-note');
+    svc.links.forEach((k, i) => {
+      if (i) l.append(' · ');
+      const a = el('a', null, k.label);
+      a.href = k.href; a.target = '_blank'; a.rel = 'noopener';
+      l.append(a);
+    });
+    c.append(l);
+  }
+  const foot = el('div', 'card-foot');
+  const left = el('code', null, svc.port ? ':' + svc.port : svc.kind === 'image' ? 'make image' : 'runtime dependency');
+  foot.append(left);
+  foot.append(el('span', null, svc.kind));
+  c.append(foot);
+  return c;
+}
+
+async function checkAll() {
+  if (!CATALOG) return;
+  const host = $('#services');
+  host.textContent = '';
+  const cards = CATALOG.services.map(s => {
+    const initial = s.kind === 'http' ? 'checking' : (s.kind === 'dependency' ? 'external' : 'unknown');
+    const c = serviceCard(s, initial);
+    host.append(c);
+    return { svc: s, node: c };
+  });
+  $('#refresh').disabled = true;
+  await Promise.all(cards.map(async ({ svc, node }) => {
+    const state = await probe(svc);
+    node.replaceWith(serviceCard(svc, state));
+  }));
+  $('#refresh').disabled = false;
+  $('#checked').textContent = 'checked ' + new Date().toLocaleTimeString();
+}
+
+/* ---------------- build progress ---------------- */
+function renderProgress(c) {
+  const ms = c.milestones || [];
+  const bar = $('#prog-bar');
+  bar.textContent = '';
+  ms.forEach(m => {
+    const i = el('i', m.status === 'done' ? 'done' : m.status === 'active' ? 'active' : '');
+    i.style.flex = '1';
+    bar.append(i);
+  });
+  const done = ms.filter(m => m.status === 'done').length;
+  const tasksDone = ms.reduce((a, m) => a + m.task_done, 0);
+  const tasksTotal = ms.reduce((a, m) => a + m.task_total, 0);
+  const active = ms.filter(m => m.status === 'active').map(m => m.id).join(' and ');
+  $('#prog-sum').innerHTML =
+    `<strong>${done} of ${ms.length}</strong> milestones complete · ` +
+    `<strong>${tasksDone} of ${tasksTotal}</strong> tasks ticked` +
+    (active ? ` · in flight: <strong>${active}</strong>` : '');
+
+  const host = $('#milestones');
+  host.textContent = '';
+  ms.forEach(m => {
+    const row = el('div', 'ms is-' + m.status);
+    const mark = el('div', 'ms-mark', m.status === 'done' ? '✓' : '');
+    row.append(mark);
+    row.append(el('div', 'ms-id', m.id));
+    row.append(el('div', 'ms-title', m.title));
+    row.append(el('div', 'ms-tasks', `${m.task_done}/${m.task_total}`));
+    if (m.done_when) {
+      const w = el('div', 'ms-when');
+      w.innerHTML = '<strong>Done when:</strong> ' + md(m.done_when);
+      row.append(w);
+    }
+    /* A task carrying a parenthetical reason is blocked, not merely unticked.
+       Those are different conversations and the page should not flatten them. */
+    m.blocked.forEach(t => {
+      const b = el('div', 'ms-block');
+      b.innerHTML = '⚠ ' + md(t);
+      row.append(b);
+    });
+    /* Click a milestone to see every task, in full, ticked where done. */
+    if (m.tasks.length) {
+      row.classList.add('has-left');
+      const ul = el('ul', 'ms-left');
+      m.tasks.forEach(t => {
+        const li = el('li', t.done ? 'done' : '');
+        const box = el('input');
+        box.type = 'checkbox';
+        box.checked = t.done;
+        box.tabIndex = -1;
+        const span = el('span');
+        span.innerHTML = md(t.text);
+        li.append(box, span);
+        ul.append(li);
+      });
+      row.append(ul);
+      row.addEventListener('click', e => {
+        if (e.target.closest('a') || e.target.closest('.ms-left')) return;
+        row.classList.toggle('open');
+      });
+    }
+    host.append(row);
+  });
+
+  const dod = $('#dod');
+  dod.textContent = '';
+  (c.dod || []).forEach(d => {
+    const r = el('div', 'dod-row' + (d.done ? ' on' : ''));
+    r.append(el('i', 'dod-box', d.done ? '✓' : ''));
+    const s = el('span');
+    s.innerHTML = md(d.text);
+    r.append(s);
+    dod.append(r);
+  });
+}
+
+/* ---------------- prose sections (Home) ----------------
+   Blocks: `h` heading, `sub` subheading, `p` paragraph, `ul` list (items are strings or
+   {text, tasks}), `img` (src, alt), `link` (text, href). `tasks` names build plan task
+   keys (`{#key}` in docs/07-build-plan.md) that will make a not-yet-true line true. */
+function taskLinks(keys) {
+  if (!keys || !keys.length) return '';
+  return ' <span class="bp-tasks">' +
+    keys.map(k => `<a href="#build" title="Build plan task">#${k}</a>`).join(' ') + '</span>';
+}
+
+function renderBlock(b) {
+  if (b.kind === 'h') return el('h3', null, b.text);
+  if (b.kind === 'sub') {
+    const h = el('h4');
+    h.innerHTML = md(b.text) + taskLinks(b.tasks);
+    return h;
+  }
+  if (b.kind === 'link') {
+    const p = el('p'), l = el('a', null, b.text + ' →');
+    l.href = b.href;
+    p.append(l);
+    return p;
+  }
+  if (b.kind === 'img') {
+    const f = el('figure', 'diagram'), i = el('img');
+    i.src = b.src; i.alt = b.alt || '';
+    f.append(i);
+    return f;
+  }
+  if (b.kind === 'ul') {
+    const ul = el('ul', 'plain');
+    b.items.forEach(i => {
+      const li = el('li');
+      li.innerHTML = typeof i === 'string' ? md(i) : md(i.text) + taskLinks(i.tasks);
+      ul.append(li);
+    });
+    return ul;
+  }
+  const p = el('p');
+  p.innerHTML = md(b.text) + taskLinks(b.tasks);
+  return p;
+}
+
+function sectionNode(s, cls, mark = true) {
+  const sec = el('section', cls);
+  sec.id = s.id;
+  sec.append(el('h2', null, s.title));
+  if (s.lede) { const l = el('p', 'lede'); l.innerHTML = md(s.lede); sec.append(l); }
+  const body = el('div', 'sec-body');
+  (s.blocks || []).forEach(b => body.append(renderBlock(b)));
+  sec.append(body);
+  /* Once per chapter, not once per block: a term marked in every paragraph of a
+     long chapter is noise by the third one. */
+  if (mark) markSection(sec);
+  return sec;
+}
+
+function markSection(node) {
+  const seen = new Set();
+  node.querySelectorAll('p, li').forEach(el => {
+    const before = el.innerHTML;
+    const after = markTerms(before, { skip: seen });
+    if (after !== before) {
+      el.innerHTML = after;
+      el.querySelectorAll('.gt').forEach(s => seen.add(s.dataset.term));
+    }
+  });
+}
+
+/* ---------------- design ----------------
+   The docs themselves, converted by `make catalog` — not a summary of them. A summary
+   drifts from the docs; the docs cannot. `#design/<doc>` opens a doc,
+   `#design/<doc>/<heading>` a heading in it. */
+let docCurrent = null;
+
+function renderDesign(c) {
+  const rail = $('#design-rail');
+  (c.docs || []).forEach(d => {
+    const b = el('button', null, d.title.replace(/^\d\d\s*—\s*/, ''));
+    b.type = 'button';
+    b.dataset.doc = d.id;
+    b.onclick = () => { location.hash = 'design/' + d.id; };
+    rail.append(b);
+    const toc = el('div', 'toc');
+    toc.dataset.for = d.id;
+    toc.hidden = true;
+    d.toc.forEach(t => {
+      const a = el('a');
+      a.href = '#design/' + d.id + '/' + t.id.slice(d.id.length + 2);
+      a.innerHTML = md(t.text);
+      toc.append(a);
+    });
+    rail.append(toc);
+  });
+}
+
+function showDoc(id, anchor) {
+  const docs = CATALOG.docs || [];
+  const d = docs.find(x => x.id === id) || docs.find(x => x.id === docCurrent) || docs[0];
+  if (!d) return;
+  if (docCurrent !== d.id) {
+    const repo = CATALOG.project.repo;
+    const src = repo
+      ? `<a href="https://github.com/${esc(repo)}/blob/main/${d.file}" target="_blank" rel="noopener"><code>${d.file}</code></a>`
+      : `<code>${d.file}</code>`;
+    $('#design-doc').innerHTML =
+      `<p class="doc-src">Shown from ${src} ` +
+      `by <code>make catalog</code>. To change what this says, change the doc.</p>` + d.html;
+    docCurrent = d.id;
+  }
+  document.querySelectorAll('#design-rail button').forEach(b => b.classList.toggle('on', b.dataset.doc === d.id));
+  document.querySelectorAll('#design-rail .toc').forEach(t => { t.hidden = t.dataset.for !== d.id; });
+  const want = '#design/' + d.id + (anchor ? '/' + anchor : '');
+  if (location.hash !== want) history.replaceState(null, '', want);
+  const target = anchor && document.getElementById(d.id + '--' + anchor);
+  if (target) target.scrollIntoView();
+  else window.scrollTo({ top: 0 });
+}
+
+/* ---------------- decisions ---------------- */
+function renderDecisions(c) {
+  const host = $('#decisions');
+  host.textContent = '';
+  const order = { open: 0, deferred: 1, resolved: 2 };
+  if (!(c.decisions || []).length) {
+    host.innerHTML = '<div class="loading">No open questions yet. Add them to <code>docs/99-open-questions.md</code>, then run <code>make catalog</code>.</div>';
+    return;
+  }
+  [...(c.decisions || [])].sort((a, b) => order[a.state] - order[b.state]).forEach(d => {
+    const n = el('div', 'dec');
+    const top = el('div', 'dec-top');
+    const q = el('div', 'dec-q'); q.innerHTML = md(d.question); top.append(q);
+    top.append(el('span', 'dec-state ' + d.state, d.state));
+    n.append(top);
+    if (d.status) { const r = el('div', 'dec-row'); r.innerHTML = '<b>Status:</b> ' + md(d.status); n.append(r); }
+    if (d.trigger) { const r = el('div', 'dec-row'); r.innerHTML = '<b>What would force it:</b> ' + md(d.trigger); n.append(r); }
+    if (d.notes) { const r = el('div', 'dec-row'); r.innerHTML = md(d.notes); n.append(r); }
+    host.append(n);
+  });
+}
+
+
+function esc(v) {
+  return String(v == null ? '' : v).replace(/[<>&]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]));
+}
+
+
+/* ---------------- glossary term marking ----------------
+   Wraps the first mention of each glossary term in a block so hovering it shows
+   the definition. Applied to rendered HTML, so it has to step over markup: a
+   term inside a tag attribute or inside <code> is not prose and marking it there
+   would corrupt the tag or contradict the code. */
+let GLOSS_RE = null;
+
+function glossIndex() {
+  const terms = (CATALOG && CATALOG.glossary) || [];
+  const flat = [];
+  terms.forEach(t => {
+    flat.push(t);
+    (t.parts || []).forEach(p => flat.push({ ...p, never: [] }));
+  });
+  // Longest first, so a two-word term wins over the one-word term inside it.
+  flat.sort((a, b) => b.term.length - a.term.length);
+  const byLower = new Map(flat.map(t => [t.term.toLowerCase(), t]));
+  const escaped = flat.map(t => t.term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  GLOSS_RE = escaped.length ? new RegExp(`\\b(${escaped.join('|')})(e?s)?\\b`, 'gi') : null;
+  return byLower;
+}
+
+function markTerms(html, { skip = new Set() } = {}) {
+  const byLower = glossIndex();
+  if (!GLOSS_RE) return html;
+  const seen = new Set(skip);
+  let inCode = 0;
+  // Split into tags and text. Odd indices are tags, and tags are never touched.
+  return html.split(/(<[^>]+>)/).map(part => {
+    if (part.startsWith('<')) {
+      if (/^<code[\s>]/i.test(part)) inCode++;
+      else if (/^<\/code>/i.test(part)) inCode = Math.max(0, inCode - 1);
+      return part;
+    }
+    if (inCode || !part.trim()) return part;
+    return part.replace(GLOSS_RE, (whole, term, plural) => {
+      const entry = byLower.get(term.toLowerCase());
+      if (!entry) return whole;
+      const key = entry.term.toLowerCase();
+      if (seen.has(key)) return whole;
+      seen.add(key);
+      const never = (entry.never || []).length
+        ? ` data-never="never: ${esc(entry.never.join(', '))}"` : '';
+      return `<span class="gt" tabindex="0" data-term="${esc(key)}" data-def="${esc(entry.definition)}"${never}>` +
+             `${whole}</span>`;
+    });
+  }).join('');
+}
+
+/* ---------------- glossary ---------------- */
+function renderGlossary(q = '') {
+  const host = $('#gloss');
+  if (!host) return;
+  const want = q.trim().toLowerCase();
+  const hit = t => !want ||
+    (t.term + ' ' + t.definition + ' ' + (t.never || []).join(' ') +
+     (t.parts || []).map(p => p.term + ' ' + p.definition).join(' ')).toLowerCase().includes(want);
+  if (!(CATALOG.glossary || []).length) {
+    host.innerHTML = '<div class="gloss-empty">No terms yet. Add them to the Domain vocabulary section of <code>CLAUDE.md</code>, then run <code>make catalog</code>.</div>';
+    return;
+  }
+  const terms = (CATALOG.glossary || []).filter(hit);
+  if (!terms.length) {
+    host.innerHTML = `<div class="gloss-empty">No term matches &ldquo;${esc(q)}&rdquo;.</div>`;
+    return;
+  }
+  host.innerHTML = terms.map(t => `<div class="gterm">
+    <dt>${esc(t.term)}</dt>
+    <dd>${md(t.definition)}
+      ${(t.parts || []).length ? `<div class="gparts">${t.parts.map(p =>
+        `<div><b>${esc(p.term)}</b> &mdash; ${md(p.definition)}</div>`).join('')}</div>` : ''}
+      ${(t.never || []).length ? `<div class="gnever"><span class="lab">never</span>${
+        t.never.map(n => `<code>${esc(n)}</code>`).join('')}</div>` : ''}
+    </dd>
+  </div>`).join('');
+}
+
+/* ---------------- home ---------------- */
+function renderHome(c) {
+  const host = $('#home-body');
+  host.textContent = '';
+  const secs = c.sections || [];
+  if (!secs.length) {
+    host.innerHTML = '<div class="loading">Nothing here yet. Add a section to <code>sections</code> in <code>site/catalog.json</code>.</div>';
+    return;
+  }
+  secs.forEach(s => host.append(sectionNode(s, '')));
+}
+
+/* ---------------- tabs ---------------- */
+const TABS = [
+  ['home', 'Home', 'pane-home'],
+  ['status', 'Status', 'pane-status'],
+  ['build', 'Build progress', 'pane-build'],
+  ['decisions', 'Open decisions', 'pane-decisions'],
+  ['design', 'Design', 'pane-design'],
+  ['glossary', 'Glossary', 'pane-glossary'],
+];
+
+function showTab(key, { push = true } = {}) {
+  const tab = TABS.find(t => t[0] === key) || TABS[0];
+  TABS.forEach(([k, , pane]) => {
+    const p = document.getElementById(pane);
+    if (p) p.classList.toggle('on', k === tab[0]);
+  });
+  document.querySelectorAll('nav button.tab').forEach(b => b.classList.toggle('on', b.dataset.tab === tab[0]));
+  if (push && location.hash.slice(1) !== tab[0]) history.replaceState(null, '', '#' + tab[0]);
+  if (tab[0] === 'status') checkAll();
+  if (tab[0] === 'glossary') renderGlossary($('#gloss-q') ? $('#gloss-q').value : '');
+  if (tab[0] === 'design' && !docCurrent) showDoc();
+  window.scrollTo({ top: 0 });
+}
+
+function buildTabs() {
+  const search = $('#gloss-q');
+  if (search) search.oninput = () => renderGlossary(search.value);
+  const nav = $('#nav'), themeBtn = $('#theme');
+  TABS.forEach(([key, label]) => {
+    const b = el('button', 'tab', label);
+    b.dataset.tab = key;
+    b.onclick = () => showTab(key);
+    nav.insertBefore(b, themeBtn);
+  });
+  route();
+  addEventListener('hashchange', route);
+}
+
+/* A hash names a tab, optionally followed by a path the tab owns. */
+function route() {
+  const raw = location.hash.slice(1);
+  const [want, ...rest] = raw.split('/');
+  if (!want || !TABS.some(t => t[0] === want)) return showTab('home', { push: false });
+  showTab(want, { push: false });
+  if (want === 'design' && rest.length) showDoc(rest[0], rest.slice(1).join('/'));
+}
+
+/* ---------------- boot ---------------- */
+function render(c) {
+  CATALOG = c;
+  document.title = `Mission Control — ${c.project.name}`;
+  const banner = $('#banner');
+  banner.textContent = c.project.banner || '';
+  banner.hidden = !banner.textContent;
+
+  $('#proj-name').textContent = c.project.name;
+
+  const ms = c.milestones || [];
+  const doneCount = ms.filter(m => m.status === 'done').length;
+  const active = ms.filter(m => m.status === 'active');
+  const openDec = (c.decisions || []).filter(d => d.state === 'open').length;
+
+  $('#proj-meta').innerHTML =
+    (c.project.phase ? `<span class="pill warn">${esc(c.project.phase)}</span>` : '') +
+    `<span class="pill">${doneCount}/${ms.length} milestones</span>` +
+    (active.length ? `<span class="pill on">now: ${active.map(m => m.id).join(' + ')}</span>` : '') +
+    `<span class="pill">${openDec} open decisions</span>`;
+
+  $('#foot').innerHTML =
+    `${esc(c.project.name)}` + (c.project.repo ? ` · <code>${esc(c.project.repo)}</code>` : '') +
+    ` · catalog generated ${c.generated_at || 'never — run make catalog'} · ` +
+    `this page reads <code>site/catalog.json</code> · <code>make catalog</code> to refresh`;
+
+  renderProgress(c);
+  renderHome(c);
+  renderDesign(c);
+  renderDecisions(c);
+  buildTabs();
+  $('#refresh').onclick = checkAll;
+}
+
+fetch('catalog.json', { cache: 'no-store' })
+  .then(r => r.json())
+  .then(render)
+  .catch(e => {
+    document.querySelector('main').innerHTML =
+      `<div class="loading">Could not load <code>catalog.json</code>: ${e}. ` +
+      `Serve this directory with <code>make site</code> — opening the file directly blocks the fetch.</div>`;
+  });
+</script>
+</body>
+</html>
