@@ -10,7 +10,7 @@ The **Now:** line below names the milestone(s) being worked on, comma-separated 
 
 **Status: milestone order M1–M7 agreed 2026-11-04.**
 
-**Now:** M3
+**Now:** M4
 
 ## v1 — Definition of Done
 
@@ -74,9 +74,9 @@ Goal: the beginner method, taught one stage per level.
 
 Goal: XP, badges, locked levels, saved progress.
 
-- [ ] XP and badge rules.
-- [ ] Unlocks: later levels locked until earlier ones are passed.
-- [ ] Progress saved on the device.
+- [x] XP and badge rules.
+- [x] Unlocks: later levels locked until earlier ones are passed.
+- [x] Progress saved on the device.
 
 **Done when:** progress, XP, and badges survive closing and reopening the app.
 

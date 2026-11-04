@@ -2,8 +2,10 @@
 //   #/            home: level list
 //   #/level/<id>  a lesson
 //   #/play        free play
+//   #/badges      badges
 
 import type { CubeView } from "../render/cubeView";
+import { mountBadges } from "./badges";
 import { mountHome } from "./home";
 import { mountLesson } from "./lesson";
 import { mountPractice } from "./practice";
@@ -44,6 +46,7 @@ export function mountShell(root: HTMLElement): void {
     back.hidden = parts[0] === "";
     if (parts[0] === "level" && parts[1]) current = mountLesson(screenEl, parts[1]);
     else if (parts[0] === "play") current = mountPractice(screenEl);
+    else if (parts[0] === "badges") current = mountBadges(screenEl);
     else current = mountHome(screenEl);
     // Test hook: ?ada=1 forces ADA shapes on without saving.
     if (new URLSearchParams(location.search).get("ada") === "1") {

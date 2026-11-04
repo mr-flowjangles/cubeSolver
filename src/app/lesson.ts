@@ -1,16 +1,11 @@
 // One level: what it teaches, a practice cube, Hint / Show me, and the pass check.
 
-import { type CubeState, applyMoves, scramble, solved, toString } from "../cube";
+import { type CubeState, applyMoves, toString } from "../cube";
+import { isUnlocked, rankOf, recordPass } from "../game/rules";
+import { loadProgress, saveProgress, today } from "../game/storage";
 import { BEGINNER_LEVELS, type Level, NOTATION_DRILL } from "../lessons/beginner";
 import { practicePosition } from "../lessons/position";
-import {
-  STAGES,
-  STAGE_DONE,
-  type SolveStep,
-  type StageId,
-  solveBeginner,
-  stateAfter,
-} from "../solver/beginner";
+import { STAGE_DONE, type SolveStep, type StageId, solveBeginner } from "../solver/beginner";
 import { type CubePanel, mountCubePanel } from "./cubePanel";
 import type { Screen } from "./shell";
 
@@ -24,6 +19,19 @@ export function mountLesson(root: HTMLElement, id: string): Screen {
   const level = BEGINNER_LEVELS.find((l) => l.id === id) ?? BEGINNER_LEVELS[0];
   const next = BEGINNER_LEVELS[BEGINNER_LEVELS.indexOf(level) + 1];
   const isDrill = level.kind === "notation";
+  const order = BEGINNER_LEVELS.map((l) => l.id);
+
+  const testHook = new URLSearchParams(location.search).get("autoshow") === "1";
+  if (!testHook && !isUnlocked(loadProgress(), order, level.id)) {
+    const prev = BEGINNER_LEVELS[BEGINNER_LEVELS.indexOf(level) - 1];
+    root.innerHTML = `
+      <main class="lesson locked">
+        <h2><span class="num">🔒</span> ${level.title}</h2>
+        <p>Pass <strong>${prev.title}</strong> first to unlock this level.</p>
+        <a class="button primary" href="#/level/${prev.id}">Go to ${prev.title}</a>
+      </main>`;
+    return { dispose() {} };
+  }
 
   root.innerHTML = `
     <main class="lesson">
@@ -46,6 +54,7 @@ export function mountLesson(root: HTMLElement, id: string): Screen {
       </div>
       <div class="passed" hidden>
         <p>Level passed! 🎉</p>
+        <div class="reward"></div>
         ${next ? `<a class="button primary" href="#/level/${next.id}">Next: ${next.title}</a>` : `<a class="button primary" href="#/">Back to levels</a>`}
       </div>
     </main>`;
@@ -53,6 +62,8 @@ export function mountLesson(root: HTMLElement, id: string): Screen {
   const passedEl = root.querySelector<HTMLElement>(".passed")!;
   let drill = 0;
   let done = false;
+  let usedHelp = false;
+  let started = Date.now();
 
   const drillPrompt = () =>
     `Turn: ${NOTATION_DRILL[drill]}   (${drill + 1} of ${NOTATION_DRILL.length})`;
@@ -60,6 +71,25 @@ export function mountLesson(root: HTMLElement, id: string): Screen {
   const check = (p: CubePanel) => {
     if (!done && passed(level, p, drill)) {
       done = true;
+      const before = loadProgress();
+      const r = recordPass(
+        before,
+        order,
+        level.id,
+        {
+          usedHelp,
+          moves: p.history.length,
+          seconds: Math.round((Date.now() - started) / 1000),
+        },
+        today(),
+      );
+      saveProgress(r.progress);
+      const rankBefore = rankOf(before.xp).name;
+      const rankNow = rankOf(r.progress.xp).name;
+      passedEl.querySelector(".reward")!.innerHTML = `
+        <p class="xp">+${r.xpGained} XP${!usedHelp && !isDrill ? " · no help!" : ""}</p>
+        ${rankNow !== rankBefore ? `<p class="rankup">New rank: <strong>${rankNow}</strong></p>` : ""}
+        ${r.newBadges.map((b) => `<p class="badge-new"><span>${b.icon}</span> Badge: <strong>${b.name}</strong></p>`).join("")}`;
       passedEl.hidden = false;
       p.say("Passed!");
       passedEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -104,10 +134,12 @@ export function mountLesson(root: HTMLElement, id: string): Screen {
   };
 
   root.querySelector("#hint")?.addEventListener("click", () => {
+    usedHelp = true;
     const step = nextStep();
     panel.say(step ? `${step.say}  →  ${step.moves.join(" ")}` : "Already done!");
   });
   root.querySelector("#show")?.addEventListener("click", async () => {
+    usedHelp = true;
     const step = nextStep();
     if (!step) return;
     panel.say(`${step.say}  →  ${step.moves.join(" ")}`);
@@ -123,6 +155,8 @@ export function mountLesson(root: HTMLElement, id: string): Screen {
     panel.setState(practicePosition(level));
     drill = 0;
     done = false;
+    usedHelp = false;
+    started = Date.now();
     passedEl.hidden = true;
     panel.say(isDrill ? drillPrompt() : "New cube. Hold white on the bottom.");
   });
@@ -130,6 +164,7 @@ export function mountLesson(root: HTMLElement, id: string): Screen {
   // Test hook: ?autoshow=1 applies every "Show me" step instantly until the level is passed.
   // Instant because headless browsers may not run animation frames.
   if (new URLSearchParams(location.search).get("autoshow") === "1" && !isDrill) {
+    usedHelp = true;
     for (let i = 0; i < 40 && !done; i++) {
       const step = nextStep();
       if (!step) break;

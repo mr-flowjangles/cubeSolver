@@ -2,8 +2,8 @@
   "project": {
     "name": "Cube Solver",
     "repo": "https://github.com/mr-flowjangles/cubeSolver",
-    "phase": "Building M3 — Game layer",
-    "banner": "Building M3 — Game layer · 3 of 8 milestones complete. Anything marked planned is unticked in the build plan.",
+    "phase": "Building M4 — Solve my cube",
+    "banner": "Building M4 — Solve my cube · 4 of 8 milestones complete. Anything marked planned is unticked in the build plan.",
     "updated": "2026-11-04"
   },
   "services": [
@@ -51,6 +51,7 @@
             "Installs on your phone, works offline, no sign-in.",
             "Public, free, hosted on GitHub Pages.",
             "9 beginner levels: notation, the 7 stages, then a full solve. Levels list: Design tab → 02 — Levels.",
+            "XP, ranks and 13 badges; levels unlock in order. Rules: Design tab → 03 — Game.",
             "Live at https://mr-flowjangles.github.io/cubeSolver/"
           ]
         }
@@ -168,22 +169,22 @@
       "goal": "XP, badges, locked levels, saved progress.",
       "tasks": [
         {
-          "done": false,
+          "done": true,
           "text": "XP and badge rules."
         },
         {
-          "done": false,
+          "done": true,
           "text": "Unlocks: later levels locked until earlier ones are passed."
         },
         {
-          "done": false,
+          "done": true,
           "text": "Progress saved on the device."
         }
       ],
       "done_when": "progress, XP, and badges survive closing and reopening the app.",
       "task_total": 3,
-      "task_done": 0,
-      "status": "planned",
+      "task_done": 3,
+      "status": "done",
       "blocked": []
     },
     {
@@ -337,10 +338,10 @@
     },
     {
       "question": "What are the XP amounts, badges, and unlock rules?",
-      "status": "open",
-      "trigger": "before M3.",
+      "status": "resolved 2026-11-04",
+      "trigger": "before M3. **Decision:** in `03-game.md`. Decided by Claude under the standing go-ahead; Rob to review.",
       "notes": "",
-      "state": "open"
+      "state": "resolved"
     },
     {
       "question": "How does the camera read colors?",
@@ -375,6 +376,11 @@
     {
       "term": "ADA support",
       "definition": "a setting, off by default, that adds a shape to each sticker color for colorblind players.",
+      "parts": []
+    },
+    {
+      "term": "Badge",
+      "definition": "an award for a milestone, e.g. First Solve. 13 in all; listed on the Badges screen.",
       "parts": []
     },
     {
@@ -419,7 +425,7 @@
     },
     {
       "term": "Level",
-      "definition": "one lesson; passing it is the goal. Beginner levels are numbered 0–8.",
+      "definition": "one lesson; passing it is the goal. Beginner levels are numbered 0–8. Each unlocks when the one before is passed.",
       "parts": []
     },
     {
@@ -438,13 +444,28 @@
       "parts": []
     },
     {
+      "term": "On your own",
+      "definition": "passing a level without pressing Hint or Show me. Earns bonus XP and a ★ on the level.",
+      "parts": []
+    },
+    {
       "term": "Practice cube",
       "definition": "the cube a level starts you on: a random scramble with every earlier stage already done.",
       "parts": []
     },
     {
+      "term": "Rank",
+      "definition": "a title earned by XP, from Newcomer to Speedcuber.",
+      "parts": []
+    },
+    {
       "term": "Scramble",
       "definition": "a random list of moves used to mix up a cube.",
+      "parts": []
+    },
+    {
+      "term": "Streak",
+      "definition": "days in a row with at least one level passed.",
       "parts": []
     },
     {
@@ -593,10 +614,38 @@
       ]
     },
     {
+      "id": "03-game",
+      "file": "docs/03-game.md",
+      "title": "03 — Game",
+      "html": "<h1 id=\"03-game--03--game\">03 — Game</h1>\n<p><strong>Status:</strong> decided by Claude under Rob's standing go-ahead, 2026-11-04. Rob to review.</p>\n<h2 id=\"03-game--xp\">XP</h2>\n<div class=\"doc-table\"><table>\n<thead>\n<tr><th>Event</th><th>XP</th></tr>\n</thead>\n<tbody>\n<tr><td>Pass a level, first time</td><td>100</td></tr>\n<tr><td>Pass Full solve, first time</td><td>300</td></tr>\n<tr><td>Pass a level again</td><td>25</td></tr>\n<tr><td>Pass Full solve again</td><td>50</td></tr>\n<tr><td>First pass of a level without Hint or Show me</td><td>+50 bonus</td></tr>\n</tbody>\n</table></div>\n<ul>\n<li>The no-help bonus doesn't apply to Meet the cube (it has no Hint).</li>\n</ul>\n<h2 id=\"03-game--ranks\">Ranks</h2>\n<div class=\"doc-table\"><table>\n<thead>\n<tr><th>Rank</th><th>XP</th></tr>\n</thead>\n<tbody>\n<tr><td>Newcomer</td><td>0</td></tr>\n<tr><td>Turner</td><td>200</td></tr>\n<tr><td>Layer Builder</td><td>500</td></tr>\n<tr><td>Solver</td><td>1000</td></tr>\n<tr><td>Cube Master</td><td>2000</td></tr>\n<tr><td>Speedcuber</td><td>4000</td></tr>\n</tbody>\n</table></div>\n<h2 id=\"03-game--badges\">Badges</h2>\n<ul>\n<li>One badge each for passing: Meet the cube, White cross, White corners, Middle edges, Yellow cross, Twist yellow corners, Full solve.</li>\n<li><strong>On My Own:</strong> pass any level without Hint or Show me.</li>\n<li><strong>Solo Solver:</strong> pass Full solve without Hint or Show me.</li>\n<li><strong>Five Solves:</strong> pass Full solve 5 times.</li>\n<li><strong>3-Day Streak / 7-Day Streak:</strong> pass a level on that many days in a row.</li>\n<li><strong>Beginner Graduate:</strong> pass every beginner level.</li>\n</ul>\n<h2 id=\"03-game--unlocks\">Unlocks</h2>\n<ul>\n<li>Meet the cube is always open.</li>\n<li>Each level unlocks when the one before it is passed.</li>\n<li>Free play is always open.</li>\n</ul>\n<h2 id=\"03-game--saving\">Saving</h2>\n<ul>\n<li>Saved in the browser on this device only. No account, nothing sent anywhere.</li>\n<li>Clearing the browser's site data resets progress.</li>\n<li>Private browsing: progress lasts only for that visit.</li>\n</ul>\n",
+      "toc": [
+        {
+          "id": "03-game--xp",
+          "text": "XP"
+        },
+        {
+          "id": "03-game--ranks",
+          "text": "Ranks"
+        },
+        {
+          "id": "03-game--badges",
+          "text": "Badges"
+        },
+        {
+          "id": "03-game--unlocks",
+          "text": "Unlocks"
+        },
+        {
+          "id": "03-game--saving",
+          "text": "Saving"
+        }
+      ]
+    },
+    {
       "id": "07-build-plan",
       "file": "docs/07-build-plan.md",
       "title": "07 — Build plan",
-      "html": "<h1 id=\"07-build-plan--07--build-plan\">07 — Build plan</h1>\n<p>The implementation order is the order in this doc. Milestones are sequential, tasks within a milestone are ordered. <strong>We check the boxes as we go.</strong> When a milestone is fully checked, the next one starts.</p>\n<p>If something forces us off this plan (a discovered constraint, a customer arriving early, etc.), we update this doc <em>first</em>, then change course. Don't drift silently.</p>\n<p>The convention is <code>## M&lt;N&gt; — {Title}</code> so <code>make version-M&lt;N&gt;</code> can auto-resolve the milestone title from this file.</p>\n<p>The <strong>Now:</strong> line below names the milestone(s) being worked on, comma-separated when there is more than one. Mission Control's phase pill and banner read it (<code>make catalog</code>).</p>\n<p><strong>Status: milestone order M1–M7 agreed 2026-11-04.</strong></p>\n<p><strong>Now:</strong> M3</p>\n<h2 id=\"07-build-plan--v1--definition-of-done\">v1 — Definition of Done</h2>\n<p>v1 ships when <strong>all</strong> of the following are true:</p>\n<ul>\n<li><input type=\"checkbox\" disabled> Live on GitHub Pages, installable on iPhone and Android.</li>\n<li><input type=\"checkbox\" disabled> Works offline after the first visit.</li>\n<li><input type=\"checkbox\" disabled> A beginner can go from level 1 to a full solve using only the app.</li>\n<li><input type=\"checkbox\" disabled> CFOP levels are playable.</li>\n<li><input type=\"checkbox\" disabled> Camera scan of a real cube leads to a guided solve.</li>\n<li><input type=\"checkbox\" disabled> All milestones below are checked.</li>\n<li><input type=\"checkbox\" disabled> <code>README.md</code> has a quickstart.</li>\n</ul>\n<hr>\n<h2 id=\"07-build-plan--m0--foundations\">M0 — Foundations</h2>\n<p>Goal: project skeleton and dev environment ready, no feature code yet.</p>\n<ul>\n<li><input type=\"checkbox\" disabled checked> Initialize git repo, add <code>.gitignore</code> and <code>README.md</code>, make initial commit of design docs.</li>\n<li><input type=\"checkbox\" disabled checked> Replace placeholders across the repo.</li>\n<li><input type=\"checkbox\" disabled checked> Add <code>package.json</code> (Vite, TypeScript, Three.js, Vitest, Prettier).</li>\n<li><input type=\"checkbox\" disabled checked> Wire up <code>make setup</code> / <code>make test</code> / <code>make lint</code> / <code>make format</code>.</li>\n<li><input type=\"checkbox\" disabled checked> Verify <code>make ci</code> passes on an empty test suite.</li>\n<li><input type=\"checkbox\" disabled checked> Docker image for local testing: <code>make image</code>, <code>make smoke</code> passes.</li>\n<li><input type=\"checkbox\" disabled checked> Verify versioning ceremony: <code>./scripts/new-version.sh --dry-run \"Smoke Test\"</code>.</li>\n<li><input type=\"checkbox\" disabled checked> Fill in <a href=\"#design/mission\"><code>docs/mission.md</code></a> and <a href=\"#design/00-overview\"><code>docs/00-overview.md</code></a>.</li>\n<li><input type=\"checkbox\" disabled checked> Sketch <a href=\"#design/01-architecture\"><code>docs/01-architecture.md</code></a>.</li>\n<li><input type=\"checkbox\" disabled checked> Fill in <code>Versions/v0/v0.0/release-notes.md</code> for the bootstrap commit.</li>\n</ul>\n<p><strong>Done when:</strong> project builds, tests run, versioning ceremony runs cleanly, mission/overview/architecture have v1 content.</p>\n<hr>\n<h2 id=\"07-build-plan--m1--cube-and-live-site\">M1 — Cube and live site</h2>\n<p>Goal: a 3D cube you can turn, live on GitHub Pages as an installable PWA.</p>\n<ul>\n<li><input type=\"checkbox\" disabled checked> Cube model: cube state, all moves, scramble. Fully tested.</li>\n<li><input type=\"checkbox\" disabled checked> 3D cube: draw, animate moves, spin the view.</li>\n<li><input type=\"checkbox\" disabled checked> PWA setup: offline, home-screen install.</li>\n<li><input type=\"checkbox\" disabled checked> GitHub Pages deploy on every push to <code>main</code>.</li>\n</ul>\n<p><strong>Done when:</strong> the live site shows a cube you can turn and scramble, on a phone, offline.</p>\n<hr>\n<h2 id=\"07-build-plan--m2--beginner-levels\">M2 — Beginner levels</h2>\n<p>Goal: the beginner method, taught one stage per level.</p>\n<ul>\n<li><input type=\"checkbox\" disabled checked> Beginner solver, stage by stage, tested on many random scrambles.</li>\n<li><input type=\"checkbox\" disabled checked> Level content for each beginner stage.</li>\n<li><input type=\"checkbox\" disabled checked> Lesson screen: explain, show moves, practice, pass check.</li>\n</ul>\n<p><strong>Done when:</strong> a player can learn a full beginner solve in the app.</p>\n<hr>\n<h2 id=\"07-build-plan--m3--game-layer\">M3 — Game layer</h2>\n<p>Goal: XP, badges, locked levels, saved progress.</p>\n<ul>\n<li><input type=\"checkbox\" disabled> XP and badge rules.</li>\n<li><input type=\"checkbox\" disabled> Unlocks: later levels locked until earlier ones are passed.</li>\n<li><input type=\"checkbox\" disabled> Progress saved on the device.</li>\n</ul>\n<p><strong>Done when:</strong> progress, XP, and badges survive closing and reopening the app.</p>\n<hr>\n<h2 id=\"07-build-plan--m4--solve-my-cube\">M4 — Solve my cube</h2>\n<p>Goal: enter a real cube and get guided through solving it.</p>\n<ul>\n<li><input type=\"checkbox\" disabled> Tap-to-fix cube map (also used after camera scan).</li>\n<li><input type=\"checkbox\" disabled> Check that an entered cube is possible to solve.</li>\n<li><input type=\"checkbox\" disabled> Guided solve: one move at a time, grouped by stage.</li>\n</ul>\n<p><strong>Done when:</strong> a cube entered by hand is solved by following the guide.</p>\n<hr>\n<h2 id=\"07-build-plan--m5--camera-scan\">M5 — Camera scan</h2>\n<p>Goal: scan a real cube instead of entering it by hand.</p>\n<ul>\n<li><input type=\"checkbox\" disabled> Camera capture, one face at a time, with a framing guide.</li>\n<li><input type=\"checkbox\" disabled> Read sticker colors.</li>\n<li><input type=\"checkbox\" disabled> Hand off to the check-and-fix screen.</li>\n</ul>\n<p><strong>Done when:</strong> a real cube scanned on iPhone and Android leads to a correct guided solve.</p>\n<hr>\n<h2 id=\"07-build-plan--m6--cfop-levels\">M6 — CFOP levels</h2>\n<p>Goal: teach CFOP after the beginner method.</p>\n<ul>\n<li><input type=\"checkbox\" disabled> Cross, F2L, OLL, PLL levels.</li>\n<li><input type=\"checkbox\" disabled> CFOP move-sequence lists, each checked by the cube model.</li>\n<li><input type=\"checkbox\" disabled> Solve timer and personal bests.</li>\n</ul>\n<p><strong>Done when:</strong> a player who finished the beginner levels can learn and practice full CFOP.</p>\n<hr>\n<h2 id=\"07-build-plan--m7--launch\">M7 — Launch</h2>\n<p>Goal: polished and public.</p>\n<ul>\n<li><input type=\"checkbox\" disabled> Test on real iPhone and Android devices.</li>\n<li><input type=\"checkbox\" disabled> README quickstart.</li>\n<li><input type=\"checkbox\" disabled> v1 Definition of Done all checked.</li>\n</ul>\n<p><strong>Done when:</strong> v1 Definition of Done is fully checked.</p>\n",
+      "html": "<h1 id=\"07-build-plan--07--build-plan\">07 — Build plan</h1>\n<p>The implementation order is the order in this doc. Milestones are sequential, tasks within a milestone are ordered. <strong>We check the boxes as we go.</strong> When a milestone is fully checked, the next one starts.</p>\n<p>If something forces us off this plan (a discovered constraint, a customer arriving early, etc.), we update this doc <em>first</em>, then change course. Don't drift silently.</p>\n<p>The convention is <code>## M&lt;N&gt; — {Title}</code> so <code>make version-M&lt;N&gt;</code> can auto-resolve the milestone title from this file.</p>\n<p>The <strong>Now:</strong> line below names the milestone(s) being worked on, comma-separated when there is more than one. Mission Control's phase pill and banner read it (<code>make catalog</code>).</p>\n<p><strong>Status: milestone order M1–M7 agreed 2026-11-04.</strong></p>\n<p><strong>Now:</strong> M4</p>\n<h2 id=\"07-build-plan--v1--definition-of-done\">v1 — Definition of Done</h2>\n<p>v1 ships when <strong>all</strong> of the following are true:</p>\n<ul>\n<li><input type=\"checkbox\" disabled> Live on GitHub Pages, installable on iPhone and Android.</li>\n<li><input type=\"checkbox\" disabled> Works offline after the first visit.</li>\n<li><input type=\"checkbox\" disabled> A beginner can go from level 1 to a full solve using only the app.</li>\n<li><input type=\"checkbox\" disabled> CFOP levels are playable.</li>\n<li><input type=\"checkbox\" disabled> Camera scan of a real cube leads to a guided solve.</li>\n<li><input type=\"checkbox\" disabled> All milestones below are checked.</li>\n<li><input type=\"checkbox\" disabled> <code>README.md</code> has a quickstart.</li>\n</ul>\n<hr>\n<h2 id=\"07-build-plan--m0--foundations\">M0 — Foundations</h2>\n<p>Goal: project skeleton and dev environment ready, no feature code yet.</p>\n<ul>\n<li><input type=\"checkbox\" disabled checked> Initialize git repo, add <code>.gitignore</code> and <code>README.md</code>, make initial commit of design docs.</li>\n<li><input type=\"checkbox\" disabled checked> Replace placeholders across the repo.</li>\n<li><input type=\"checkbox\" disabled checked> Add <code>package.json</code> (Vite, TypeScript, Three.js, Vitest, Prettier).</li>\n<li><input type=\"checkbox\" disabled checked> Wire up <code>make setup</code> / <code>make test</code> / <code>make lint</code> / <code>make format</code>.</li>\n<li><input type=\"checkbox\" disabled checked> Verify <code>make ci</code> passes on an empty test suite.</li>\n<li><input type=\"checkbox\" disabled checked> Docker image for local testing: <code>make image</code>, <code>make smoke</code> passes.</li>\n<li><input type=\"checkbox\" disabled checked> Verify versioning ceremony: <code>./scripts/new-version.sh --dry-run \"Smoke Test\"</code>.</li>\n<li><input type=\"checkbox\" disabled checked> Fill in <a href=\"#design/mission\"><code>docs/mission.md</code></a> and <a href=\"#design/00-overview\"><code>docs/00-overview.md</code></a>.</li>\n<li><input type=\"checkbox\" disabled checked> Sketch <a href=\"#design/01-architecture\"><code>docs/01-architecture.md</code></a>.</li>\n<li><input type=\"checkbox\" disabled checked> Fill in <code>Versions/v0/v0.0/release-notes.md</code> for the bootstrap commit.</li>\n</ul>\n<p><strong>Done when:</strong> project builds, tests run, versioning ceremony runs cleanly, mission/overview/architecture have v1 content.</p>\n<hr>\n<h2 id=\"07-build-plan--m1--cube-and-live-site\">M1 — Cube and live site</h2>\n<p>Goal: a 3D cube you can turn, live on GitHub Pages as an installable PWA.</p>\n<ul>\n<li><input type=\"checkbox\" disabled checked> Cube model: cube state, all moves, scramble. Fully tested.</li>\n<li><input type=\"checkbox\" disabled checked> 3D cube: draw, animate moves, spin the view.</li>\n<li><input type=\"checkbox\" disabled checked> PWA setup: offline, home-screen install.</li>\n<li><input type=\"checkbox\" disabled checked> GitHub Pages deploy on every push to <code>main</code>.</li>\n</ul>\n<p><strong>Done when:</strong> the live site shows a cube you can turn and scramble, on a phone, offline.</p>\n<hr>\n<h2 id=\"07-build-plan--m2--beginner-levels\">M2 — Beginner levels</h2>\n<p>Goal: the beginner method, taught one stage per level.</p>\n<ul>\n<li><input type=\"checkbox\" disabled checked> Beginner solver, stage by stage, tested on many random scrambles.</li>\n<li><input type=\"checkbox\" disabled checked> Level content for each beginner stage.</li>\n<li><input type=\"checkbox\" disabled checked> Lesson screen: explain, show moves, practice, pass check.</li>\n</ul>\n<p><strong>Done when:</strong> a player can learn a full beginner solve in the app.</p>\n<hr>\n<h2 id=\"07-build-plan--m3--game-layer\">M3 — Game layer</h2>\n<p>Goal: XP, badges, locked levels, saved progress.</p>\n<ul>\n<li><input type=\"checkbox\" disabled checked> XP and badge rules.</li>\n<li><input type=\"checkbox\" disabled checked> Unlocks: later levels locked until earlier ones are passed.</li>\n<li><input type=\"checkbox\" disabled checked> Progress saved on the device.</li>\n</ul>\n<p><strong>Done when:</strong> progress, XP, and badges survive closing and reopening the app.</p>\n<hr>\n<h2 id=\"07-build-plan--m4--solve-my-cube\">M4 — Solve my cube</h2>\n<p>Goal: enter a real cube and get guided through solving it.</p>\n<ul>\n<li><input type=\"checkbox\" disabled> Tap-to-fix cube map (also used after camera scan).</li>\n<li><input type=\"checkbox\" disabled> Check that an entered cube is possible to solve.</li>\n<li><input type=\"checkbox\" disabled> Guided solve: one move at a time, grouped by stage.</li>\n</ul>\n<p><strong>Done when:</strong> a cube entered by hand is solved by following the guide.</p>\n<hr>\n<h2 id=\"07-build-plan--m5--camera-scan\">M5 — Camera scan</h2>\n<p>Goal: scan a real cube instead of entering it by hand.</p>\n<ul>\n<li><input type=\"checkbox\" disabled> Camera capture, one face at a time, with a framing guide.</li>\n<li><input type=\"checkbox\" disabled> Read sticker colors.</li>\n<li><input type=\"checkbox\" disabled> Hand off to the check-and-fix screen.</li>\n</ul>\n<p><strong>Done when:</strong> a real cube scanned on iPhone and Android leads to a correct guided solve.</p>\n<hr>\n<h2 id=\"07-build-plan--m6--cfop-levels\">M6 — CFOP levels</h2>\n<p>Goal: teach CFOP after the beginner method.</p>\n<ul>\n<li><input type=\"checkbox\" disabled> Cross, F2L, OLL, PLL levels.</li>\n<li><input type=\"checkbox\" disabled> CFOP move-sequence lists, each checked by the cube model.</li>\n<li><input type=\"checkbox\" disabled> Solve timer and personal bests.</li>\n</ul>\n<p><strong>Done when:</strong> a player who finished the beginner levels can learn and practice full CFOP.</p>\n<hr>\n<h2 id=\"07-build-plan--m7--launch\">M7 — Launch</h2>\n<p>Goal: polished and public.</p>\n<ul>\n<li><input type=\"checkbox\" disabled> Test on real iPhone and Android devices.</li>\n<li><input type=\"checkbox\" disabled> README quickstart.</li>\n<li><input type=\"checkbox\" disabled> v1 Definition of Done all checked.</li>\n</ul>\n<p><strong>Done when:</strong> v1 Definition of Done is fully checked.</p>\n",
       "toc": [
         {
           "id": "07-build-plan--v1--definition-of-done",
@@ -640,7 +689,7 @@
       "id": "99-open-questions",
       "file": "docs/99-open-questions.md",
       "title": "99 — Open questions",
-      "html": "<h1 id=\"99-open-questions--99--open-questions\">99 — Open questions</h1>\n<p>Decisions not made yet, with what would force them.</p>\n<h2 id=\"99-open-questions--is-the-architecture-and-milestone-order-ok\">Is the architecture and milestone order OK?</h2>\n<p><strong>Status:</strong> resolved 2026-11-04\n<strong>Resolution trigger:</strong> before M1 starts.\n<strong>Notes:</strong> milestone order M1–M7 and the app parts in <a href=\"#design/01-architecture\"><code>01-architecture.md</code></a> both agreed 2026-11-04.</p>\n<h2 id=\"99-open-questions--should-colorblind-players-get-symbols-on-stickers\">Should colorblind players get symbols on stickers?</h2>\n<p><strong>Status:</strong> resolved 2026-11-04\n<strong>Resolution trigger:</strong> before the 3D cube (M1) and check-and-fix screen (M4).\n<strong>Notes:</strong> cube colors red/orange and green/blue are hard for colorblind players.\n<strong>Decision:</strong> stickers always keep their colors. An \"ADA support\" setting, off by default, adds a shape on each color (one shape per color).</p>\n<h2 id=\"99-open-questions--how-many-levels-and-what-does-each-teach\">How many levels, and what does each teach?</h2>\n<p><strong>Status:</strong> resolved 2026-11-04\n<strong>Resolution trigger:</strong> before M2.\n<strong>Decision:</strong> 9 beginner levels (0–8), listed in <a href=\"#design/02-levels\"><code>02-levels.md</code></a>. Decided by Claude under the standing go-ahead; Rob to review.</p>\n<h2 id=\"99-open-questions--what-are-the-xp-amounts-badges-and-unlock-rules\">What are the XP amounts, badges, and unlock rules?</h2>\n<p><strong>Status:</strong> open\n<strong>Resolution trigger:</strong> before M3.</p>\n<h2 id=\"99-open-questions--how-does-the-camera-read-colors\">How does the camera read colors?</h2>\n<p><strong>Status:</strong> open\n<strong>Resolution trigger:</strong> before M5.\n<strong>Notes:</strong> red vs. orange is the hard case under indoor light.</p>\n<h2 id=\"99-open-questions--should-the-solve-path-give-the-shortest-solution-or-the-beginner-method-one\">Should the solve path give the shortest solution, or the beginner-method one?</h2>\n<p><strong>Status:</strong> resolved 2026-11-04\n<strong>Resolution trigger:</strong> before M4.\n<strong>Notes:</strong> beginner-method moves match what the player learned; shortest is ~20 moves but hard to follow.\n<strong>Decision:</strong> guide with the method the player has learned (beginner or CFOP), step by step, each step explained. No shortest-solution option.</p>\n<h2 id=\"99-open-questions--keep-or-remove-the-docker-stub\">Keep or remove the Docker stub?</h2>\n<p><strong>Status:</strong> resolved 2026-11-04\n<strong>Resolution trigger:</strong> M0 close-out.\n<strong>Notes:</strong> the app is static files on GitHub Pages; Docker isn't needed to run it.\n<strong>Decision:</strong> keep it for local testing. The image builds the app and serves it with nginx on port 4027 (<code>make serve-image</code>).</p>\n<h2 id=\"99-open-questions--track-usage-on-the-public-site\">Track usage on the public site?</h2>\n<p><strong>Status:</strong> resolved 2026-11-04\n<strong>Resolution trigger:</strong> before M7.\n<strong>Notes:</strong> no tracking keeps the \"no personal data\" promise simple.\n<strong>Decision:</strong> no tracking of any kind.</p>\n",
+      "html": "<h1 id=\"99-open-questions--99--open-questions\">99 — Open questions</h1>\n<p>Decisions not made yet, with what would force them.</p>\n<h2 id=\"99-open-questions--is-the-architecture-and-milestone-order-ok\">Is the architecture and milestone order OK?</h2>\n<p><strong>Status:</strong> resolved 2026-11-04\n<strong>Resolution trigger:</strong> before M1 starts.\n<strong>Notes:</strong> milestone order M1–M7 and the app parts in <a href=\"#design/01-architecture\"><code>01-architecture.md</code></a> both agreed 2026-11-04.</p>\n<h2 id=\"99-open-questions--should-colorblind-players-get-symbols-on-stickers\">Should colorblind players get symbols on stickers?</h2>\n<p><strong>Status:</strong> resolved 2026-11-04\n<strong>Resolution trigger:</strong> before the 3D cube (M1) and check-and-fix screen (M4).\n<strong>Notes:</strong> cube colors red/orange and green/blue are hard for colorblind players.\n<strong>Decision:</strong> stickers always keep their colors. An \"ADA support\" setting, off by default, adds a shape on each color (one shape per color).</p>\n<h2 id=\"99-open-questions--how-many-levels-and-what-does-each-teach\">How many levels, and what does each teach?</h2>\n<p><strong>Status:</strong> resolved 2026-11-04\n<strong>Resolution trigger:</strong> before M2.\n<strong>Decision:</strong> 9 beginner levels (0–8), listed in <a href=\"#design/02-levels\"><code>02-levels.md</code></a>. Decided by Claude under the standing go-ahead; Rob to review.</p>\n<h2 id=\"99-open-questions--what-are-the-xp-amounts-badges-and-unlock-rules\">What are the XP amounts, badges, and unlock rules?</h2>\n<p><strong>Status:</strong> resolved 2026-11-04\n<strong>Resolution trigger:</strong> before M3.\n<strong>Decision:</strong> in <a href=\"#design/03-game\"><code>03-game.md</code></a>. Decided by Claude under the standing go-ahead; Rob to review.</p>\n<h2 id=\"99-open-questions--how-does-the-camera-read-colors\">How does the camera read colors?</h2>\n<p><strong>Status:</strong> open\n<strong>Resolution trigger:</strong> before M5.\n<strong>Notes:</strong> red vs. orange is the hard case under indoor light.</p>\n<h2 id=\"99-open-questions--should-the-solve-path-give-the-shortest-solution-or-the-beginner-method-one\">Should the solve path give the shortest solution, or the beginner-method one?</h2>\n<p><strong>Status:</strong> resolved 2026-11-04\n<strong>Resolution trigger:</strong> before M4.\n<strong>Notes:</strong> beginner-method moves match what the player learned; shortest is ~20 moves but hard to follow.\n<strong>Decision:</strong> guide with the method the player has learned (beginner or CFOP), step by step, each step explained. No shortest-solution option.</p>\n<h2 id=\"99-open-questions--keep-or-remove-the-docker-stub\">Keep or remove the Docker stub?</h2>\n<p><strong>Status:</strong> resolved 2026-11-04\n<strong>Resolution trigger:</strong> M0 close-out.\n<strong>Notes:</strong> the app is static files on GitHub Pages; Docker isn't needed to run it.\n<strong>Decision:</strong> keep it for local testing. The image builds the app and serves it with nginx on port 4027 (<code>make serve-image</code>).</p>\n<h2 id=\"99-open-questions--track-usage-on-the-public-site\">Track usage on the public site?</h2>\n<p><strong>Status:</strong> resolved 2026-11-04\n<strong>Resolution trigger:</strong> before M7.\n<strong>Notes:</strong> no tracking keeps the \"no personal data\" promise simple.\n<strong>Decision:</strong> no tracking of any kind.</p>\n",
       "toc": [
         {
           "id": "99-open-questions--is-the-architecture-and-milestone-order-ok",

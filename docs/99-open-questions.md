@@ -33,8 +33,9 @@ Format for each entry:
 
 ## What are the XP amounts, badges, and unlock rules?
 
-**Status:** open
+**Status:** resolved 2026-11-04
 **Resolution trigger:** before M3.
+**Decision:** in `03-game.md`. Decided by Claude under the standing go-ahead; Rob to review.
 
 ## How does the camera read colors?
 
