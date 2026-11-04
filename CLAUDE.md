@@ -8,7 +8,7 @@ Commit identity: Rob Rose <robmrose@me.com>
 
 ## Current state
 
-**Design phase.** No code yet. The architecture, decisions, and rationale live in `docs/` and should be updated as the design evolves.
+**Building.** M1 shipped: 3D cube, live at https://mr-flowjangles.github.io/cubeSolver/. Test hook: `?moves=R%20U&instant=1&ada=1`.
 
 ## How to read this repo
 
@@ -45,6 +45,7 @@ Commit identity: Rob Rose <robmrose@me.com>
 
 <!-- One line per term: a dash, the term in bold, an em dash, then the plain-words meaning. `make catalog` puts these on Mission Control's Glossary tab. -->
 
+- **ADA support** — a setting, off by default, that adds a shape to each sticker color for colorblind players.
 - **Beginner method** — the standard first way to solve a cube, one layer at a time, about 7 stages.
 - **CFOP** — the most common speedcubing method, named for its four steps: Cross, F2L, OLL, PLL.
 - **Cross** — first CFOP step: four edge pieces placed to make a plus sign on one face.
