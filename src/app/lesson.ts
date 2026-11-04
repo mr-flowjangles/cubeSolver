@@ -3,7 +3,7 @@
 import { type CubeState, applyMoves, isSolved, toString } from "../cube";
 import { isUnlocked, rankOf, recordPass } from "../game/rules";
 import { loadProgress, saveProgress, today } from "../game/storage";
-import { type Level, NOTATION_DRILL } from "../lessons/beginner";
+import { type Level, NOTATION_DRILL, NOTATION_STEPS } from "../lessons/beginner";
 import { ALL_LEVELS, BEGINNER_IDS, type GuideStep, LEVEL_IDS, METHODS } from "../lessons/index";
 import { practicePosition } from "../lessons/position";
 import { solvePll } from "../solver/cfop";
@@ -75,8 +75,20 @@ export function mountLesson(root: HTMLElement, id: string): Screen {
   let usedHelp = false;
   let started = Date.now();
 
-  const drillPrompt = () =>
-    `Turn: ${NOTATION_DRILL[drill]}   (${drill + 1} of ${NOTATION_DRILL.length})`;
+  // Drill: say what the next button does, light up that side, make that button glow.
+  const drillPrompt = () => {
+    const st = NOTATION_STEPS[drill];
+    return st
+      ? `Tap ${st.move}: ${st.side} — ${st.how}.  (${drill + 1} of ${NOTATION_STEPS.length})`
+      : "";
+  };
+  const showDrill = (p: CubePanel) => {
+    const st = NOTATION_STEPS[drill];
+    p.view.highlight(st ? st.move : null);
+    root.querySelectorAll<HTMLElement>(".pad [data-move]").forEach((b) => {
+      b.classList.toggle("glow", !!st && b.dataset.move === st.move);
+    });
+  };
 
   const check = (p: CubePanel) => {
     if (!done && passed(level, p, drill)) {
@@ -113,8 +125,9 @@ export function mountLesson(root: HTMLElement, id: string): Screen {
         if (m === NOTATION_DRILL[drill]) {
           drill++;
           if (drill < NOTATION_DRILL.length) p.say(`Good! ${drillPrompt()}`);
+          showDrill(p);
         } else {
-          p.say(`That was ${m}. Try ${NOTATION_DRILL[drill]}.`);
+          p.say(`That was ${m}. Tap the glowing ${NOTATION_DRILL[drill]} button.`);
           setTimeout(() => p.undo(), 250);
         }
       } else {
@@ -124,6 +137,7 @@ export function mountLesson(root: HTMLElement, id: string): Screen {
     },
   });
   panel.say(isDrill ? drillPrompt() : "Hold white on the bottom. Use Hint if you get stuck.");
+  if (isDrill) showDrill(panel);
   // White cross and the first layer are on the bottom: look from below so the player can see them.
   if (["cross", "corners", "f2l"].includes(level.stage ?? "")) panel.view.lookFrom("below");
 
@@ -163,7 +177,10 @@ export function mountLesson(root: HTMLElement, id: string): Screen {
   root.querySelector("#undo")!.addEventListener("click", () => {
     if (isDrill && drill > 0 && panel.history.length) drill--;
     panel.undo();
-    if (isDrill) panel.say(drillPrompt());
+    if (isDrill) {
+      panel.say(drillPrompt());
+      showDrill(panel);
+    }
   });
   root.querySelector("#fresh")!.addEventListener("click", () => {
     panel.setState(practicePosition(level));
@@ -173,6 +190,7 @@ export function mountLesson(root: HTMLElement, id: string): Screen {
     started = Date.now();
     passedEl.hidden = true;
     panel.say(isDrill ? drillPrompt() : "New cube. Hold white on the bottom.");
+    if (isDrill) showDrill(panel);
   });
 
   // Test hook: ?autoshow=1 applies every "Show me" step instantly until the level is passed.

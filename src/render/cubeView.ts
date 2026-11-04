@@ -120,6 +120,17 @@ export class CubeView {
     this.camera.updateProjectionMatrix();
   }
 
+  /** Light up the stickers a move will turn and dim the rest; null clears it. */
+  highlight(move: Move | null) {
+    const turn = move ? moveTurn(move) : null;
+    STICKERS.forEach((s, i) => {
+      const p = s.position;
+      const lit =
+        !turn || turn.inLayer(p[0] * turn.axis[0] + p[1] * turn.axis[1] + p[2] * turn.axis[2]);
+      this.stickers[i].material.color.setHex(lit ? 0xffffff : 0x4a4a4a);
+    });
+  }
+
   /** Look from slightly above (default) or below, e.g. to see a white cross on the bottom. */
   lookFrom(side: "above" | "below") {
     this.camera.position.set(5.2, side === "above" ? 4.4 : -4.4, 7.2);

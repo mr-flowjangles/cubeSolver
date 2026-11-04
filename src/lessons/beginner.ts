@@ -22,15 +22,14 @@ export const BEGINNER_LEVELS: Level[] = [
     id: "meet",
     number: 0,
     title: "Meet the cube",
-    goal: "Make each turn the app asks for.",
+    goal: "Learn what each button does. Tap the glowing button, 10 times.",
     kind: "notation",
     method: "beginner",
     teach: [
-      "Centers never move. They tell you each face's color.",
-      "Each face has a letter: U up, D down, R right, L left, F front, B back.",
-      "A letter alone turns that face clockwise, as if you are looking at it.",
-      "A ' (prime) turns it counter-clockwise. A 2 turns it twice.",
-      "y turns the whole cube, like U.",
+      "Each button turns one side of the cube.",
+      "The letter says which side: R right, L left, U up (top), D down (bottom), F front, B back.",
+      "A ' after the letter turns that side the other way.",
+      "The side that will turn is lit up; the rest of the cube is dimmed.",
     ],
     algs: [],
   },
@@ -163,5 +162,17 @@ export const BEGINNER_LEVELS: Level[] = [
   },
 ];
 
-/** Turns the notation level asks for, in order. */
-export const NOTATION_DRILL = ["R", "U", "R'", "U'", "F", "F'", "L", "D'", "y", "B"];
+/** Turns the notation level asks for, in order, each with what it does in plain words. */
+export const NOTATION_STEPS: { move: string; side: string; how: string }[] = [
+  { move: "R", side: "Right side", how: "turns so its front edge goes up" },
+  { move: "U", side: "Top", how: "turns so its front edge goes to the left" },
+  { move: "R'", side: "Right side, the other way", how: "its front edge goes down" },
+  { move: "U'", side: "Top, the other way", how: "its front edge goes to the right" },
+  { move: "F", side: "Front", how: "turns clockwise, like a clock hand" },
+  { move: "F'", side: "Front, the other way", how: "turns counter-clockwise" },
+  { move: "L", side: "Left side", how: "turns so its front edge goes down" },
+  { move: "D'", side: "Bottom, the other way", how: "its front edge goes to the left" },
+  { move: "y", side: "Whole cube", how: "turns like the top, so you see a new front" },
+  { move: "B", side: "Back", how: "turns so its top edge goes to the left" },
+];
+export const NOTATION_DRILL = NOTATION_STEPS.map((s) => s.move);

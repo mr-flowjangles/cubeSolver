@@ -70,3 +70,9 @@ Format for each entry:
 **Status:** deferred to v2
 **Resolution trigger:** players finishing Full PLL and asking for more.
 **Notes:** v1 teaches 2-look OLL (9 sequences). Full OLL is 57 sequences, an advanced step most cubers learn after full PLL. Decided by Claude under the standing go-ahead; Rob to review.
+
+## Which license for the public repo?
+
+**Status:** open
+**Resolution trigger:** before v1.0.0.
+**Notes:** the repo is public, but without a license others have no right to reuse the code. Rob's call.
