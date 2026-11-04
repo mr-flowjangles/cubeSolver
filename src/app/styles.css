@@ -248,8 +248,65 @@ a {
 
 .pad {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+.group {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 4px;
+  padding: 5px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+}
+.group.wide {
+  grid-column: 1 / -1;
+}
+.group-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  text-align: center;
+}
+.group-buttons {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 4px;
+}
+.pad .move {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  min-height: 52px;
+  min-width: 0;
+  padding: 2px 0;
+  overflow: hidden;
+}
+.pad .move b {
+  font-size: 1.15rem;
+  line-height: 1.1;
+}
+.pad .move small {
+  font-size: 0.62rem;
+  font-weight: 500;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.pad .move.glow small {
+  color: #fff;
+}
+.pad.letters .move {
+  min-height: 44px;
+}
+.pad .peek {
+  font-size: 0.85rem;
+  min-height: 52px;
 }
 .actions {
   display: grid;
@@ -741,14 +798,6 @@ button.small {
   cursor: pointer;
   font-weight: 600;
   min-height: 32px;
-}
-.pad.wide {
-  grid-template-columns: repeat(8, 1fr);
-  gap: 6px;
-}
-.pad.wide button {
-  min-height: 44px;
-  padding: 0;
 }
 .pad button.glow {
   background: var(--accent);

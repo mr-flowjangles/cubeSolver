@@ -28,6 +28,13 @@ export class CubeView {
   private queue: { move: Move; next: CubeState; ms: number; done: () => void }[] = [];
   private animating = false;
   private resizeObserver: ResizeObserver;
+  // Camera: the view always comes back to "home" (the front), so button letters
+  // always match what the player sees. Dragging is limited to about 40° each way.
+  private home = new THREE.Spherical();
+  private fly: { from: THREE.Spherical; to: THREE.Spherical; start: number; ms: number } | null =
+    null;
+  private peeking = false;
+  private tags: THREE.Sprite[] = [];
 
   constructor(
     private container: HTMLElement,
@@ -40,21 +47,25 @@ export class CubeView {
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     container.appendChild(this.renderer.domElement);
 
-    this.camera.position.set(5.2, 4.4, 7.2);
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enablePan = false;
-    this.controls.enableDamping = true;
-    this.controls.minDistance = 6;
-    this.controls.maxDistance = 16;
+    this.controls.enableZoom = false;
+    this.controls.enableDamping = false; // leftover drag motion would fight the snap back
+    this.controls.addEventListener("end", () => {
+      if (!this.peeking) this.snapHome();
+    });
+    this.setHome(new THREE.Vector3(5.2, 4.4, 7.2));
 
     this.buildPieces();
+    this.buildTags("above");
     this.paint();
 
     this.resizeObserver = new ResizeObserver(() => this.resize());
     this.resizeObserver.observe(container);
     this.resize();
-    this.renderer.setAnimationLoop(() => {
-      this.controls.update();
+    this.renderer.setAnimationLoop((now) => {
+      if (this.fly) this.stepFly(now);
+      else this.controls.update();
       this.renderer.render(this.scene, this.camera);
     });
   }
@@ -133,8 +144,122 @@ export class CubeView {
 
   /** Look from slightly above (default) or below, e.g. to see a white cross on the bottom. */
   lookFrom(side: "above" | "below") {
-    this.camera.position.set(5.2, side === "above" ? 4.4 : -4.4, 7.2);
+    this.setHome(new THREE.Vector3(5.2, side === "above" ? 4.4 : -4.4, 7.2));
+    this.buildTags(side);
+  }
+
+  /** Make `pos` the home view and limit dragging to about 40° around it. */
+  private setHome(pos: THREE.Vector3) {
+    this.fly = null;
+    this.home.setFromVector3(pos);
+    this.camera.position.copy(pos);
+    this.camera.lookAt(0, 0, 0);
+    this.setLimits(true);
     this.controls.update();
+  }
+
+  private setLimits(on: boolean) {
+    const lim = (40 * Math.PI) / 180;
+    const c = this.controls;
+    c.minAzimuthAngle = on ? this.home.theta - lim : -Infinity;
+    c.maxAzimuthAngle = on ? this.home.theta + lim : Infinity;
+    c.minPolarAngle = on ? Math.max(0.05, this.home.phi - lim) : 0.05;
+    c.maxPolarAngle = on ? Math.min(Math.PI - 0.05, this.home.phi + lim) : Math.PI - 0.05;
+  }
+
+  /** Glide back to the front view. */
+  snapHome(ms = 350) {
+    this.peeking = false;
+    this.showTags(true);
+    this.setLimits(true);
+    this.flyTo(this.home, ms);
+  }
+
+  /** Swing round to see the back, or back to the front if already peeking. */
+  togglePeek(): boolean {
+    if (this.peeking) {
+      this.snapHome(500);
+      return false;
+    }
+    this.peeking = true;
+    this.showTags(false); // the tags name the front sides; hide them while looking at the back
+    this.setLimits(false);
+    const back = this.home.clone();
+    back.theta += Math.PI;
+    this.flyTo(back, 500);
+    return true;
+  }
+
+  get isPeeking() {
+    return this.peeking;
+  }
+
+  private flyTo(to: THREE.Spherical, ms: number) {
+    const from = new THREE.Spherical().setFromVector3(this.camera.position);
+    // Take the short way round.
+    let d = to.theta - from.theta;
+    while (d > Math.PI) d -= 2 * Math.PI;
+    while (d < -Math.PI) d += 2 * Math.PI;
+    const target = to.clone();
+    target.theta = from.theta + d;
+    this.fly = { from, to: target, start: performance.now(), ms };
+  }
+
+  private stepFly(now: number) {
+    const f = this.fly!;
+    const t = Math.min(1, (now - f.start) / f.ms);
+    const e = 1 - (1 - t) ** 3;
+    const s = new THREE.Spherical(
+      f.from.radius + (f.to.radius - f.from.radius) * e,
+      f.from.phi + (f.to.phi - f.from.phi) * e,
+      f.from.theta + (f.to.theta - f.from.theta) * e,
+    );
+    this.camera.position.setFromSpherical(s);
+    this.camera.lookAt(0, 0, 0);
+    if (t >= 1) {
+      this.fly = null;
+      this.controls.update();
+    }
+  }
+
+  /**
+   * Labels fixed in space next to the faces: "FRONT · F", "TOP · U", "RIGHT · R".
+   * They don't turn with the cube, which shows that letters mean places, not colors.
+   */
+  private buildTags(side: "above" | "below") {
+    for (const t of this.tags) this.scene.remove(t);
+    const tags: [string, [number, number, number]][] = [
+      ["FRONT · F", [0, 0, 2.35]],
+      ["RIGHT · R", [2.35, 0, 0]],
+      side === "above" ? ["TOP · U", [0, 2.1, 0]] : ["BOTTOM · D", [0, -2.1, 0]],
+    ];
+    this.tags = tags.map(([text, pos]) => {
+      const c = document.createElement("canvas");
+      c.width = 256;
+      c.height = 64;
+      const g = c.getContext("2d")!;
+      g.fillStyle = "rgba(20,22,27,0.75)";
+      g.beginPath();
+      g.roundRect(4, 8, 248, 48, 24);
+      g.fill();
+      g.fillStyle = "#fff";
+      g.font = "bold 28px system-ui, sans-serif";
+      g.textAlign = "center";
+      g.textBaseline = "middle";
+      g.fillText(text, 128, 33);
+      const tex = new THREE.CanvasTexture(c);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false }));
+      sprite.scale.set(1.6, 0.4, 1);
+      sprite.position.set(...pos);
+      sprite.renderOrder = 10;
+      this.scene.add(sprite);
+      return sprite;
+    });
+  }
+
+  showTags(on: boolean) {
+    for (const t of this.tags) t.visible = on;
   }
 
   setAda(on: boolean) {
