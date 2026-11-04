@@ -1,5 +1,39 @@
 # v0.8
 
+## v0.8.1 — Learn the controls (2026-11-04)
+
+### Problem
+
+- Level 0 didn't say plainly that it only teaches the buttons.
+
+### Solution
+
+- Renamed it and stated its purpose and task up front.
+
+### New
+
+- **Task line** on level 0: "Tap the glowing button. 10 taps and you're done."
+
+### Changed
+
+- **Level 0** renamed "Meet the cube" → "Learn the controls".
+- **Level 0 top line:** "This level teaches the buttons. Each letter turns one side of the cube. You'll need these for every level after this."
+- **Docs and badge text** use the new name.
+
+### Fixed
+
+- None.
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `src/lessons/beginner.ts` | New name and top line |
+| `src/app/lesson.ts`, `src/app/styles.css` | Task line |
+| `src/game/rules.ts` | Badge text |
+| `docs/02-levels.md`, `docs/03-game.md`, `docs/05-phone-check.md` | New name |
+| `Versions/v0/v0.8/release-notes.md` | This entry |
+
 ## v0.8.0 — Launch (2026-11-04)
 
 ### Problem

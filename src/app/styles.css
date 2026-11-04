@@ -766,3 +766,10 @@ button.small {
     animation: none;
   }
 }
+.task {
+  margin: 0 0 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 2px solid var(--accent);
+  font-weight: 600;
+}

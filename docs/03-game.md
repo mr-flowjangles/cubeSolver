@@ -12,7 +12,7 @@
 | Pass Full solve again | 50 |
 | First pass of a level without Hint or Show me | +50 bonus |
 
-- The no-help bonus doesn't apply to Meet the cube (it has no Hint).
+- The no-help bonus doesn't apply to Learn the controls (it has no Hint).
 
 ## Ranks
 
@@ -27,7 +27,7 @@
 
 ## Badges
 
-- One badge each for passing: Meet the cube, White cross, White corners, Middle edges, Yellow cross, Twist yellow corners, Full solve.
+- One badge each for passing: Learn the controls, White cross, White corners, Middle edges, Yellow cross, Twist yellow corners, Full solve.
 - **On My Own:** pass any level without Hint or Show me.
 - **Solo Solver:** pass Full solve without Hint or Show me.
 - **Five Solves:** pass Full solve 5 times.
@@ -36,7 +36,7 @@
 
 ## Unlocks
 
-- Meet the cube is always open.
+- Learn the controls is always open.
 - Each level unlocks when the one before it is passed.
 - Free play is always open.
 

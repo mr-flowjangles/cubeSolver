@@ -13,7 +13,7 @@ Open **https://mr-flowjangles.github.io/cubeSolver/** in Safari (iPhone) or Chro
 ## Cube and levels
 
 - [ ] Drag the cube to spin it. Tap move buttons; turns animate smoothly.
-- [ ] Pass Meet the cube. XP and a badge appear.
+- [ ] Pass Learn the controls. XP and a badge appear.
 - [ ] Close the app and reopen. Progress is still there.
 - [ ] Turn on ADA support. Shapes appear on stickers.
 

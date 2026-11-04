@@ -21,8 +21,8 @@ export const BEGINNER_LEVELS: Level[] = [
   {
     id: "meet",
     number: 0,
-    title: "Meet the cube",
-    goal: "Learn what each button does. Tap the glowing button, 10 times.",
+    title: "Learn the controls",
+    goal: "This level teaches the buttons. Each letter turns one side of the cube. You'll need these for every level after this.",
     kind: "notation",
     method: "beginner",
     teach: [
