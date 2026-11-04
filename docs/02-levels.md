@@ -19,6 +19,17 @@ Rules that follow from it:
 - Pieces are named by their colors ("the white–orange edge") and lit up, not described by position alone.
 - White cross uses the **daisy**: put the 4 white edges around the yellow center on top (visible), then match each with its center and turn it down with F2.
 
+How the three parts are built (v0.8.4):
+
+- **Show it** and **Walk through it** use the same demo cube every time.
+- The moves come from the solver, so they are the moves Hint and Show me use.
+- A half turn the buttons don't have (U2) is two taps.
+- The daisy never turns the left, back or bottom: the player can't see them. It turns the whole cube instead.
+- The daisy never knocks a white edge off the top on the way.
+- White edges already finished on the bottom stay there.
+- **Try it** has 3 practice cubes: one step left, about three steps left, then fully mixed. The level passes on the third.
+- Levels after White cross already run in three parts. Their per-move reasons are still generic ("Move 2 of 4") until rebuilt.
+
 ## Beginner method (M2)
 
 - The standard 7-stage layer-by-layer method, white on the bottom.
@@ -28,7 +39,7 @@ Rules that follow from it:
 | # | Level | Passed when | Sequence taught |
 |---|---|---|---|
 | 0 | Learn the controls | 10 turns made as asked | — |
-| 1 | White cross | 4 white edges on the bottom, matching centers | none (intuitive) |
+| 1 | White cross | 4 white edges on the bottom, matching centers | none — the daisy, then F2 for each edge |
 | 2 | White corners | white layer done | `R U R' U'` (repeat) |
 | 3 | Middle edges | first two layers done | `U R U' R' U' F' U F` / `U' L' U L U F U' F'` |
 | 4 | Yellow cross | yellow plus on top | `F R U R' U' F'` |

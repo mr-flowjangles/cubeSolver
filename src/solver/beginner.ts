@@ -16,14 +16,14 @@ import {
   EDGE_SLOTS,
   applyMoves,
   center,
-  faceOfSticker,
   isSolved,
+  moveTargets,
   simplifyMoves,
   slot,
   slotHasRightPiece,
   slotSolved,
 } from "../cube";
-import { type Step, pieceSearch, stepSearch } from "./search";
+import { type Step, stepSearch } from "./search";
 
 export type StageId =
   | "hold"
@@ -39,6 +39,13 @@ export interface SolveStep {
   stage: StageId;
   moves: Move[];
   say: string;
+  /** A plain-words reason for each move, for the walk-through. */
+  why?: string[];
+  /** Which part of the stage this step belongs to, e.g. "Part 1: the daisy". */
+  part?: string;
+  /** Colors of the piece this step moves, and the slot it ends in (lit up on screen). */
+  piece?: Face[];
+  to?: string;
 }
 
 /** The taught move sequences. Lessons show these exact strings. */
@@ -125,36 +132,177 @@ function hold(s: CubeState): SolveStep[] {
   ];
 }
 
+// ---- White cross, the daisy way ----
+// Part 1 (daisy): bring the 4 white edges up around the top center, white side up.
+// Part 2: turn the top until an edge matches the center below it, then drop it with F2.
+// Every move carries a plain-words reason for the walk-through.
+
+const U_EDGE_STICKERS = new Set([1, 3, 5, 7]); // the 4 edge squares of the top face
+const DAISY_MOVES: Move[] = "U U' U2 F F' F2 R R' R2 y y' y2 L L' L2 D D' D2 B B' B2".split(" ");
+const DAISY_COST: Record<string, number> = { U: 1, F: 1, R: 1, y: 1, L: 3, D: 3, B: 3 };
+const DAISY_TARGETS = new Map(DAISY_MOVES.map((m) => [m, moveTargets(m)]));
+const SIDE_NAME: Record<string, string> = {
+  F: "front",
+  R: "right side",
+  L: "left side",
+  B: "back",
+  D: "bottom",
+};
+
+/** Where the white sticker of each white edge is, and the edge's other color. */
+function whiteEdges(s: CubeState) {
+  const white = center(s, "D");
+  return EDGE_SLOTS.filter((e) => e.stickers.some((i) => s[i] === white)).map((e) => {
+    const w = e.stickers.find((i) => s[i] === white)!;
+    const other = s[e.stickers.find((i) => i !== w)!];
+    return { at: w, other };
+  });
+}
+
+/** Fewest turns that add one white edge to the daisy without knocking any off on the way. */
+function daisyStep(s: CubeState): SolveStep | null {
+  const edges = whiteEdges(s);
+  const start = edges.map((e) => e.at);
+  const slotOf = (i: number) => EDGE_SLOTS.find((e) => e.stickers.includes(i))!;
+  const onBottom = (x: CubeState, i: number) => i >= 27 && i < 36 && slotSolved(x, slotOf(i));
+  // Edges already finished on the bottom stay there; the rest go up into the daisy.
+  const finished = start.map((i) => onBottom(s, i));
+  const kept = start.map((i) => U_EDGE_STICKERS.has(i));
+  const have = kept.filter(Boolean).length;
+  const todo = finished.filter((f) => !f).length;
+  if (have === todo) return null;
+  // Cheapest turns first. Sides the player can't see from the front (left, back, bottom)
+  // cost more, so the walk-through turns the cube to face the piece instead.
+  type Node = { st: CubeState; pos: number[]; moves: Move[] };
+  const buckets: Node[][] = [[{ st: s, pos: start, moves: [] }]];
+  const seen = new Set<string>();
+  let found: Node | null = null;
+  for (let c = 0; c < 16 && !found; c++) {
+    for (const node of buckets[c] ?? []) {
+      const { st, pos, moves } = node;
+      const key = pos.join(",") + st[22];
+      if (seen.has(key)) continue;
+      seen.add(key);
+      if (
+        pos.filter((i, j) => !finished[j] && U_EDGE_STICKERS.has(i)).length > have &&
+        pos.every((i, j) => !finished[j] || onBottom(st, i))
+      ) {
+        found = node;
+        break;
+      }
+      const last = moves[moves.length - 1]?.[0];
+      for (const m of DAISY_MOVES) {
+        if (m[0] === last) continue;
+        const t = DAISY_TARGETS.get(m)!;
+        const np = pos.map((i) => t[i]);
+        if (kept.some((k, j) => k && !U_EDGE_STICKERS.has(np[j]))) continue; // knocks one off
+        const nc = c + DAISY_COST[m[0]];
+        (buckets[nc] ??= []).push({ st: applyMoves(st, [m]), pos: np, moves: [...moves, m] });
+      }
+    }
+  }
+  if (!found) throw new Error("Daisy search failed");
+  const j = found.pos.findIndex((i, k) => !kept[k] && !finished[k] && U_EDGE_STICKERS.has(i));
+  const c = name(edges[j].other);
+  const top = name(center(s, "U"));
+  const white = center(s, "D");
+  // Reason for each move, from what it does to the white edge being brought up.
+  const doneCount = (x: CubeState, p: number[]) =>
+    p.filter((i, k) => finished[k] && onBottom(x, i)).length;
+  const why: string[] = [];
+  let at = start[j];
+  let cur = s;
+  let pos = start;
+  for (const m of found.moves) {
+    const t = DAISY_TARGETS.get(m)!;
+    const nextAt = t[at];
+    const next = applyMoves(cur, [m]);
+    const nextPos = pos.map((i) => t[i]);
+    const broke = doneCount(next, nextPos) < doneCount(cur, pos);
+    const fixed = doneCount(next, nextPos) > doneCount(cur, pos);
+    if (m[0] === "y") {
+      why.push(`Turn the whole cube so the white–${c} edge is easier to reach.`);
+    } else if (m[0] === "U") {
+      why.push("Turn the top so the next turn won't knock a white edge off the top.");
+    } else if (fixed && !U_EDGE_STICKERS.has(nextAt)) {
+      why.push("Turn it back, so the finished white edge returns to the bottom.");
+    } else if (U_EDGE_STICKERS.has(nextAt)) {
+      why.push(
+        `Lift the white–${c} edge up to the top, white side up.` +
+          (broke ? " A finished bottom edge moves too; it goes back next." : ""),
+      );
+    } else if (nextAt === at) {
+      why.push(`Turn the ${SIDE_NAME[m[0]]} out of the way.`);
+    } else {
+      const middle = !slotOf(nextAt).name.includes("U") && !slotOf(nextAt).name.includes("D");
+      why.push(
+        middle
+          ? `Move the white–${c} edge to the middle row, so one more turn can lift it white side up.`
+          : `Move the white–${c} edge along the bottom, under the free spot.`,
+      );
+    }
+    at = nextAt;
+    cur = next;
+    pos = nextPos;
+  }
+  return {
+    stage: "cross",
+    part: "Part 1: the daisy",
+    moves: found.moves,
+    why,
+    say: `Bring the white–${c} edge up next to the ${top} center, white side up.`,
+    piece: [white, edges[j].other],
+    to: slotOf(at).name,
+  };
+}
+
+/** Turn one white edge from the daisy down to the bottom, under its matching center. */
+function flipStep(s: CubeState): SolveStep | null {
+  const white = center(s, "D");
+  const done = (x: CubeState, f: Face) => slotSolved(x, D_EDGES[["F", "R", "B", "L"].indexOf(f)]);
+  let best: { rot: Move[]; u: Move[] } | null = null;
+  for (const rot of [[], ["y"], ["y'"], ["y2"]] as Move[][]) {
+    const r = applyMoves(s, rot);
+    if (done(r, "F")) continue;
+    for (const u of [[], ["U"], ["U'"], ["U2"]] as Move[][]) {
+      const x = applyMoves(r, u);
+      if (x[7] === white && x[19] === center(x, "F")) {
+        if (!best || rot.length + u.length < best.rot.length + best.u.length) best = { rot, u };
+      }
+    }
+  }
+  if (!best) return null;
+  const r = applyMoves(s, best.rot);
+  const c = name(center(r, "F"));
+  const why = [
+    ...best.rot.map(() => `Turn the whole cube so the ${c} side faces you.`),
+    ...best.u.map(() => `Turn the top until the white–${c} edge sits above the ${c} center.`),
+    `Turn the front twice: the white–${c} edge drops to the bottom, white side down.`,
+  ];
+  return {
+    stage: "cross",
+    part: "Part 2: turn them down",
+    moves: [...best.rot, ...best.u, "F2"],
+    why,
+    say: `Turn the white–${c} edge down under the ${c} center.`,
+    piece: [white, center(r, "F")],
+    to: "DF",
+  };
+}
+
 function cross(s: CubeState): SolveStep[] {
+  if (STAGE_DONE.cross(s)) return [];
   const out: SolveStep[] = [];
   let cur = s;
-  while (!STAGE_DONE.cross(cur)) {
-    const done = D_EDGES.filter((e) => slotSolved(cur, e));
-    let best: { moves: Move[]; edge: (typeof D_EDGES)[number] } | null = null;
-    for (const e of D_EDGES.filter((x) => !slotSolved(cur, x))) {
-      const from: number[] = [];
-      const to: number[] = [];
-      for (const t of [...done, e]) {
-        const want = t.stickers.map((i) => center(cur, faceOfSticker(i)));
-        const at = EDGE_SLOTS.find((x) => {
-          const have = x.stickers.map((i) => cur[i]);
-          return have.includes(want[0]) && have.includes(want[1]);
-        })!;
-        from.push(at.stickers.find((i) => cur[i] === want[0])!);
-        to.push(t.stickers[0]);
-      }
-      const moves = pieceSearch(from, to);
-      if (moves && (!best || moves.length < best.moves.length)) best = { moves, edge: e };
-    }
-    if (!best) throw new Error("Cross search failed");
-    const other = center(cur, faceOfSticker(best.edge.stickers[1]));
-    out.push({
-      stage: "cross",
-      moves: best.moves,
-      say: `Bring the white–${name(other)} edge down next to the ${name(other)} center.`,
-    });
-    cur = applyMoves(cur, best.moves);
+  for (let step = daisyStep(cur); step; step = daisyStep(cur)) {
+    out.push(step);
+    cur = applyMoves(cur, step.moves);
   }
+  for (let step = flipStep(cur); step; step = flipStep(cur)) {
+    out.push(step);
+    cur = applyMoves(cur, step.moves);
+  }
+  if (!STAGE_DONE.cross(cur)) throw new Error("Cross failed");
   return out;
 }
 

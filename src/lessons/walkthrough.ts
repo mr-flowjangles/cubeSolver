@@ -1,0 +1,71 @@
+// The "Show it" and "Walk through it" parts of a level: one fixed demo cube, and the
+// moves that finish the level's stage on it, each with a plain-words reason.
+
+import { type CubeState, type Face, type Move, applyMoves } from "../cube";
+import type { Level } from "./beginner";
+import { type GuideStep, METHODS } from "./index";
+import { practicePosition } from "./position";
+
+export interface GuideMove {
+  move: Move;
+  /** Why this move, in plain words. */
+  why: string;
+  /** What the whole step is doing, e.g. "Bring the white–red edge up…". */
+  say: string;
+  part?: string;
+  piece?: Face[];
+  to?: string;
+  /** Which step (0-based) of how many. */
+  step: number;
+  steps: number;
+}
+
+export function seeded(seed: number) {
+  return () => (seed = (seed * 1103515245 + 12345) % 2 ** 31) / 2 ** 31;
+}
+
+/** The steps that finish this level's stage from `pos`. */
+export function stageSteps(level: Level, pos: CubeState): GuideStep[] {
+  return METHODS[level.method]
+    .solve(pos, level.stage)
+    .filter((s) => s.stage === level.stage && s.moves.length > 0);
+}
+
+/** The same demo cube every time, so "Show it" and "Walk through it" match. */
+export function demoPosition(level: Level): CubeState {
+  return practicePosition(level, seeded(level.number * 31 + 7));
+}
+
+/**
+ * One entry per button tap. A half turn the buttons don't have (U2) becomes two taps.
+ * `pad` is the list of buttons on screen.
+ */
+export function guideMoves(steps: GuideStep[], pad: readonly Move[]): GuideMove[] {
+  const out: GuideMove[] = [];
+  steps.forEach((st, k) => {
+    st.moves.forEach((m, j) => {
+      const why = st.why?.[j] ?? `Move ${j + 1} of ${st.moves.length} in this step.`;
+      const taps = !pad.includes(m) && m.endsWith("2") ? [m.slice(0, -1), m.slice(0, -1)] : [m];
+      for (const t of taps)
+        out.push({
+          move: t,
+          why,
+          say: st.say,
+          part: st.part,
+          piece: st.piece,
+          to: st.to,
+          step: k,
+          steps: steps.length,
+        });
+    });
+  });
+  return out;
+}
+
+/** The cube after every guide move: the stage should be done. */
+export function afterGuide(pos: CubeState, moves: GuideMove[]): CubeState {
+  return applyMoves(
+    pos,
+    moves.map((g) => g.move),
+  );
+}

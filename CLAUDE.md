@@ -55,11 +55,13 @@ Commit identity: Rob Rose <robmrose@me.com>
 - **CFOP** — the most common speedcubing method, named for its four steps: Cross, F2L, OLL, PLL.
 - **Cross** — first CFOP step: four edge pieces placed to make a plus sign on one face.
 - **Cube state** — the color of all 54 stickers; the one piece of data every part of the app passes around.
+- **Edge piece** — a piece with 2 colors. There are 12; four have white.
 - **F2L** — "first two layers": second CFOP step, solving the bottom two layers in pairs.
 - **Move notation** — standard letters for turns: R, L, U, D, F, B; an apostrophe means counter-clockwise, a 2 means a half turn; y turns the whole cube.
 - **Camera scan** — pointing the phone camera at each face in turn so the app reads the cube's colors.
 - **Flat cube map** — all six faces laid out flat in a cross shape; you tap stickers to copy your cube's colors.
 - **Framing guide** — the 3×3 grid drawn over the camera view; line one face up inside it.
+- **Center** — the middle square of a side. It never moves, so it tells you that side's color.
 - **Daisy** — beginner way to start the white cross: put the 4 white edges around the yellow center on top, then turn each one down to the bottom.
 - **Free play** — the screen where you turn and scramble the cube with no lesson.
 - **Guided solve** — after entering your cube, the app shows each move to make, one at a time, grouped by stage.
@@ -76,6 +78,7 @@ Commit identity: Rob Rose <robmrose@me.com>
 - **Streak** — days in a row with at least one level passed.
 - **See back** — button that swings the view round to show the back of the cube; any turn swings it back.
 - **Show me** — lesson button that plays the next step on the cube.
+- **Show it · Walk through it · Try it** — the three parts of every level: watch the app, do it with the app, then practice alone.
 - **Side tags** — the FRONT · F, TOP · U, RIGHT · R labels beside the 3D cube. They stay put when the cube turns, because letters mean places, not colors.
 - **Solve my cube** — enter your own scrambled cube and get a guided solve.
 - **Stage** — one step of a solving method, e.g. White cross. Each beginner level teaches one stage.

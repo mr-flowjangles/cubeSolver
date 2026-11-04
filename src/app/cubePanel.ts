@@ -72,8 +72,8 @@ export interface CubePanel {
   readonly history: Move[];
   /** Player or app turn, animated. */
   turn(m: Move, record?: boolean): void;
-  /** Play several moves, animated, one after another. */
-  play(moves: readonly Move[]): Promise<void>;
+  /** Play several moves, animated, one after another. `ms` is the time per move. */
+  play(moves: readonly Move[], ms?: number): Promise<void>;
   undo(): void;
   setState(s: CubeState): void;
   say(text: string): void;
@@ -135,12 +135,12 @@ export function mountCubePanel(
       void view.animate(m, state);
       opts.onMove?.(m, panel);
     },
-    async play(moves) {
+    async play(moves, ms) {
       let last: Promise<void> = Promise.resolve();
       for (const m of moves) {
         state = applyMove(state, m);
         history.push(m);
-        last = view.animate(m, state);
+        last = view.animate(m, state, ms);
       }
       await last;
     },

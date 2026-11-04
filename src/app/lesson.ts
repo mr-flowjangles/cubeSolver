@@ -1,14 +1,17 @@
-// One level: what it teaches, a practice cube, Hint / Show me, and the pass check.
+// One level. Stage levels are tutorials (stageLesson.ts); this file runs the controls drill,
+// the PLL level and the full solve.
 
 import { type CubeState, applyMoves, isSolved, toString } from "../cube";
-import { isUnlocked, rankOf, recordPass } from "../game/rules";
-import { loadProgress, saveProgress, today } from "../game/storage";
+import { isUnlocked } from "../game/rules";
+import { loadProgress } from "../game/storage";
 import { type Level, NOTATION_DRILL, NOTATION_STEPS } from "../lessons/beginner";
-import { ALL_LEVELS, BEGINNER_IDS, type GuideStep, LEVEL_IDS, METHODS } from "../lessons/index";
+import { ALL_LEVELS, type GuideStep, LEVEL_IDS, METHODS } from "../lessons/index";
 import { practicePosition } from "../lessons/position";
 import { solvePll } from "../solver/cfop";
 import { CFOP_GROUPS, type CubePanel, mountCubePanel } from "./cubePanel";
+import { showPass } from "./reward";
 import type { Screen } from "./shell";
+import { mountStageLesson } from "./stageLesson";
 
 const algList = (level: Level) =>
   level.algs
@@ -40,6 +43,8 @@ export function mountLesson(root: HTMLElement, id: string): Screen {
       </main>`;
     return { dispose() {} };
   }
+
+  if (level.kind === "stage") return mountStageLesson(root, level, next);
 
   root.innerHTML = `
     <main class="lesson">
@@ -94,28 +99,12 @@ export function mountLesson(root: HTMLElement, id: string): Screen {
   const check = (p: CubePanel) => {
     if (!done && passed(level, p, drill)) {
       done = true;
-      const before = loadProgress();
-      const r = recordPass(
-        before,
-        BEGINNER_IDS,
-        level.id,
-        {
-          usedHelp,
-          moves: p.history.length,
-          seconds: Math.round((Date.now() - started) / 1000),
-        },
-        today(),
-      );
-      saveProgress(r.progress);
-      const rankBefore = rankOf(before.xp).name;
-      const rankNow = rankOf(r.progress.xp).name;
-      passedEl.querySelector(".reward")!.innerHTML = `
-        <p class="xp">+${r.xpGained} XP${!usedHelp && !isDrill ? " · no help!" : ""}</p>
-        ${rankNow !== rankBefore ? `<p class="rankup">New rank: <strong>${rankNow}</strong></p>` : ""}
-        ${r.newBadges.map((b) => `<p class="badge-new"><span>${b.icon}</span> Badge: <strong>${b.name}</strong></p>`).join("")}`;
-      passedEl.hidden = false;
+      showPass(passedEl, level, {
+        usedHelp,
+        moves: p.history.length,
+        seconds: Math.round((Date.now() - started) / 1000),
+      });
       p.say("Passed!");
-      passedEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
   };
 
@@ -140,8 +129,6 @@ export function mountLesson(root: HTMLElement, id: string): Screen {
   });
   panel.say(isDrill ? drillPrompt() : "Hold white on the bottom. Use Hint if you get stuck.");
   if (isDrill) showDrill(panel);
-  // White cross and the first layer are on the bottom: look from below so the player can see them.
-  if (["cross", "corners", "f2l"].includes(level.stage ?? "")) panel.view.lookFrom("below");
 
   // Follow one plan while the player stays on it. Re-planning mid-way would go wrong
   // in the twist stage, where the bottom is meant to look broken until it's done.

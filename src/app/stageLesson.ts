@@ -1,0 +1,330 @@
+// A stage level as a tutorial, in three parts:
+//   1 Show it          the app does the stage on a demo cube, slowly, saying why each move is made
+//   2 Walk through it  the player does the same moves; the right button glows, wrong turns are undone
+//   3 Try it           practice cubes on their own, easy first, with Hint and Show me
+// See docs/02-levels.md → "Every level is a tutorial".
+
+import { type CubeState, type Move, applyMoves, findPiece, slot, toString } from "../cube";
+import type { Level } from "../lessons/beginner";
+import { type GuideStep, METHODS } from "../lessons/index";
+import { PRACTICE_RAMP, practicePosition } from "../lessons/position";
+import { type GuideMove, demoPosition, guideMoves, stageSteps } from "../lessons/walkthrough";
+import { CFOP_GROUPS, CFOP_PAD, type CubePanel, DEFAULT_PAD, mountCubePanel } from "./cubePanel";
+import { showPass } from "./reward";
+import type { Screen } from "./shell";
+
+type Phase = "show" | "walk" | "try";
+
+const PHASE_TITLE: Record<Phase, string> = {
+  show: "1 · Show it",
+  walk: "2 · Walk through it",
+  try: "3 · Try it",
+};
+const PHASE_HELP: Record<Phase, string> = {
+  show: "Watch the app do it. Lit squares are the piece being moved and where it goes.",
+  walk: "Now you do it. Tap the glowing button. Each move says why.",
+  try: "On your own now. Three cubes: the first is nearly done, the last is fully mixed.",
+};
+
+const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+export function mountStageLesson(root: HTMLElement, level: Level, next?: Level): Screen {
+  const method = METHODS[level.method];
+  const cfop = level.method === "cfop";
+  const pad = cfop ? CFOP_PAD : DEFAULT_PAD;
+  const demo = demoPosition(level);
+  const guide = guideMoves(stageSteps(level, demo), pad);
+  // White cross is built on top (the daisy), then shows on the bottom when done.
+  const lookWork = ["corners", "f2l"].includes(level.stage!) ? "below" : "above";
+  const lookDone = ["cross", "corners", "f2l"].includes(level.stage!) ? "below" : "above";
+
+  root.innerHTML = `
+    <main class="lesson">
+      <section class="intro">
+        <h2><span class="num">${level.number}</span> ${level.title}</h2>
+        <p class="goal">${level.goal}</p>
+        <details open>
+          <summary>How it works</summary>
+          <ul>${level.teach.map((t) => `<li>${t}</li>`).join("")}</ul>
+        </details>
+        ${level.algs.map((a) => `<p class="alg"><span>${a.name}</span><code>${a.moves}</code></p>`).join("")}
+      </section>
+      <nav class="phases" aria-label="Lesson parts">
+        ${(["show", "walk", "try"] as Phase[])
+          .map((p) => `<button data-phase="${p}">${PHASE_TITLE[p]}</button>`)
+          .join("")}
+      </nav>
+      <p class="phase-help"></p>
+      <div class="guide" aria-live="polite">
+        <p class="guide-part"></p>
+        <p class="guide-say"></p>
+        <p class="guide-move"></p>
+      </div>
+      <div class="panel"></div>
+      <div class="actions"></div>
+      <div class="passed" hidden>
+        <p>Level passed! 🎉</p>
+        <div class="reward"></div>
+        ${next ? `<a class="button primary" href="#/level/${next.id}">Next: ${next.title}</a>` : `<a class="button primary" href="#/">Back to levels</a>`}
+      </div>
+    </main>`;
+
+  const $ = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
+  const actions = $(".actions");
+  const guideEl = $(".guide");
+  const passedEl = $(".passed");
+
+  let phase: Phase = "show";
+  let at = 0; // next guide move (show and walk)
+  let playing = false;
+  let practice = 0; // which practice cube (try)
+  let usedHelp = false;
+  let started = Date.now();
+  let passed = false;
+  let cubeDone = false;
+
+  const glow = (m: Move | null) =>
+    root.querySelectorAll<HTMLElement>(".pad [data-move]").forEach((b) => {
+      b.classList.toggle("glow", b.dataset.move === m);
+    });
+
+  const light = (g: GuideMove | undefined, s: CubeState) => {
+    if (!g?.piece) return panel.view.spotlight(null);
+    const lit = [...findPiece(s, g.piece).stickers, ...(g.to ? slot(g.to).stickers : [])];
+    panel.view.spotlight(lit);
+  };
+
+  /** Say what the next guide move is, light its piece, make its button glow. */
+  const present = () => {
+    const g = guide[at];
+    guideEl.hidden = false;
+    if (!g) {
+      $(".guide-part").textContent = "";
+      $(".guide-say").textContent = `Done: ${level.goal}`;
+      $(".guide-move").textContent =
+        phase === "show"
+          ? "Now you do it: press Walk through it."
+          : "You did it! Now press Try it.";
+      glow(null);
+      panel.view.spotlight(null);
+      panel.view.lookFrom(lookDone);
+      return;
+    }
+    $(".guide-part").textContent = g.part
+      ? `${g.part} · step ${g.step + 1} of ${g.steps}`
+      : `Step ${g.step + 1} of ${g.steps}`;
+    $(".guide-say").textContent = g.say;
+    $(".guide-move").innerHTML = `<b>${g.move}</b> — ${g.why}`;
+    glow(g.move);
+    light(g, panel.state);
+  };
+
+  const panel: CubePanel = mountCubePanel($(".panel"), demo, {
+    groups: cfop ? CFOP_GROUPS : undefined,
+    words: !cfop,
+    onMove: (m, p) => {
+      if (phase === "show") {
+        p.say("Just watch for now. Press Walk through it to do it yourself.");
+        setTimeout(() => p.undo(), 250);
+      } else if (phase === "walk") {
+        const g = guide[at];
+        if (g && m === g.move) {
+          at++;
+          p.say(at < guide.length ? "Good!" : "");
+          present();
+        } else {
+          p.say(`That was ${m}. Undoing it — tap the glowing ${g?.move ?? ""} button.`);
+          setTimeout(() => p.undo(), 250);
+        }
+      } else {
+        p.say(`Moves: ${p.history.length}`);
+        checkCube();
+      }
+    },
+  });
+
+  // ---- Show it ----
+  const playShow = async () => {
+    if (playing) {
+      playing = false;
+      return;
+    }
+    if (at >= guide.length) restartDemo();
+    playing = true;
+    setActions();
+    while (playing && at < guide.length) {
+      present();
+      await wait(1400);
+      if (!playing || phase !== "show") break;
+      await panel.play([guide[at].move], 550);
+      at++;
+    }
+    playing = false;
+    if (phase === "show") {
+      present();
+      setActions();
+    }
+  };
+
+  const restartDemo = () => {
+    playing = false;
+    at = 0;
+    panel.setState(demo);
+    panel.view.lookFrom(lookWork);
+    panel.say("");
+    present();
+  };
+
+  // ---- Try it ----
+  const newCube = () => {
+    const left = PRACTICE_RAMP[Math.min(practice, PRACTICE_RAMP.length - 1)];
+    panel.setState(practicePosition(level, Math.random, left));
+    panel.view.lookFrom(lookWork);
+    panel.view.spotlight(null);
+    glow(null);
+    plan = [];
+    cubeDone = false;
+    started = Date.now();
+    panel.say(
+      practice === 0
+        ? `Cube 1 of 3: almost done — one step left.`
+        : practice === 1
+          ? `Cube 2 of 3: a few steps left.`
+          : `Cube 3 of 3: the whole step, from a mixed cube.`,
+    );
+    setActions();
+  };
+
+  const checkCube = () => {
+    if (cubeDone || !method.done[level.stage!](panel.state)) return;
+    cubeDone = true;
+    panel.view.lookFrom(lookDone);
+    if (practice < PRACTICE_RAMP.length - 1) {
+      panel.say(`Cube ${practice + 1} done! Press Next cube.`);
+      setActions();
+      return;
+    }
+    if (!passed) {
+      passed = true;
+      showPass(passedEl, level, {
+        usedHelp,
+        moves: panel.history.length,
+        seconds: Math.round((Date.now() - started) / 1000),
+      });
+    }
+    panel.say("Passed!");
+    setActions();
+  };
+
+  // Follow one plan while the player stays on it (see lesson.ts).
+  let plan: { at: string; step: GuideStep }[] = [];
+  const nextStep = (): GuideStep | undefined => {
+    const now = toString(panel.state);
+    const k = plan.findIndex((p) => p.at === now);
+    if (k >= 0) return plan[k].step;
+    let s: CubeState = panel.state;
+    plan = stageSteps(level, s).map((step) => {
+      const at = toString(s);
+      s = applyMoves(s, step.moves);
+      return { at, step };
+    });
+    return plan[0]?.step;
+  };
+
+  // ---- Phase switching and buttons ----
+  const setActions = () => {
+    const b = (id: string, label: string, cls = "") =>
+      `<button id="${id}" class="${cls}">${label}</button>`;
+    if (phase === "show") {
+      actions.className = "actions two";
+      actions.innerHTML =
+        b(
+          "play",
+          playing ? "⏸ Pause" : at >= guide.length ? "▶ Watch again" : "▶ Play",
+          "primary",
+        ) + b("walk", "Walk through it →");
+    } else if (phase === "walk") {
+      actions.className = "actions two";
+      actions.innerHTML = b("restart", "Start over") + b("totry", "Try it →");
+    } else {
+      actions.className = "actions";
+      const nextCube = cubeDone && practice < PRACTICE_RAMP.length - 1;
+      actions.innerHTML =
+        b("hint", "Hint") +
+        b("show", "Show me") +
+        b("undo", "Undo") +
+        (nextCube ? b("nextcube", "Next cube →", "primary") : b("fresh", "New cube"));
+    }
+  };
+
+  const setPhase = (p: Phase) => {
+    playing = false;
+    phase = p;
+    root.querySelectorAll<HTMLElement>(".phases button").forEach((b) => {
+      b.classList.toggle("current", b.dataset.phase === p);
+      b.setAttribute("aria-current", String(b.dataset.phase === p));
+    });
+    $(".phase-help").textContent = PHASE_HELP[p];
+    if (p === "try") {
+      guideEl.hidden = true;
+      practice = 0;
+      newCube();
+    } else {
+      restartDemo();
+      setActions();
+    }
+  };
+
+  actions.addEventListener("click", async (e) => {
+    const id = (e.target as HTMLElement).closest("button")?.id;
+    if (id === "play") void playShow();
+    else if (id === "walk") setPhase("walk");
+    else if (id === "totry") setPhase("try");
+    else if (id === "restart") restartDemo();
+    else if (id === "nextcube") {
+      practice++;
+      newCube();
+    } else if (id === "fresh") newCube();
+    else if (id === "undo") panel.undo();
+    else if (id === "hint") {
+      usedHelp = true;
+      const step = nextStep();
+      panel.say(step ? `${step.say}  →  ${step.moves.join(" ")}` : "Already done!");
+    } else if (id === "show") {
+      usedHelp = true;
+      const step = nextStep();
+      if (!step) return;
+      panel.say(`${step.say}  →  ${step.moves.join(" ")}`);
+      await panel.play(step.moves);
+      checkCube();
+    }
+  });
+  root.querySelector(".phases")!.addEventListener("click", (e) => {
+    const p = (e.target as HTMLElement).closest<HTMLElement>("[data-phase]")?.dataset.phase;
+    if (p) setPhase(p as Phase);
+  });
+
+  setPhase("show");
+
+  // Test hook: ?autoshow=1 does every practice cube instantly with Show me's steps.
+  if (new URLSearchParams(location.search).get("autoshow") === "1") {
+    setPhase("try");
+    usedHelp = true;
+    for (let c = 0; c < PRACTICE_RAMP.length && !passed; c++) {
+      if (c > 0) {
+        practice = c;
+        newCube();
+      }
+      for (const st of stageSteps(level, panel.state))
+        panel.setState(applyMoves(panel.state, st.moves));
+      checkCube();
+    }
+  }
+
+  return {
+    dispose() {
+      playing = false;
+      panel.dispose();
+    },
+  };
+}

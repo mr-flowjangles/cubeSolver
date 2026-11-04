@@ -1,5 +1,50 @@
 # v0.8
 
+## v0.8.4 — Guided white cross (2026-11-04)
+
+### Problem
+
+- White cross said "find a white edge, turn it into place" and dropped the player on a scrambled cube. Not clear, and not a tutorial.
+
+### Solution
+
+- Every stage level now runs in three parts: Show it, Walk through it, Try it.
+- White cross is taught with the daisy, every move with a plain-words reason.
+
+### New
+
+- Lesson parts: 1 Show it (app plays the demo cube slowly), 2 Walk through it (glowing button, wrong turns undone), 3 Try it.
+- Lit squares: the piece being moved and the spot it goes to.
+- Daisy solver for the beginner cross: Part 1 builds the daisy, Part 2 turns each edge down with F2.
+- The daisy only turns top, front, right and the whole cube — sides the player can see.
+- Practice ramp: cube 1 has one step left, cube 2 about three, cube 3 fully mixed; the level passes on cube 3.
+- Tests: every stage level's walk-through finishes its stage; daisy rules; practice ramp.
+
+### Changed
+
+- White cross text rewritten: what an edge piece and a center are, then the two parts.
+- Guided solve ("Solve my cube") and Hint use the daisy for the beginner cross.
+- Level pass rewards moved to their own module.
+
+### Fixed
+
+- None.
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `src/app/stageLesson.ts` | New: the three-part lesson screen |
+| `src/app/reward.ts` | New: record a pass, show XP and badges |
+| `src/lessons/walkthrough.ts` | New: demo cube and per-tap guide moves |
+| `src/solver/beginner.ts` | Daisy cross with per-move reasons |
+| `src/lessons/position.ts` | Practice ramp |
+| `src/lessons/beginner.ts`, `index.ts` | Cross text; guide step fields |
+| `src/app/lesson.ts`, `cubePanel.ts`, `styles.css` | Hand stage levels to the new screen; slow play; styles |
+| `src/render/cubeView.ts`, `src/cube/pieces.ts` | Light up a piece; find a piece by colors |
+| `tests/walkthrough.test.ts` | New tests |
+| `docs/02-levels.md`, `docs/07-build-plan.md`, `CLAUDE.md` | How the parts are built; M8 ticks; glossary |
+
 ## v0.8.3 — Tutorial plan (2026-11-04)
 
 ### Problem
