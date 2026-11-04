@@ -9,6 +9,8 @@ const KEY = "cubesolver.settings";
 const DEFAULTS: Settings = { ada: false };
 
 export function loadSettings(): Settings {
+  // Test hook: ?ada=1 turns ADA shapes on for this visit without saving.
+  if (new URLSearchParams(location.search).get("ada") === "1") return { ada: true };
   try {
     const raw = localStorage.getItem(KEY);
     return raw ? { ...DEFAULTS, ...(JSON.parse(raw) as Partial<Settings>) } : { ...DEFAULTS };

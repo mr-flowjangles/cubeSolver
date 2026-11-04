@@ -68,3 +68,31 @@ export function drawShape(
   g.closePath();
   g.fill("nonzero");
 }
+
+/** The same shape as a small inline SVG, for buttons and the flat cube map. */
+export function shapeSvg(shape: Shape, color: string): string {
+  const pts = (list: [number, number][]) => list.map(([x, y]) => `${x},${y}`).join(" ");
+  const star = Array.from({ length: 10 }, (_, i) => {
+    const a = -Math.PI / 2 + (i * Math.PI) / 5;
+    const r = i % 2 ? 4.2 : 10;
+    return [12 + Math.cos(a) * r, 12 + Math.sin(a) * r] as [number, number];
+  });
+  const body: Record<Shape, string> = {
+    circle: `<circle cx="12" cy="12" r="8.5"/>`,
+    triangle: `<polygon points="${pts([
+      [12, 2],
+      [21.5, 19.5],
+      [2.5, 19.5],
+    ])}"/>`,
+    square: `<rect x="4.5" y="4.5" width="15" height="15"/>`,
+    diamond: `<polygon points="${pts([
+      [12, 2],
+      [20, 12],
+      [12, 22],
+      [4, 12],
+    ])}"/>`,
+    cross: `<path d="M5 3 L12 10 L19 3 L21 5 L14 12 L21 19 L19 21 L12 14 L5 21 L3 19 L10 12 L3 5 Z"/>`,
+    star: `<polygon points="${pts(star)}"/>`,
+  };
+  return `<svg viewBox="0 0 24 24" width="1em" height="1em" fill="${color}" aria-hidden="true">${body[shape]}</svg>`;
+}

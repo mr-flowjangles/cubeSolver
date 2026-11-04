@@ -393,3 +393,162 @@ button:focus-visible,
 .badge small {
   color: var(--muted);
 }
+
+/* Solve my cube */
+.solve-mine h2,
+.guide h2 {
+  margin: 4px 0 8px;
+}
+.solve-mine .how {
+  margin: 0 0 12px;
+  padding-left: 20px;
+  color: var(--muted);
+}
+.solve-mine-link .num {
+  background: #0046ad;
+}
+.net {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-areas:
+    ". U . ."
+    "L F R B"
+    ". D . .";
+  gap: 4px;
+  max-width: 440px;
+  margin: 0 auto;
+}
+.face {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  padding: 2px;
+  border-radius: 6px;
+  background: #111;
+}
+.face-U {
+  grid-area: U;
+}
+.face-L {
+  grid-area: L;
+}
+.face-F {
+  grid-area: F;
+}
+.face-R {
+  grid-area: R;
+}
+.face-B {
+  grid-area: B;
+}
+.face-D {
+  grid-area: D;
+}
+.sticker {
+  aspect-ratio: 1;
+  min-height: 0;
+  padding: 0;
+  border-radius: 4px;
+  border: 0;
+  display: grid;
+  place-items: center;
+  font-size: 0.85rem;
+}
+.sticker.blank {
+  background: repeating-linear-gradient(45deg, #444 0 4px, #555 4px 8px);
+}
+.sticker:disabled {
+  opacity: 1;
+  cursor: default;
+  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.35);
+}
+.sticker.bad {
+  outline: 3px solid #ff2d55;
+  outline-offset: -1px;
+}
+.palette {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  margin: 14px 0 8px;
+}
+.swatch {
+  position: relative;
+  min-height: 52px;
+  border: 3px solid transparent;
+  font-size: 1.1rem;
+}
+.swatch.on {
+  border-color: var(--fg);
+  transform: translateY(-2px);
+}
+.swatch .count {
+  position: absolute;
+  bottom: -18px;
+  left: 0;
+  right: 0;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.problems {
+  margin: 18px 0 8px;
+  padding-left: 20px;
+  color: #ff5a6e;
+}
+.problems:empty {
+  display: none;
+}
+.actions.two,
+.actions.three {
+  grid-template-columns: 1fr 1fr;
+}
+.actions.three {
+  grid-template-columns: 1fr 1.4fr 1fr;
+}
+.solve-mine .actions {
+  margin-top: 12px;
+}
+.faces-help {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.85rem;
+  color: var(--muted);
+  padding-bottom: 16px;
+}
+.guide {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 10px;
+  padding-bottom: 16px;
+}
+.guide-head p {
+  margin: 2px 0;
+}
+.stage-name {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+.step-say {
+  color: var(--muted);
+}
+.step-moves {
+  font-size: 1.4rem;
+  font-weight: 700;
+  word-spacing: 6px;
+  min-height: 1.6em;
+}
+.step-moves .done {
+  opacity: 0.35;
+}
+.step-moves .now {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+.hint-line {
+  text-align: center;
+  color: var(--muted);
+  margin: 0;
+}

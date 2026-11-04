@@ -10,7 +10,7 @@ The **Now:** line below names the milestone(s) being worked on, comma-separated 
 
 **Status: milestone order M1–M7 agreed 2026-11-04.**
 
-**Now:** M4
+**Now:** M5
 
 ## v1 — Definition of Done
 
@@ -86,9 +86,9 @@ Goal: XP, badges, locked levels, saved progress.
 
 Goal: enter a real cube and get guided through solving it.
 
-- [ ] Tap-to-fix cube map (also used after camera scan).
-- [ ] Check that an entered cube is possible to solve.
-- [ ] Guided solve: one move at a time, grouped by stage.
+- [x] Tap-to-fix cube map (also used after camera scan).
+- [x] Check that an entered cube is possible to solve.
+- [x] Guided solve: one move at a time, grouped by stage.
 
 **Done when:** a cube entered by hand is solved by following the guide.
 

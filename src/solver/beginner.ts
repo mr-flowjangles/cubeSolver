@@ -114,21 +114,15 @@ const ROTATIONS = ["", "x", "x'", "x2", "y", "y'", "y2", "z", "z'", "z2"];
 function hold(s: CubeState): SolveStep[] {
   // Already white-down (the player may have spun the cube since): nothing to do.
   if (center(s, "D") === "U") return [];
-  for (const a of ROTATIONS)
-    for (const b of ["", "y", "y'", "y2"]) {
-      const moves = [a, b].filter(Boolean);
-      if (STAGE_DONE.hold(applyMoves(s, moves)))
-        return moves.length
-          ? [
-              {
-                stage: "hold",
-                moves,
-                say: "Hold the cube with white on the bottom and green in front.",
-              },
-            ]
-          : [];
-    }
-  throw new Error("No white or green center");
+  const options = ROTATIONS.flatMap((a) =>
+    ["", "y", "y'", "y2"].map((b) => [a, b].filter(Boolean)),
+  );
+  options.sort((x, y) => x.length - y.length);
+  const moves = options.find((m) => STAGE_DONE.hold(applyMoves(s, m)));
+  if (!moves) throw new Error("No white or green center");
+  return [
+    { stage: "hold", moves, say: "Hold the cube with white on the bottom and green in front." },
+  ];
 }
 
 function cross(s: CubeState): SolveStep[] {

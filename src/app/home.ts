@@ -27,6 +27,10 @@ export function mountHome(root: HTMLElement): Screen {
           <a href="#/badges">🏅 ${badgeCount} of ${BADGES.length} badges</a>
         </div>
       </section>
+      <a class="level solve-mine-link" href="#/solve">
+        <span class="num">📷</span>
+        <span class="text"><strong>Solve my cube</strong><small>Enter your scrambled cube and get guided, move by move.</small></span>
+      </a>
       <h2>Beginner method</h2>
       <ol class="levels">
         ${BEGINNER_LEVELS.map((l) => {
