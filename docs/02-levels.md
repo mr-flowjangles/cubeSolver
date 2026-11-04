@@ -2,6 +2,23 @@
 
 **Status:** decided by Claude under Rob's standing go-ahead, 2026-11-04. Rob to review.
 
+## Every level is a tutorial (Rob, 2026-11-04)
+
+**This is a tutorial, not a test.** Shipped levels drop the player on a scrambled cube and say "figure it out". That is wrong and is being rebuilt (M8).
+
+Every level runs in three parts:
+
+1. **Show it.** The app does the step slowly on the cube. Plain words say what is happening and why.
+2. **Walk through it.** The player does it while the app names each move, lights up the piece being moved and its target spot, and makes the right button glow. A wrong turn is undone with a correction.
+3. **Then try it.** Only now a practice cube, with Hint and Show me. The first cubes are easy (one piece left), then harder.
+
+Rules that follow from it:
+
+- Never ask the player to do something the level hasn't shown.
+- Every move on screen gets a plain-words reason ("this lifts the white edge out of the way").
+- Pieces are named by their colors ("the white–orange edge") and lit up, not described by position alone.
+- White cross uses the **daisy**: put the 4 white edges around the yellow center on top (visible), then match each with its center and turn it down with F2.
+
 ## Beginner method (M2)
 
 - The standard 7-stage layer-by-layer method, white on the bottom.
