@@ -10,6 +10,13 @@ export const DEFAULT_PAD: Move[] = [
   ...["D", "D'", "L", "L'", "B", "B'", "y'"],
 ];
 
+/** CFOP sequences also use middle-layer (M), wide (r, f) and whole-cube (x) turns. */
+export const CFOP_PAD: Move[] = [
+  ...["U", "U'", "R", "R'", "F", "F'", "y", "y'"],
+  ...["D", "D'", "L", "L'", "B", "B'", "x", "x'"],
+  ...["M", "M'", "M2", "r", "r'", "f", "f'", "U2"],
+];
+
 export interface CubePanel {
   readonly state: Face[];
   readonly history: Move[];
@@ -33,7 +40,7 @@ export function mountCubePanel(
   root.innerHTML = `
     <div class="stage" aria-label="3D cube. Drag to look around."></div>
     <p class="status" role="status"></p>
-    <div class="pad">${pad.map((m) => `<button class="move" data-move="${m}">${m}</button>`).join("")}</div>`;
+    <div class="pad ${pad.length > 14 ? "wide" : ""}">${pad.map((m) => `<button class="move" data-move="${m}">${m}</button>`).join("")}</div>`;
   const status = root.querySelector<HTMLElement>(".status")!;
   const view = new CubeView(root.querySelector(".stage")!, start, { ada: loadSettings().ada });
 

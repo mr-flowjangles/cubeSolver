@@ -1,7 +1,7 @@
 // Beginner levels. Content is data; the lesson screen reads it.
 // Level list decided by Claude under Rob's standing go-ahead (2026-11-04); see docs/02-levels.md.
 
-import { ALGS, type StageId } from "../solver/beginner";
+import { ALGS } from "../solver/beginner";
 
 export interface Level {
   id: string;
@@ -10,9 +10,11 @@ export interface Level {
   goal: string; // one line: what "passed" means
   teach: string[]; // short bullets
   algs: { name: string; moves: string }[];
-  /** Stage the player must finish to pass. Missing for the notation and full-solve levels. */
-  stage?: StageId;
-  kind: "notation" | "stage" | "full";
+  /** Which solving method the level's Hint, Show me and practice cube use. */
+  method: "beginner" | "cfop";
+  /** Stage the player must finish to pass. Missing for notation, PLL and full-solve levels. */
+  stage?: string;
+  kind: "notation" | "stage" | "full" | "pll";
 }
 
 export const BEGINNER_LEVELS: Level[] = [
@@ -22,6 +24,7 @@ export const BEGINNER_LEVELS: Level[] = [
     title: "Meet the cube",
     goal: "Make each turn the app asks for.",
     kind: "notation",
+    method: "beginner",
     teach: [
       "Centers never move. They tell you each face's color.",
       "Each face has a letter: U up, D down, R right, L left, F front, B back.",
@@ -37,6 +40,7 @@ export const BEGINNER_LEVELS: Level[] = [
     title: "White cross",
     goal: "Make a white plus on the bottom, edges matching the side centers.",
     kind: "stage",
+    method: "beginner",
     stage: "cross",
     teach: [
       "Hold white on the bottom, green in front.",
@@ -52,6 +56,7 @@ export const BEGINNER_LEVELS: Level[] = [
     title: "White corners",
     goal: "Finish the white layer.",
     kind: "stage",
+    method: "beginner",
     stage: "corners",
     teach: [
       "Find a white corner in the top layer.",
@@ -67,6 +72,7 @@ export const BEGINNER_LEVELS: Level[] = [
     title: "Middle edges",
     goal: "Finish the first two layers.",
     kind: "stage",
+    method: "beginner",
     stage: "middle",
     teach: [
       "Find a top edge with no yellow.",
@@ -85,6 +91,7 @@ export const BEGINNER_LEVELS: Level[] = [
     title: "Yellow cross",
     goal: "Make a yellow plus on top.",
     kind: "stage",
+    method: "beginner",
     stage: "yellowCross",
     teach: [
       "Look at the yellow on top: a dot, an L, or a line.",
@@ -100,6 +107,7 @@ export const BEGINNER_LEVELS: Level[] = [
     title: "Yellow edges",
     goal: "Match every top edge with its side center.",
     kind: "stage",
+    method: "beginner",
     stage: "yellowEdges",
     teach: [
       "Turn the top until two edges match their centers.",
@@ -114,6 +122,7 @@ export const BEGINNER_LEVELS: Level[] = [
     title: "Yellow corners into place",
     goal: "Put every top corner in its right spot. Twisted is fine.",
     kind: "stage",
+    method: "beginner",
     stage: "yellowCornersPlace",
     teach: [
       "A corner is in place when its three colors match the three centers around it.",
@@ -129,6 +138,7 @@ export const BEGINNER_LEVELS: Level[] = [
     title: "Twist yellow corners",
     goal: "Solve the cube!",
     kind: "stage",
+    method: "beginner",
     stage: "yellowCornersTwist",
     teach: [
       "Hold a twisted corner at front-right.",
@@ -144,6 +154,7 @@ export const BEGINNER_LEVELS: Level[] = [
     title: "Full solve",
     goal: "Solve a fully scrambled cube.",
     kind: "full",
+    method: "beginner",
     teach: [
       "Everything you've learned, start to finish.",
       "Use Hint if you're stuck — it tells you the next step.",

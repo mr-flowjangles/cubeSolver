@@ -1,29 +1,37 @@
 // One level: what it teaches, a practice cube, Hint / Show me, and the pass check.
 
-import { type CubeState, applyMoves, toString } from "../cube";
+import { type CubeState, applyMoves, isSolved, toString } from "../cube";
 import { isUnlocked, rankOf, recordPass } from "../game/rules";
 import { loadProgress, saveProgress, today } from "../game/storage";
-import { BEGINNER_LEVELS, type Level, NOTATION_DRILL } from "../lessons/beginner";
+import { type Level, NOTATION_DRILL } from "../lessons/beginner";
+import { ALL_LEVELS, BEGINNER_IDS, type GuideStep, LEVEL_IDS, METHODS } from "../lessons/index";
 import { practicePosition } from "../lessons/position";
-import { STAGE_DONE, type SolveStep, type StageId, solveBeginner } from "../solver/beginner";
-import { type CubePanel, mountCubePanel } from "./cubePanel";
+import { solvePll } from "../solver/cfop";
+import { CFOP_PAD, type CubePanel, mountCubePanel } from "./cubePanel";
 import type { Screen } from "./shell";
+
+const algList = (level: Level) =>
+  level.algs
+    .map((a) => `<p class="alg"><span>${a.name}</span><code>${a.moves}</code></p>`)
+    .join("");
 
 function passed(level: Level, p: CubePanel, drillIndex: number): boolean {
   if (level.kind === "notation") return drillIndex >= NOTATION_DRILL.length;
-  const stage: StageId = level.kind === "full" ? "yellowCornersTwist" : level.stage!;
-  return STAGE_DONE[stage](p.state);
+  if (level.kind === "full" || level.kind === "pll") return isSolved(p.state);
+  return METHODS[level.method].done[level.stage!](p.state);
 }
 
 export function mountLesson(root: HTMLElement, id: string): Screen {
-  const level = BEGINNER_LEVELS.find((l) => l.id === id) ?? BEGINNER_LEVELS[0];
-  const next = BEGINNER_LEVELS[BEGINNER_LEVELS.indexOf(level) + 1];
+  const level = ALL_LEVELS.find((l) => l.id === id) ?? ALL_LEVELS[0];
+  const next = ALL_LEVELS[ALL_LEVELS.indexOf(level) + 1];
   const isDrill = level.kind === "notation";
-  const order = BEGINNER_LEVELS.map((l) => l.id);
+  const method = METHODS[level.method];
 
-  const testHook = new URLSearchParams(location.search).get("autoshow") === "1";
-  if (!testHook && !isUnlocked(loadProgress(), order, level.id)) {
-    const prev = BEGINNER_LEVELS[BEGINNER_LEVELS.indexOf(level) - 1];
+  // Test hooks ?autoshow=1 and ?unlock=1 skip the lock (headless checks).
+  const q = new URLSearchParams(location.search);
+  const testHook = q.get("autoshow") === "1" || q.get("unlock") === "1";
+  if (!testHook && !isUnlocked(loadProgress(), LEVEL_IDS, level.id)) {
+    const prev = ALL_LEVELS[ALL_LEVELS.indexOf(level) - 1];
     root.innerHTML = `
       <main class="lesson locked">
         <h2><span class="num">🔒</span> ${level.title}</h2>
@@ -38,13 +46,15 @@ export function mountLesson(root: HTMLElement, id: string): Screen {
       <section class="intro">
         <h2><span class="num">${level.number}</span> ${level.title}</h2>
         <p class="goal">${level.goal}</p>
-        <details ${level.number <= 1 ? "open" : ""}>
+        <details ${level.number <= 1 || level.number === 9 ? "open" : ""}>
           <summary>How it works</summary>
           <ul>${level.teach.map((t) => `<li>${t}</li>`).join("")}</ul>
         </details>
-        ${level.algs
-          .map((a) => `<p class="alg"><span>${a.name}</span><code>${a.moves}</code></p>`)
-          .join("")}
+        ${
+          level.algs.length > 4
+            ? `<details class="algs"><summary>Sequences (${level.algs.length})</summary>${algList(level)}</details>`
+            : algList(level)
+        }
       </section>
       <div class="panel"></div>
       <div class="actions ${isDrill ? "two" : ""}">
@@ -74,7 +84,7 @@ export function mountLesson(root: HTMLElement, id: string): Screen {
       const before = loadProgress();
       const r = recordPass(
         before,
-        order,
+        BEGINNER_IDS,
         level.id,
         {
           usedHelp,
@@ -97,6 +107,7 @@ export function mountLesson(root: HTMLElement, id: string): Screen {
   };
 
   const panel = mountCubePanel(root.querySelector(".panel")!, practicePosition(level), {
+    pad: level.method === "cfop" ? CFOP_PAD : undefined,
     onMove: (m, p) => {
       if (isDrill) {
         if (m === NOTATION_DRILL[drill]) {
@@ -113,19 +124,22 @@ export function mountLesson(root: HTMLElement, id: string): Screen {
     },
   });
   panel.say(isDrill ? drillPrompt() : "Hold white on the bottom. Use Hint if you get stuck.");
-  // White cross and corners are on the bottom: look from below so the player can see them.
-  if (level.stage === "cross" || level.stage === "corners") panel.view.lookFrom("below");
+  // White cross and the first layer are on the bottom: look from below so the player can see them.
+  if (["cross", "corners", "f2l"].includes(level.stage ?? "")) panel.view.lookFrom("below");
 
   // Follow one plan while the player stays on it. Re-planning mid-way would go wrong
   // in the twist stage, where the bottom is meant to look broken until it's done.
-  let plan: { at: string; step: SolveStep }[] = [];
-  const nextStep = (): SolveStep | undefined => {
+  let plan: { at: string; step: GuideStep }[] = [];
+  const nextStep = (): GuideStep | undefined => {
     const now = toString(panel.state);
     const k = plan.findIndex((p) => p.at === now);
     if (k >= 0) return plan[k].step;
-    const stage = level.kind === "full" ? undefined : level.stage;
     let s: CubeState = panel.state;
-    plan = solveBeginner(s, stage).map((step) => {
+    const steps =
+      level.kind === "pll"
+        ? solvePll(s)
+        : method.solve(s, level.kind === "full" ? undefined : level.stage);
+    plan = steps.map((step) => {
       const at = toString(s);
       s = applyMoves(s, step.moves);
       return { at, step };

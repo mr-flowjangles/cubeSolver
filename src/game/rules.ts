@@ -73,6 +73,22 @@ export const BADGES: Badge[] = [
   { id: "streak-3", name: "3-Day Streak", how: "Pass a level 3 days in a row.", icon: "🔥" },
   { id: "streak-7", name: "7-Day Streak", how: "Pass a level 7 days in a row.", icon: "📅" },
   { id: "all-beginner", name: "Beginner Graduate", how: "Pass every beginner level.", icon: "🎒" },
+  { id: "f2l", name: "Pair Maker", how: "Pass F2L pairs.", icon: "🧲" },
+  { id: "four-look", name: "4-Look Last Layer", how: "Pass PLL 2: edges.", icon: "👀" },
+  { id: "pll-pro", name: "PLL Pro", how: "Pass Full PLL.", icon: "🧠" },
+  { id: "cfop-solver", name: "CFOP Solver", how: "Pass CFOP solve.", icon: "⚡" },
+  {
+    id: "sub-60",
+    name: "Under a Minute",
+    how: "Time a real-cube solve under 60 seconds.",
+    icon: "⏱️",
+  },
+  {
+    id: "sub-30",
+    name: "Under 30 Seconds",
+    how: "Time a real-cube solve under 30 seconds.",
+    icon: "🚀",
+  },
 ];
 
 const BADGE_FOR_LEVEL: Record<string, string> = {
@@ -83,7 +99,14 @@ const BADGE_FOR_LEVEL: Record<string, string> = {
   yellowCross: "yellow-cross",
   yellowCornersTwist: "first-solve",
   full: "full-solve",
+  cfopF2l: "f2l",
+  cfopEp: "four-look",
+  cfopPll: "pll-pro",
+  cfopFull: "cfop-solver",
 };
+
+/** Full-solve levels earn more XP. */
+const BIG_LEVELS = new Set(["full", "cfopFull"]);
 
 /** Level ids in play order. A level unlocks when the one before it is passed. */
 export function isUnlocked(p: Progress, order: readonly string[], id: string): boolean {
@@ -105,16 +128,30 @@ const dayBefore = (day: string) => {
   return d.toISOString().slice(0, 10);
 };
 
-/** Record a level pass. `today` is YYYY-MM-DD in the player's own time zone. */
+/** Record a timed real-cube solve from the Timer. Earns time badges only, no XP. */
+export function recordTimedSolve(before: Progress, seconds: number, today: string): PassResult {
+  const p: Progress = structuredClone(before);
+  const earned: string[] = [];
+  if (seconds < 60) earned.push("sub-60");
+  if (seconds < 30) earned.push("sub-30");
+  const newBadges = BADGES.filter((b) => earned.includes(b.id) && !p.badges[b.id]);
+  for (const b of newBadges) p.badges[b.id] = today;
+  return { progress: p, xpGained: 0, newBadges, firstTime: false };
+}
+
+/**
+ * Record a level pass. `beginnerIds` are the beginner levels (for the graduate badge).
+ * `today` is YYYY-MM-DD in the player's own time zone.
+ */
 export function recordPass(
   before: Progress,
-  order: readonly string[],
+  beginnerIds: readonly string[],
   id: string,
   run: { usedHelp: boolean; moves: number; seconds: number },
   today: string,
 ): PassResult {
   const p: Progress = structuredClone(before);
-  const full = id === "full";
+  const full = BIG_LEVELS.has(id);
   const rec = p.levels[id] ?? { passes: 0, noHelp: false };
   const firstTime = rec.passes === 0;
 
@@ -144,11 +181,11 @@ export function recordPass(
   const earned = new Set<string>();
   if (BADGE_FOR_LEVEL[id]) earned.add(BADGE_FOR_LEVEL[id]);
   if (!run.usedHelp && id !== "meet") earned.add("no-help");
-  if (full && !run.usedHelp) earned.add("solo-solve");
-  if (full && rec.passes >= 5) earned.add("five-solves");
+  if (id === "full" && !run.usedHelp) earned.add("solo-solve");
+  if (id === "full" && rec.passes >= 5) earned.add("five-solves");
   if (p.streak.days >= 3) earned.add("streak-3");
   if (p.streak.days >= 7) earned.add("streak-7");
-  if (order.every((l) => (p.levels[l]?.passes ?? 0) > 0)) earned.add("all-beginner");
+  if (beginnerIds.every((l) => (p.levels[l]?.passes ?? 0) > 0)) earned.add("all-beginner");
 
   const newBadges = BADGES.filter((b) => earned.has(b.id) && !p.badges[b.id]);
   for (const b of newBadges) p.badges[b.id] = today;

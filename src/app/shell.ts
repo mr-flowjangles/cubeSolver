@@ -4,6 +4,7 @@
 //   #/play        free play
 //   #/badges      badges
 //   #/solve       solve my cube (enter, then #/solve/guide)
+//   #/timer       timer for real-cube solves
 
 import type { CubeView } from "../render/cubeView";
 import { mountBadges } from "./badges";
@@ -11,6 +12,7 @@ import { mountHome } from "./home";
 import { mountLesson } from "./lesson";
 import { mountPractice } from "./practice";
 import { mountSolveMine } from "./solveMine";
+import { mountTimer } from "./timer";
 import { loadSettings, saveSettings } from "./settings";
 
 export interface Screen {
@@ -52,6 +54,7 @@ export function mountShell(root: HTMLElement): void {
     else if (parts[0] === "play") current = mountPractice(screenEl);
     else if (parts[0] === "badges") current = mountBadges(screenEl);
     else if (parts[0] === "solve") current = mountSolveMine(screenEl, parts[1]);
+    else if (parts[0] === "timer") current = mountTimer(screenEl);
     else current = mountHome(screenEl);
     window.scrollTo(0, 0);
   }

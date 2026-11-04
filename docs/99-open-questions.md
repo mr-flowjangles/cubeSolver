@@ -64,3 +64,9 @@ Format for each entry:
 **Resolution trigger:** before M7.
 **Notes:** no tracking keeps the "no personal data" promise simple.
 **Decision:** no tracking of any kind.
+
+## Teach full OLL (57 cases)?
+
+**Status:** deferred to v2
+**Resolution trigger:** players finishing Full PLL and asking for more.
+**Notes:** v1 teaches 2-look OLL (9 sequences). Full OLL is 57 sequences, an advanced step most cubers learn after full PLL. Decided by Claude under the standing go-ahead; Rob to review.
