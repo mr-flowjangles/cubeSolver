@@ -4,7 +4,7 @@
 # Targets that produce no files are .PHONY so make doesn't try to track them.
 
 .DEFAULT_GOAL := help
-.PHONY: help setup dev build test lint format ci image smoke clean catalog site standalone version version-minor version-major
+.PHONY: help setup dev build serve-image test lint format ci image smoke clean catalog site standalone version version-minor version-major
 
 # Mission Control's port, from app-catalog's port registry (web band).
 SITE_PORT ?= 4025
@@ -57,11 +57,22 @@ ci: lint test ## Lint + test, suitable for CI gating
 # ---------------------------------------------------------------------------
 # Docker image
 # ---------------------------------------------------------------------------
-image: ## Build the runtime Docker image
-	docker build -t eha/cubesolver:dev .
+# Local test port for the Docker image, from app-catalog's port registry (web band).
+PREVIEW_PORT ?= 4027
 
-smoke: ## Smoke-test the built image (override CMD as appropriate for your tool)
-	docker run --rm eha/cubesolver:dev --help
+image: ## Build the Docker image (built PWA served by nginx)
+	docker build -t cubesolver:dev .
+
+smoke: image ## Run the image briefly and check it serves the app
+	@docker rm -f cubesolver-smoke >/dev/null 2>&1 || true
+	@docker run -d --name cubesolver-smoke -p $(PREVIEW_PORT):80 cubesolver:dev >/dev/null
+	@sleep 1; curl -fsS http://localhost:$(PREVIEW_PORT)/ | grep -q "<title>Cube Solver</title>" \
+	  && echo "smoke ok" || (docker rm -f cubesolver-smoke >/dev/null; echo "smoke FAILED"; exit 1)
+	@docker rm -f cubesolver-smoke >/dev/null
+
+serve-image: image ## Serve the built app from Docker on localhost:PREVIEW_PORT
+	@echo "→ http://localhost:$(PREVIEW_PORT)"
+	docker run --rm -p $(PREVIEW_PORT):80 cubesolver:dev
 
 # ---------------------------------------------------------------------------
 # Mission Control (see CLAUDE.md → Mission Control)

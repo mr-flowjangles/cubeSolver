@@ -1,76 +1,110 @@
 # 01 — Architecture
 
+**Status: agreed 2026-11-04.**
+
 ## The spine
 
-<!--
-One short paragraph: the system's organizing principle.
-For the FHIR tool the spine is "two phases with a contract artifact between them" — Discovery (LLM, once) → mapping.yaml → Extraction (deterministic, every run).
-Find your equivalent. The spine should fit on one line and a diagram.
--->
+- Everything passes around one thing: the **cube state**.
+- Cube state = the color of all 54 stickers.
+- The camera produces a cube state.
+- The solver reads a cube state and returns a list of moves.
+- The 3D cube draws a cube state and animates moves on it.
+- Lessons start from a set cube state and check the player's result.
 
 ```
-... ──▶ {contract artifact} ──▶ ...
+camera scan ──▶ cube state ──▶ solver ──▶ moves ──▶ 3D cube (shows each move)
+lesson      ──▶ cube state ──────────────────────▶ 3D cube ──▶ pass/fail ──▶ XP
 ```
 
 ## Why this shape
 
-<!--
-Bullet list of reasons. Common axes:
-- Cost & speed
-- Auditability
-- Determinism / reproducibility
-- Failure isolation
-- Fit-for-constraints (regulatory, deployment, headcount, ...)
--->
+- Each part can be built and tested alone.
+- The camera can be swapped for tap-to-fix input without touching the solver.
+- Solver logic is tested with plain data, no 3D or camera needed.
+- No server: everything runs in the browser.
 
-- ...
+## Modules
 
-## Modules / phases
+### Cube model
 
-<!-- One subsection per major module or phase. Each describes inputs, outputs, what it owns, what it doesn't. -->
+- Holds a cube state and applies moves (R, U, F, L, D, B and their variants).
+- Standard cube notation, the same one every tutorial uses.
+- No drawing, no camera. Pure data, heavily tested.
 
-### Module 1 — ...
+### 3D cube
 
-### Module 2 — ...
+- Draws a cube state with Three.js.
+- Animates moves, lets the player spin the view, replays steps.
 
-## The contract artifact
+### Solver
 
-<!--
-Identify the one canonical intermediate representation that every module produces or consumes.
-This is the most important section of this doc — it's the seam that defines the system.
-For the FHIR tool: `mapping.yaml`. For an LLM-powered analyzer: a typed `AnalysisResult`. For a renderer: the `RenderedX` shape.
--->
+- Beginner solver: works out moves stage by stage, same stages the lessons teach.
+- CFOP: uses the standard published move-sequence lists (F2L, OLL, PLL).
+- Output: moves grouped by stage, so the guide can explain each one.
+
+### Lessons
+
+- One level per stage: what it teaches, start position, pass check.
+- Lesson content is data, not code.
+
+### Game
+
+- XP, badges, unlock rules.
+- Saves progress on the device.
+
+### Camera scan
+
+- Reads one face at a time from the camera.
+- Turns sticker colors into a cube state.
+- Ends on the check-and-fix screen.
+
+### App shell
+
+- Screens and navigation.
+- PWA setup: offline, installable.
+
+## The contract: cube state
 
 ```ts
-// Example shape; adapt to your project's language.
-type Artifact = {
-  ...
-};
+// 54 stickers, 9 per face, faces in the order U, R, F, D, L, B.
+// Each sticker is the face it belongs to when solved.
+type Face = "U" | "R" | "F" | "D" | "L" | "B";
+type CubeState = Face[]; // length 54
+type Move = string; // standard notation: "R", "U'", "F2", ...
 ```
 
-Schema spec: see `02-{contract-spec}.md` (create when contract details exceed what fits here).
+- Same layout most cube solvers use, so published test cases work as-is.
 
-## File / process layout
+## File layout
 
 ```
-cubesolver/
-├── CLAUDE.md
+cubeSolver/
 ├── docs/
+├── site/               # Mission Control
 ├── src/
-│   └── ...
-├── tests/
-├── infra/terraform/
-└── Dockerfile
+│   ├── cube/           # cube model
+│   ├── render/         # 3D cube
+│   ├── solver/
+│   ├── lessons/
+│   ├── game/
+│   ├── scan/           # camera scan
+│   └── app/            # screens, PWA setup
+└── tests/
 ```
 
-## Subsystem responsibilities
+## Who talks to whom
 
-| Subsystem | Owns | Talks to |
-| --------- | ---- | -------- |
-| `...`     | ...  | ...      |
+| Part        | Owns                          | Talks to                  |
+| ----------- | ----------------------------- | ------------------------- |
+| Cube model  | cube state, moves             | everyone                  |
+| 3D cube     | drawing, animation            | cube model                |
+| Solver      | working out moves             | cube model                |
+| Lessons     | level content, pass checks    | cube model, solver        |
+| Game        | XP, badges, unlocks, saves    | lessons                   |
+| Camera scan | reading colors                | cube model                |
+| App shell   | screens, offline, install     | all of the above          |
 
-## Non-goals for the architecture
+## Non-goals
 
-<!-- What the architecture deliberately does NOT support. -->
-
-- ...
+- No server, no database, no accounts.
+- No puzzles other than the 3x3.

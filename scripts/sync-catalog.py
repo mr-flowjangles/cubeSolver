@@ -52,7 +52,7 @@ VOCABULARY = ROOT / "CLAUDE.md"
 REPO_URL = ""
 
 #: The Design tab: every doc under docs/, in filename order.
-DESIGN_DOCS = tuple(sorted(p.name for p in DOCS.glob("*.md")))
+DESIGN_DOCS = tuple(sorted((p.name for p in DOCS.glob("*.md")), key=lambda n: (n != "mission.md", n)))
 
 COMMENT = re.compile(r"<!--.*?-->", re.S)
 

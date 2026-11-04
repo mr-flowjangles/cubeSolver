@@ -1,9 +1,9 @@
 {
   "project": {
     "name": "Cube Solver",
-    "repo": "",
-    "phase": "Building M0 — Foundations",
-    "banner": "Building M0 — Foundations · 0 of 2 milestones complete. Anything marked planned is unticked in the build plan.",
+    "repo": "https://github.com/mr-flowjangles/cubeSolver",
+    "phase": "Building M1 — Cube and live site",
+    "banner": "Building M1 — Cube and live site · 1 of 8 milestones complete. Anything marked planned is unticked in the build plan.",
     "updated": "2026-11-04"
   },
   "services": [
@@ -15,6 +15,24 @@
       "port": "4025",
       "probe": "/catalog.json",
       "note": "If you are reading this, it is up. The dot is still probed rather than assumed."
+    },
+    {
+      "id": "app",
+      "name": "Cube Solver app",
+      "role": "The game itself, run locally by make dev.",
+      "kind": "http",
+      "port": "4026",
+      "probe": "/",
+      "note": "Down unless make dev is running."
+    },
+    {
+      "id": "preview",
+      "name": "App in Docker",
+      "role": "The built app served by nginx, same files as GitHub Pages. Run by make serve-image.",
+      "kind": "http",
+      "port": "4027",
+      "probe": "/",
+      "note": "Down unless make serve-image is running."
     }
   ],
   "sections": [
@@ -26,7 +44,12 @@
         {
           "kind": "ul",
           "items": [
-            "Replace this with a few plain-words bullets on what the project does and who it is for. Written by hand in `site/catalog.json` → `sections`."
+            "Teaches anyone to solve a Rubik's cube, from zero.",
+            "Game style: levels, XP, badges.",
+            "Beginner method first, then CFOP for speed.",
+            "Scan your own cube with the camera and get guided to solve it.",
+            "Installs on your phone, works offline, no sign-in.",
+            "Public, free, hosted on GitHub Pages."
           ]
         }
       ]
@@ -39,64 +62,220 @@
       "goal": "project skeleton and dev environment ready, no feature code yet.",
       "tasks": [
         {
-          "done": false,
+          "done": true,
           "text": "Initialize git repo, add `.gitignore` and `README.md`, make initial commit of design docs."
         },
         {
-          "done": false,
-          "text": "Replace `cubesolver`, `Cube Solver`, `Game-style Rubik's cube tutorial PWA — beginner to CFOP, with camera scan to solve your own cube.`, `2026-11-04` placeholders across the repo."
+          "done": true,
+          "text": "Replace placeholders across the repo."
         },
         {
-          "done": false,
-          "text": "Add language manifest (`pyproject.toml` / `package.json` / etc.) with deps pinned and dev extras."
+          "done": true,
+          "text": "Add `package.json` (Vite, TypeScript, Three.js, Vitest, Prettier)."
         },
         {
-          "done": false,
-          "text": "Wire up `make setup` / `make test` / `make lint` / `make format` to your toolchain (replace the stubs in `Makefile`)."
+          "done": true,
+          "text": "Wire up `make setup` / `make test` / `make lint` / `make format`."
         },
         {
-          "done": false,
+          "done": true,
           "text": "Verify `make ci` passes on an empty test suite."
         },
         {
-          "done": false,
-          "text": "Replace the `Dockerfile` stub with a real multi-stage build; verify `make image` builds and `make smoke` runs."
+          "done": true,
+          "text": "Docker image for local testing: `make image`, `make smoke` passes."
         },
         {
-          "done": false,
-          "text": "Verify versioning ceremony: `./scripts/new-version.sh --dry-run \"Smoke Test\"` prints the plan without side effects."
+          "done": true,
+          "text": "Verify versioning ceremony: `./scripts/new-version.sh --dry-run \"Smoke Test\"`."
         },
         {
-          "done": false,
+          "done": true,
           "text": "Fill in `docs/mission.md` and `docs/00-overview.md`."
         },
         {
+          "done": true,
+          "text": "Sketch `docs/01-architecture.md`."
+        },
+        {
+          "done": true,
+          "text": "Fill in `Versions/v0/v0.0/release-notes.md` for the bootstrap commit."
+        }
+      ],
+      "done_when": "project builds, tests run, versioning ceremony runs cleanly, mission/overview/architecture have v1 content.",
+      "task_total": 10,
+      "task_done": 10,
+      "status": "done",
+      "blocked": []
+    },
+    {
+      "id": "M1",
+      "title": "Cube and live site",
+      "goal": "a 3D cube you can turn, live on GitHub Pages as an installable PWA.",
+      "tasks": [
+        {
           "done": false,
-          "text": "Sketch `docs/01-architecture.md` — at minimum, identify the contract artifact."
+          "text": "Cube model: cube state, all moves, scramble. Fully tested."
         },
         {
           "done": false,
-          "text": "Fill in `Versions/v0/v0.0.0/release-notes.md` for the bootstrap commit."
+          "text": "3D cube: draw, animate moves, spin the view."
+        },
+        {
+          "done": false,
+          "text": "PWA setup: offline, home-screen install."
+        },
+        {
+          "done": false,
+          "text": "GitHub Pages deploy on every push to `main`."
         }
       ],
-      "done_when": "project builds, tests run (none yet), Docker image builds + smoke-tests, versioning ceremony runs cleanly, mission/overview/architecture have v1 content.",
-      "task_total": 10,
+      "done_when": "the live site shows a cube you can turn and scramble, on a phone, offline.",
+      "task_total": 4,
       "task_done": 0,
       "status": "planned",
       "blocked": []
     },
     {
-      "id": "M1",
-      "title": "{{first real milestone}}",
-      "goal": "...",
+      "id": "M2",
+      "title": "Beginner levels",
+      "goal": "the beginner method, taught one stage per level.",
       "tasks": [
         {
           "done": false,
-          "text": "..."
+          "text": "Beginner solver, stage by stage, tested on many random scrambles."
+        },
+        {
+          "done": false,
+          "text": "Level content for each beginner stage."
+        },
+        {
+          "done": false,
+          "text": "Lesson screen: explain, show moves, practice, pass check."
         }
       ],
-      "done_when": "...",
-      "task_total": 1,
+      "done_when": "a player can learn a full beginner solve in the app.",
+      "task_total": 3,
+      "task_done": 0,
+      "status": "planned",
+      "blocked": []
+    },
+    {
+      "id": "M3",
+      "title": "Game layer",
+      "goal": "XP, badges, locked levels, saved progress.",
+      "tasks": [
+        {
+          "done": false,
+          "text": "XP and badge rules."
+        },
+        {
+          "done": false,
+          "text": "Unlocks: later levels locked until earlier ones are passed."
+        },
+        {
+          "done": false,
+          "text": "Progress saved on the device."
+        }
+      ],
+      "done_when": "progress, XP, and badges survive closing and reopening the app.",
+      "task_total": 3,
+      "task_done": 0,
+      "status": "planned",
+      "blocked": []
+    },
+    {
+      "id": "M4",
+      "title": "Solve my cube",
+      "goal": "enter a real cube and get guided through solving it.",
+      "tasks": [
+        {
+          "done": false,
+          "text": "Tap-to-fix cube map (also used after camera scan)."
+        },
+        {
+          "done": false,
+          "text": "Check that an entered cube is possible to solve."
+        },
+        {
+          "done": false,
+          "text": "Guided solve: one move at a time, grouped by stage."
+        }
+      ],
+      "done_when": "a cube entered by hand is solved by following the guide.",
+      "task_total": 3,
+      "task_done": 0,
+      "status": "planned",
+      "blocked": []
+    },
+    {
+      "id": "M5",
+      "title": "Camera scan",
+      "goal": "scan a real cube instead of entering it by hand.",
+      "tasks": [
+        {
+          "done": false,
+          "text": "Camera capture, one face at a time, with a framing guide."
+        },
+        {
+          "done": false,
+          "text": "Read sticker colors."
+        },
+        {
+          "done": false,
+          "text": "Hand off to the check-and-fix screen."
+        }
+      ],
+      "done_when": "a real cube scanned on iPhone and Android leads to a correct guided solve.",
+      "task_total": 3,
+      "task_done": 0,
+      "status": "planned",
+      "blocked": []
+    },
+    {
+      "id": "M6",
+      "title": "CFOP levels",
+      "goal": "teach CFOP after the beginner method.",
+      "tasks": [
+        {
+          "done": false,
+          "text": "Cross, F2L, OLL, PLL levels."
+        },
+        {
+          "done": false,
+          "text": "CFOP move-sequence lists, each checked by the cube model."
+        },
+        {
+          "done": false,
+          "text": "Solve timer and personal bests."
+        }
+      ],
+      "done_when": "a player who finished the beginner levels can learn and practice full CFOP.",
+      "task_total": 3,
+      "task_done": 0,
+      "status": "planned",
+      "blocked": []
+    },
+    {
+      "id": "M7",
+      "title": "Launch",
+      "goal": "polished and public.",
+      "tasks": [
+        {
+          "done": false,
+          "text": "Test on real iPhone and Android devices."
+        },
+        {
+          "done": false,
+          "text": "README quickstart."
+        },
+        {
+          "done": false,
+          "text": "v1 Definition of Done all checked."
+        }
+      ],
+      "done_when": "v1 Definition of Done is fully checked.",
+      "task_total": 3,
       "task_done": 0,
       "status": "planned",
       "blocked": []
@@ -105,11 +284,23 @@
   "dod": [
     {
       "done": false,
-      "text": "Docker image builds reproducibly (`make image`)."
+      "text": "Live on GitHub Pages, installable on iPhone and Android."
     },
     {
       "done": false,
-      "text": "*(add the project-specific outcomes that mean v1 is real.)*"
+      "text": "Works offline after the first visit."
+    },
+    {
+      "done": false,
+      "text": "A beginner can go from level 1 to a full solve using only the app."
+    },
+    {
+      "done": false,
+      "text": "CFOP levels are playable."
+    },
+    {
+      "done": false,
+      "text": "Camera scan of a real cube leads to a guided solve."
     },
     {
       "done": false,
@@ -117,17 +308,170 @@
     },
     {
       "done": false,
-      "text": "`README.md` has a quickstart that a new operator can follow."
+      "text": "`README.md` has a quickstart."
     }
   ],
-  "decisions": [],
-  "glossary": [],
+  "decisions": [
+    {
+      "question": "Is the architecture and milestone order OK?",
+      "status": "resolved 2026-11-04",
+      "trigger": "before M1 starts.",
+      "notes": "milestone order M1–M7 and the app parts in `01-architecture.md` both agreed 2026-11-04.",
+      "state": "resolved"
+    },
+    {
+      "question": "Should colorblind players get symbols on stickers?",
+      "status": "resolved 2026-11-04",
+      "trigger": "before the 3D cube (M1) and check-and-fix screen (M4).",
+      "notes": "cube colors red/orange and green/blue are hard for colorblind players. **Decision:** stickers always keep their colors. An \"ADA support\" setting, off by default, adds a shape on each color (one shape per color).",
+      "state": "resolved"
+    },
+    {
+      "question": "How many levels, and what does each teach?",
+      "status": "open",
+      "trigger": "before M2.",
+      "notes": "",
+      "state": "open"
+    },
+    {
+      "question": "What are the XP amounts, badges, and unlock rules?",
+      "status": "open",
+      "trigger": "before M3.",
+      "notes": "",
+      "state": "open"
+    },
+    {
+      "question": "How does the camera read colors?",
+      "status": "open",
+      "trigger": "before M5.",
+      "notes": "red vs. orange is the hard case under indoor light.",
+      "state": "open"
+    },
+    {
+      "question": "Should the solve path give the shortest solution, or the beginner-method one?",
+      "status": "resolved 2026-11-04",
+      "trigger": "before M4.",
+      "notes": "beginner-method moves match what the player learned; shortest is ~20 moves but hard to follow. **Decision:** guide with the method the player has learned (beginner or CFOP), step by step, each step explained. No shortest-solution option.",
+      "state": "resolved"
+    },
+    {
+      "question": "Keep or remove the Docker stub?",
+      "status": "resolved 2026-11-04",
+      "trigger": "M0 close-out.",
+      "notes": "the app is static files on GitHub Pages; Docker isn't needed to run it. **Decision:** keep it for local testing. The image builds the app and serves it with nginx on port 4027 (`make serve-image`).",
+      "state": "resolved"
+    },
+    {
+      "question": "Track usage on the public site?",
+      "status": "resolved 2026-11-04",
+      "trigger": "before M7.",
+      "notes": "no tracking keeps the \"no personal data\" promise simple. **Decision:** no tracking of any kind.",
+      "state": "resolved"
+    }
+  ],
+  "glossary": [
+    {
+      "term": "Beginner method",
+      "definition": "the standard first way to solve a cube, one layer at a time, about 7 stages.",
+      "parts": []
+    },
+    {
+      "term": "CFOP",
+      "definition": "the most common speedcubing method, named for its four steps: Cross, F2L, OLL, PLL.",
+      "parts": []
+    },
+    {
+      "term": "Cross",
+      "definition": "first CFOP step: four edge pieces placed to make a plus sign on one face.",
+      "parts": []
+    },
+    {
+      "term": "Cube state",
+      "definition": "the color of all 54 stickers; the one piece of data every part of the app passes around.",
+      "parts": []
+    },
+    {
+      "term": "F2L",
+      "definition": "\"first two layers\": second CFOP step, solving the bottom two layers in pairs.",
+      "parts": []
+    },
+    {
+      "term": "Move notation",
+      "definition": "standard letters for turns: R, L, U, D, F, B; an apostrophe means counter-clockwise, a 2 means a half turn.",
+      "parts": []
+    },
+    {
+      "term": "OLL",
+      "definition": "\"orient last layer\": third CFOP step, making the top face one color. 57 cases.",
+      "parts": []
+    },
+    {
+      "term": "PLL",
+      "definition": "\"permute last layer\": final CFOP step, moving top pieces into place. 21 cases.",
+      "parts": []
+    },
+    {
+      "term": "PWA",
+      "definition": "progressive web app: a website that installs to the home screen and works offline.",
+      "parts": []
+    },
+    {
+      "term": "Scramble",
+      "definition": "a random list of moves used to mix up a cube.",
+      "parts": []
+    },
+    {
+      "term": "XP",
+      "definition": "experience points earned by passing levels.",
+      "parts": []
+    }
+  ],
   "docs": [
+    {
+      "id": "mission",
+      "file": "docs/mission.md",
+      "title": "Cube Solver — Mission Statement",
+      "html": "<h1 id=\"mission--cube-solver--mission-statement\">Cube Solver — Mission Statement</h1>\n<h2 id=\"mission--mission\">Mission</h2>\n<ul>\n<li>Teach anyone to solve a Rubik's cube, starting from zero.</li>\n<li>Make learning feel like a game: levels, XP, badges.</li>\n<li>Take players from the beginner method all the way to CFOP.</li>\n<li>Solve the player's own scrambled cube, step by step, from a camera scan.</li>\n</ul>\n<h2 id=\"mission--who-this-is-for\">Who this is for</h2>\n<ul>\n<li><strong>The public</strong>: anyone with a 3x3 cube and a phone or computer.</li>\n<li>Includes total beginners who have never solved a cube.</li>\n<li>Includes beginners who want to move up to speedcubing (CFOP).</li>\n<li>Mostly on phones, cube in one hand, so big buttons and few words.</li>\n</ul>\n<h2 id=\"mission--what-the-tool-must-do\">What the tool must do</h2>\n<ol>\n<li>Teach the beginner layer-by-layer method, one stage per level.</li>\n<li>Teach CFOP after the beginner method, as later levels.</li>\n<li>Show every move on a 3D cube the player can turn and replay.</li>\n<li>Award XP and badges, and lock later levels until earlier ones are passed.</li>\n<li>Scan the player's real cube with the camera, one face at a time.</li>\n<li>Let the player check and fix scanned colors before solving.</li>\n<li>Guide the player through solving their scanned cube, move by move.</li>\n<li>Save progress on the device.</li>\n<li>Install to the home screen and work offline.</li>\n</ol>\n<h2 id=\"mission--hard-constraints\">Hard constraints</h2>\n<ul>\n<li><strong>PWA</strong>: installs like an app, runs offline after the first visit.</li>\n<li><strong>No server</strong>: static files only, hosted on GitHub Pages.</li>\n<li><strong>No accounts</strong>: no sign-in, no personal data collected.</li>\n<li><strong>Camera stays on the device</strong>: images are never uploaded.</li>\n<li><strong>Works on phones and desktops</strong>: iPhone Safari, Android Chrome, desktop browsers.</li>\n</ul>\n<h2 id=\"mission--decisions-already-made\">Decisions already made</h2>\n<ul>\n<li>Vite + TypeScript, no framework.</li>\n<li>Three.js for the 3D cube.</li>\n<li>Hosted on GitHub Pages from <code>mr-flowjangles/cubeSolver</code>, public repo.</li>\n<li>Progress saved on the device only.</li>\n<li>Camera scan for entering a real cube, with a check-and-fix screen.</li>\n</ul>\n<h2 id=\"mission--scope-explicitly-out-of-v1\">Scope explicitly <em>out</em> of v1</h2>\n<ul>\n<li>Accounts and syncing progress across devices.</li>\n<li>Puzzles other than the 3x3 cube.</li>\n</ul>\n<h2 id=\"mission--working-style\">Working style</h2>\n<ul>\n<li>Design before code. Decisions are written in <code>docs/</code> first.</li>\n<li>Deferred decisions go in <a href=\"#design/99-open-questions\"><code>docs/99-open-questions.md</code></a>.</li>\n<li>A question found during coding pauses the work until the docs answer it.</li>\n<li>Three-part version numbers, one PR per version.</li>\n<li>Release notes live under <code>Versions/</code>.</li>\n</ul>\n<hr>\n<h2 id=\"mission--what-this-brief-deliberately-does-not-prescribe\">What this brief deliberately does NOT prescribe</h2>\n<ul>\n<li>How many levels, and what each one teaches.</li>\n<li>XP amounts, badge list, and unlock rules.</li>\n<li>How the solver works out the moves for a scanned cube.</li>\n<li>How the camera reads sticker colors.</li>\n<li>Visual style and sound.</li>\n</ul>\n",
+      "toc": [
+        {
+          "id": "mission--mission",
+          "text": "Mission"
+        },
+        {
+          "id": "mission--who-this-is-for",
+          "text": "Who this is for"
+        },
+        {
+          "id": "mission--what-the-tool-must-do",
+          "text": "What the tool must do"
+        },
+        {
+          "id": "mission--hard-constraints",
+          "text": "Hard constraints"
+        },
+        {
+          "id": "mission--decisions-already-made",
+          "text": "Decisions already made"
+        },
+        {
+          "id": "mission--scope-explicitly-out-of-v1",
+          "text": "Scope explicitly *out* of v1"
+        },
+        {
+          "id": "mission--working-style",
+          "text": "Working style"
+        },
+        {
+          "id": "mission--what-this-brief-deliberately-does-not-prescribe",
+          "text": "What this brief deliberately does NOT prescribe"
+        }
+      ]
+    },
     {
       "id": "00-overview",
       "file": "docs/00-overview.md",
       "title": "00 — Overview",
-      "html": "<h1 id=\"00-overview--00--overview\">00 — Overview</h1>\n<h2 id=\"00-overview--what-this-tool-does\">What this tool does</h2>\n<h2 id=\"00-overview--who-its-for\">Who it's for</h2>\n<h2 id=\"00-overview--v1-scope\">v1 scope</h2>\n<p><strong>In scope:</strong></p>\n<ul>\n<li>...</li>\n</ul>\n<p><strong>Explicitly out of scope for v1:</strong></p>\n<ul>\n<li>...</li>\n</ul>\n<h2 id=\"00-overview--high-level-flow\">High-level flow</h2>\n<pre><code>... ──▶ ... ──▶ ...\n</code></pre>\n<h2 id=\"00-overview--reading-order\">Reading order</h2>\n<p><strong>Design (the what and why):</strong></p>\n<ol>\n<li><strong>This doc</strong> — the what and why.</li>\n<li><a href=\"#design/01-architecture\"><code>01-architecture.md</code></a> — the spine: module map and the contract artifact.</li>\n<li><em>(add subsystem deep-dives <code>02-</code> through <code>06-</code> as you settle on the architecture.)</em></li>\n</ol>\n<p><strong>Build (the how and when):</strong></p>\n<ol start=\"7\">\n<li><a href=\"#design/07-build-plan\"><code>07-build-plan.md</code></a> — milestones, ordered tasks, checkboxes. The execution doc.</li>\n</ol>\n<p><strong>Tracking:</strong></p>\n<ol start=\"99\">\n<li><a href=\"#design/99-open-questions\"><code>99-open-questions.md</code></a> — what's deferred and why.</li>\n</ol>\n<h2 id=\"00-overview--north-star-direction-post-v1\">North-star direction (post-v1)</h2>\n",
+      "html": "<h1 id=\"00-overview--00--overview\">00 — Overview</h1>\n<h2 id=\"00-overview--what-this-tool-does\">What this tool does</h2>\n<ul>\n<li>A free web game that teaches you to solve a Rubik's cube.</li>\n<li>Levels walk you from your first solve to speedcubing (CFOP).</li>\n<li>Earn XP and badges as you pass levels.</li>\n<li>Scan your own scrambled cube with your phone camera.</li>\n<li>The game then guides you through solving it, move by move.</li>\n</ul>\n<h2 id=\"00-overview--who-its-for\">Who it's for</h2>\n<ul>\n<li>Anyone with a 3x3 cube, mostly on a phone.</li>\n<li>Total beginners through people learning to speedcube.</li>\n</ul>\n<h2 id=\"00-overview--v1-scope\">v1 scope</h2>\n<p><strong>In scope:</strong></p>\n<ul>\n<li>Beginner layer-by-layer method, one level per stage.</li>\n<li>CFOP levels after the beginner method.</li>\n<li>3D cube that shows every move, with replay.</li>\n<li>XP, badges, and locked levels.</li>\n<li>Camera scan, with a screen to check and fix colors.</li>\n<li>Guided solve of the scanned cube.</li>\n<li>Progress saved on the device.</li>\n<li>Installs to the home screen, works offline.</li>\n</ul>\n<p><strong>Explicitly out of scope for v1:</strong></p>\n<ul>\n<li>Accounts and syncing across devices.</li>\n<li>Puzzles other than the 3x3.</li>\n</ul>\n<h2 id=\"00-overview--high-level-flow\">High-level flow</h2>\n<pre><code>Learn path:   pick level ──▶ watch moves on 3D cube ──▶ practice ──▶ pass ──▶ XP + badge ──▶ next level unlocks\n\nSolve path:   camera scan ──▶ check &amp; fix colors ──▶ work out the moves ──▶ guide player move by move\n</code></pre>\n<h2 id=\"00-overview--reading-order\">Reading order</h2>\n<p><strong>Design (the what and why):</strong></p>\n<ol>\n<li><a href=\"#design/mission\"><code>mission.md</code></a> — why this exists.</li>\n<li><strong>This doc</strong> — the what.</li>\n<li><a href=\"#design/01-architecture\"><code>01-architecture.md</code></a> — the parts of the app and how they connect.</li>\n</ol>\n<p><strong>Build (the how and when):</strong></p>\n<ol start=\"7\">\n<li><a href=\"#design/07-build-plan\"><code>07-build-plan.md</code></a> — milestones, ordered tasks, checkboxes.</li>\n</ol>\n<p><strong>Tracking:</strong></p>\n<ol start=\"99\">\n<li><a href=\"#design/99-open-questions\"><code>99-open-questions.md</code></a> — what's not decided yet.</li>\n</ol>\n<h2 id=\"00-overview--north-star-direction-post-v1\">North-star direction (post-v1)</h2>\n<ul>\n<li>Not decided. See <a href=\"#design/99-open-questions\"><code>99-open-questions.md</code></a>.</li>\n</ul>\n",
       "toc": [
         {
           "id": "00-overview--what-this-tool-does",
@@ -159,7 +503,7 @@
       "id": "01-architecture",
       "file": "docs/01-architecture.md",
       "title": "01 — Architecture",
-      "html": "<h1 id=\"01-architecture--01--architecture\">01 — Architecture</h1>\n<h2 id=\"01-architecture--the-spine\">The spine</h2>\n<pre><code>... ──▶ {contract artifact} ──▶ ...\n</code></pre>\n<h2 id=\"01-architecture--why-this-shape\">Why this shape</h2>\n<ul>\n<li>...</li>\n</ul>\n<h2 id=\"01-architecture--modules--phases\">Modules / phases</h2>\n<h3 id=\"01-architecture--module-1\">Module 1 — ...</h3>\n<h3 id=\"01-architecture--module-2\">Module 2 — ...</h3>\n<h2 id=\"01-architecture--the-contract-artifact\">The contract artifact</h2>\n<pre><code class=\"language-ts\">// Example shape; adapt to your project's language.\ntype Artifact = {\n  ...\n};\n</code></pre>\n<p>Schema spec: see <code>02-{contract-spec}.md</code> (create when contract details exceed what fits here).</p>\n<h2 id=\"01-architecture--file--process-layout\">File / process layout</h2>\n<pre><code>cubesolver/\n├── CLAUDE.md\n├── docs/\n├── src/\n│   └── ...\n├── tests/\n├── infra/terraform/\n└── Dockerfile\n</code></pre>\n<h2 id=\"01-architecture--subsystem-responsibilities\">Subsystem responsibilities</h2>\n<div class=\"doc-table\"><table>\n<thead>\n<tr><th>Subsystem</th><th>Owns</th><th>Talks to</th></tr>\n</thead>\n<tbody>\n<tr><td><code>...</code></td><td>...</td><td>...</td></tr>\n</tbody>\n</table></div>\n<h2 id=\"01-architecture--non-goals-for-the-architecture\">Non-goals for the architecture</h2>\n<ul>\n<li>...</li>\n</ul>\n",
+      "html": "<h1 id=\"01-architecture--01--architecture\">01 — Architecture</h1>\n<p><strong>Status: agreed 2026-11-04.</strong></p>\n<h2 id=\"01-architecture--the-spine\">The spine</h2>\n<ul>\n<li>Everything passes around one thing: the <strong>cube state</strong>.</li>\n<li>Cube state = the color of all 54 stickers.</li>\n<li>The camera produces a cube state.</li>\n<li>The solver reads a cube state and returns a list of moves.</li>\n<li>The 3D cube draws a cube state and animates moves on it.</li>\n<li>Lessons start from a set cube state and check the player's result.</li>\n</ul>\n<pre><code>camera scan ──▶ cube state ──▶ solver ──▶ moves ──▶ 3D cube (shows each move)\nlesson      ──▶ cube state ──────────────────────▶ 3D cube ──▶ pass/fail ──▶ XP\n</code></pre>\n<h2 id=\"01-architecture--why-this-shape\">Why this shape</h2>\n<ul>\n<li>Each part can be built and tested alone.</li>\n<li>The camera can be swapped for tap-to-fix input without touching the solver.</li>\n<li>Solver logic is tested with plain data, no 3D or camera needed.</li>\n<li>No server: everything runs in the browser.</li>\n</ul>\n<h2 id=\"01-architecture--modules\">Modules</h2>\n<h3 id=\"01-architecture--cube-model\">Cube model</h3>\n<ul>\n<li>Holds a cube state and applies moves (R, U, F, L, D, B and their variants).</li>\n<li>Standard cube notation, the same one every tutorial uses.</li>\n<li>No drawing, no camera. Pure data, heavily tested.</li>\n</ul>\n<h3 id=\"01-architecture--3d-cube\">3D cube</h3>\n<ul>\n<li>Draws a cube state with Three.js.</li>\n<li>Animates moves, lets the player spin the view, replays steps.</li>\n</ul>\n<h3 id=\"01-architecture--solver\">Solver</h3>\n<ul>\n<li>Beginner solver: works out moves stage by stage, same stages the lessons teach.</li>\n<li>CFOP: uses the standard published move-sequence lists (F2L, OLL, PLL).</li>\n<li>Output: moves grouped by stage, so the guide can explain each one.</li>\n</ul>\n<h3 id=\"01-architecture--lessons\">Lessons</h3>\n<ul>\n<li>One level per stage: what it teaches, start position, pass check.</li>\n<li>Lesson content is data, not code.</li>\n</ul>\n<h3 id=\"01-architecture--game\">Game</h3>\n<ul>\n<li>XP, badges, unlock rules.</li>\n<li>Saves progress on the device.</li>\n</ul>\n<h3 id=\"01-architecture--camera-scan\">Camera scan</h3>\n<ul>\n<li>Reads one face at a time from the camera.</li>\n<li>Turns sticker colors into a cube state.</li>\n<li>Ends on the check-and-fix screen.</li>\n</ul>\n<h3 id=\"01-architecture--app-shell\">App shell</h3>\n<ul>\n<li>Screens and navigation.</li>\n<li>PWA setup: offline, installable.</li>\n</ul>\n<h2 id=\"01-architecture--the-contract-cube-state\">The contract: cube state</h2>\n<pre><code class=\"language-ts\">// 54 stickers, 9 per face, faces in the order U, R, F, D, L, B.\n// Each sticker is the face it belongs to when solved.\ntype Face = \"U\" | \"R\" | \"F\" | \"D\" | \"L\" | \"B\";\ntype CubeState = Face[]; // length 54\ntype Move = string; // standard notation: \"R\", \"U'\", \"F2\", ...\n</code></pre>\n<ul>\n<li>Same layout most cube solvers use, so published test cases work as-is.</li>\n</ul>\n<h2 id=\"01-architecture--file-layout\">File layout</h2>\n<pre><code>cubeSolver/\n├── docs/\n├── site/               # Mission Control\n├── src/\n│   ├── cube/           # cube model\n│   ├── render/         # 3D cube\n│   ├── solver/\n│   ├── lessons/\n│   ├── game/\n│   ├── scan/           # camera scan\n│   └── app/            # screens, PWA setup\n└── tests/\n</code></pre>\n<h2 id=\"01-architecture--who-talks-to-whom\">Who talks to whom</h2>\n<div class=\"doc-table\"><table>\n<thead>\n<tr><th>Part</th><th>Owns</th><th>Talks to</th></tr>\n</thead>\n<tbody>\n<tr><td>Cube model</td><td>cube state, moves</td><td>everyone</td></tr>\n<tr><td>3D cube</td><td>drawing, animation</td><td>cube model</td></tr>\n<tr><td>Solver</td><td>working out moves</td><td>cube model</td></tr>\n<tr><td>Lessons</td><td>level content, pass checks</td><td>cube model, solver</td></tr>\n<tr><td>Game</td><td>XP, badges, unlocks, saves</td><td>lessons</td></tr>\n<tr><td>Camera scan</td><td>reading colors</td><td>cube model</td></tr>\n<tr><td>App shell</td><td>screens, offline, install</td><td>all of the above</td></tr>\n</tbody>\n</table></div>\n<h2 id=\"01-architecture--non-goals\">Non-goals</h2>\n<ul>\n<li>No server, no database, no accounts.</li>\n<li>No puzzles other than the 3x3.</li>\n</ul>\n",
       "toc": [
         {
           "id": "01-architecture--the-spine",
@@ -170,24 +514,24 @@
           "text": "Why this shape"
         },
         {
-          "id": "01-architecture--modules--phases",
-          "text": "Modules / phases"
+          "id": "01-architecture--modules",
+          "text": "Modules"
         },
         {
-          "id": "01-architecture--the-contract-artifact",
-          "text": "The contract artifact"
+          "id": "01-architecture--the-contract-cube-state",
+          "text": "The contract: cube state"
         },
         {
-          "id": "01-architecture--file--process-layout",
-          "text": "File / process layout"
+          "id": "01-architecture--file-layout",
+          "text": "File layout"
         },
         {
-          "id": "01-architecture--subsystem-responsibilities",
-          "text": "Subsystem responsibilities"
+          "id": "01-architecture--who-talks-to-whom",
+          "text": "Who talks to whom"
         },
         {
-          "id": "01-architecture--non-goals-for-the-architecture",
-          "text": "Non-goals for the architecture"
+          "id": "01-architecture--non-goals",
+          "text": "Non-goals"
         }
       ]
     },
@@ -195,7 +539,7 @@
       "id": "07-build-plan",
       "file": "docs/07-build-plan.md",
       "title": "07 — Build plan",
-      "html": "<h1 id=\"07-build-plan--07--build-plan\">07 — Build plan</h1>\n<p>The implementation order is the order in this doc. Milestones are sequential, tasks within a milestone are ordered. <strong>We check the boxes as we go.</strong> When a milestone is fully checked, the next one starts.</p>\n<p>If something forces us off this plan (a discovered constraint, a customer arriving early, etc.), we update this doc <em>first</em>, then change course. Don't drift silently.</p>\n<p>The convention is <code>## M&lt;N&gt; — {Title}</code> so <code>make version-M&lt;N&gt;</code> can auto-resolve the milestone title from this file.</p>\n<p>The <strong>Now:</strong> line below names the milestone(s) being worked on, comma-separated when there is more than one. Mission Control's phase pill and banner read it (<code>make catalog</code>).</p>\n<p><strong>Now:</strong> M0</p>\n<h2 id=\"07-build-plan--v1--definition-of-done\">v1 — Definition of Done</h2>\n<p>v1 ships when <strong>all</strong> of the following are true:</p>\n<ul>\n<li><input type=\"checkbox\" disabled> Docker image builds reproducibly (<code>make image</code>).</li>\n<li><input type=\"checkbox\" disabled> <em>(add the project-specific outcomes that mean v1 is real.)</em></li>\n<li><input type=\"checkbox\" disabled> All milestones below are checked.</li>\n<li><input type=\"checkbox\" disabled> <code>README.md</code> has a quickstart that a new operator can follow.</li>\n</ul>\n<hr>\n<h2 id=\"07-build-plan--m0--foundations\">M0 — Foundations</h2>\n<p>Goal: project skeleton and dev environment ready, no feature code yet.</p>\n<ul>\n<li><input type=\"checkbox\" disabled> Initialize git repo, add <code>.gitignore</code> and <code>README.md</code>, make initial commit of design docs.</li>\n<li><input type=\"checkbox\" disabled> Replace <code>cubesolver</code>, <code>Cube Solver</code>, <code>Game-style Rubik's cube tutorial PWA — beginner to CFOP, with camera scan to solve your own cube.</code>, <code>2026-11-04</code> placeholders across the repo.</li>\n<li><input type=\"checkbox\" disabled> Add language manifest (<code>pyproject.toml</code> / <code>package.json</code> / etc.) with deps pinned and dev extras.</li>\n<li><input type=\"checkbox\" disabled> Wire up <code>make setup</code> / <code>make test</code> / <code>make lint</code> / <code>make format</code> to your toolchain (replace the stubs in <code>Makefile</code>).</li>\n<li><input type=\"checkbox\" disabled> Verify <code>make ci</code> passes on an empty test suite.</li>\n<li><input type=\"checkbox\" disabled> Replace the <code>Dockerfile</code> stub with a real multi-stage build; verify <code>make image</code> builds and <code>make smoke</code> runs.</li>\n<li><input type=\"checkbox\" disabled> Verify versioning ceremony: <code>./scripts/new-version.sh --dry-run \"Smoke Test\"</code> prints the plan without side effects.</li>\n<li><input type=\"checkbox\" disabled> Fill in <a href=\"#design/mission\"><code>docs/mission.md</code></a> and <a href=\"#design/00-overview\"><code>docs/00-overview.md</code></a>.</li>\n<li><input type=\"checkbox\" disabled> Sketch <a href=\"#design/01-architecture\"><code>docs/01-architecture.md</code></a> — at minimum, identify the contract artifact.</li>\n<li><input type=\"checkbox\" disabled> Fill in <code>Versions/v0/v0.0.0/release-notes.md</code> for the bootstrap commit.</li>\n</ul>\n<p><strong>Done when:</strong> project builds, tests run (none yet), Docker image builds + smoke-tests, versioning ceremony runs cleanly, mission/overview/architecture have v1 content.</p>\n<hr>\n<h2 id=\"07-build-plan--m1--first-real-milestone\">M1 — {{first real milestone}}</h2>\n<p>Goal: ...</p>\n<ul>\n<li><input type=\"checkbox\" disabled> ...</li>\n</ul>\n<p><strong>Done when:</strong> ...</p>\n<hr>\n",
+      "html": "<h1 id=\"07-build-plan--07--build-plan\">07 — Build plan</h1>\n<p>The implementation order is the order in this doc. Milestones are sequential, tasks within a milestone are ordered. <strong>We check the boxes as we go.</strong> When a milestone is fully checked, the next one starts.</p>\n<p>If something forces us off this plan (a discovered constraint, a customer arriving early, etc.), we update this doc <em>first</em>, then change course. Don't drift silently.</p>\n<p>The convention is <code>## M&lt;N&gt; — {Title}</code> so <code>make version-M&lt;N&gt;</code> can auto-resolve the milestone title from this file.</p>\n<p>The <strong>Now:</strong> line below names the milestone(s) being worked on, comma-separated when there is more than one. Mission Control's phase pill and banner read it (<code>make catalog</code>).</p>\n<p><strong>Status: milestone order M1–M7 agreed 2026-11-04.</strong></p>\n<p><strong>Now:</strong> M1</p>\n<h2 id=\"07-build-plan--v1--definition-of-done\">v1 — Definition of Done</h2>\n<p>v1 ships when <strong>all</strong> of the following are true:</p>\n<ul>\n<li><input type=\"checkbox\" disabled> Live on GitHub Pages, installable on iPhone and Android.</li>\n<li><input type=\"checkbox\" disabled> Works offline after the first visit.</li>\n<li><input type=\"checkbox\" disabled> A beginner can go from level 1 to a full solve using only the app.</li>\n<li><input type=\"checkbox\" disabled> CFOP levels are playable.</li>\n<li><input type=\"checkbox\" disabled> Camera scan of a real cube leads to a guided solve.</li>\n<li><input type=\"checkbox\" disabled> All milestones below are checked.</li>\n<li><input type=\"checkbox\" disabled> <code>README.md</code> has a quickstart.</li>\n</ul>\n<hr>\n<h2 id=\"07-build-plan--m0--foundations\">M0 — Foundations</h2>\n<p>Goal: project skeleton and dev environment ready, no feature code yet.</p>\n<ul>\n<li><input type=\"checkbox\" disabled checked> Initialize git repo, add <code>.gitignore</code> and <code>README.md</code>, make initial commit of design docs.</li>\n<li><input type=\"checkbox\" disabled checked> Replace placeholders across the repo.</li>\n<li><input type=\"checkbox\" disabled checked> Add <code>package.json</code> (Vite, TypeScript, Three.js, Vitest, Prettier).</li>\n<li><input type=\"checkbox\" disabled checked> Wire up <code>make setup</code> / <code>make test</code> / <code>make lint</code> / <code>make format</code>.</li>\n<li><input type=\"checkbox\" disabled checked> Verify <code>make ci</code> passes on an empty test suite.</li>\n<li><input type=\"checkbox\" disabled checked> Docker image for local testing: <code>make image</code>, <code>make smoke</code> passes.</li>\n<li><input type=\"checkbox\" disabled checked> Verify versioning ceremony: <code>./scripts/new-version.sh --dry-run \"Smoke Test\"</code>.</li>\n<li><input type=\"checkbox\" disabled checked> Fill in <a href=\"#design/mission\"><code>docs/mission.md</code></a> and <a href=\"#design/00-overview\"><code>docs/00-overview.md</code></a>.</li>\n<li><input type=\"checkbox\" disabled checked> Sketch <a href=\"#design/01-architecture\"><code>docs/01-architecture.md</code></a>.</li>\n<li><input type=\"checkbox\" disabled checked> Fill in <code>Versions/v0/v0.0/release-notes.md</code> for the bootstrap commit.</li>\n</ul>\n<p><strong>Done when:</strong> project builds, tests run, versioning ceremony runs cleanly, mission/overview/architecture have v1 content.</p>\n<hr>\n<h2 id=\"07-build-plan--m1--cube-and-live-site\">M1 — Cube and live site</h2>\n<p>Goal: a 3D cube you can turn, live on GitHub Pages as an installable PWA.</p>\n<ul>\n<li><input type=\"checkbox\" disabled> Cube model: cube state, all moves, scramble. Fully tested.</li>\n<li><input type=\"checkbox\" disabled> 3D cube: draw, animate moves, spin the view.</li>\n<li><input type=\"checkbox\" disabled> PWA setup: offline, home-screen install.</li>\n<li><input type=\"checkbox\" disabled> GitHub Pages deploy on every push to <code>main</code>.</li>\n</ul>\n<p><strong>Done when:</strong> the live site shows a cube you can turn and scramble, on a phone, offline.</p>\n<hr>\n<h2 id=\"07-build-plan--m2--beginner-levels\">M2 — Beginner levels</h2>\n<p>Goal: the beginner method, taught one stage per level.</p>\n<ul>\n<li><input type=\"checkbox\" disabled> Beginner solver, stage by stage, tested on many random scrambles.</li>\n<li><input type=\"checkbox\" disabled> Level content for each beginner stage.</li>\n<li><input type=\"checkbox\" disabled> Lesson screen: explain, show moves, practice, pass check.</li>\n</ul>\n<p><strong>Done when:</strong> a player can learn a full beginner solve in the app.</p>\n<hr>\n<h2 id=\"07-build-plan--m3--game-layer\">M3 — Game layer</h2>\n<p>Goal: XP, badges, locked levels, saved progress.</p>\n<ul>\n<li><input type=\"checkbox\" disabled> XP and badge rules.</li>\n<li><input type=\"checkbox\" disabled> Unlocks: later levels locked until earlier ones are passed.</li>\n<li><input type=\"checkbox\" disabled> Progress saved on the device.</li>\n</ul>\n<p><strong>Done when:</strong> progress, XP, and badges survive closing and reopening the app.</p>\n<hr>\n<h2 id=\"07-build-plan--m4--solve-my-cube\">M4 — Solve my cube</h2>\n<p>Goal: enter a real cube and get guided through solving it.</p>\n<ul>\n<li><input type=\"checkbox\" disabled> Tap-to-fix cube map (also used after camera scan).</li>\n<li><input type=\"checkbox\" disabled> Check that an entered cube is possible to solve.</li>\n<li><input type=\"checkbox\" disabled> Guided solve: one move at a time, grouped by stage.</li>\n</ul>\n<p><strong>Done when:</strong> a cube entered by hand is solved by following the guide.</p>\n<hr>\n<h2 id=\"07-build-plan--m5--camera-scan\">M5 — Camera scan</h2>\n<p>Goal: scan a real cube instead of entering it by hand.</p>\n<ul>\n<li><input type=\"checkbox\" disabled> Camera capture, one face at a time, with a framing guide.</li>\n<li><input type=\"checkbox\" disabled> Read sticker colors.</li>\n<li><input type=\"checkbox\" disabled> Hand off to the check-and-fix screen.</li>\n</ul>\n<p><strong>Done when:</strong> a real cube scanned on iPhone and Android leads to a correct guided solve.</p>\n<hr>\n<h2 id=\"07-build-plan--m6--cfop-levels\">M6 — CFOP levels</h2>\n<p>Goal: teach CFOP after the beginner method.</p>\n<ul>\n<li><input type=\"checkbox\" disabled> Cross, F2L, OLL, PLL levels.</li>\n<li><input type=\"checkbox\" disabled> CFOP move-sequence lists, each checked by the cube model.</li>\n<li><input type=\"checkbox\" disabled> Solve timer and personal bests.</li>\n</ul>\n<p><strong>Done when:</strong> a player who finished the beginner levels can learn and practice full CFOP.</p>\n<hr>\n<h2 id=\"07-build-plan--m7--launch\">M7 — Launch</h2>\n<p>Goal: polished and public.</p>\n<ul>\n<li><input type=\"checkbox\" disabled> Test on real iPhone and Android devices.</li>\n<li><input type=\"checkbox\" disabled> README quickstart.</li>\n<li><input type=\"checkbox\" disabled> v1 Definition of Done all checked.</li>\n</ul>\n<p><strong>Done when:</strong> v1 Definition of Done is fully checked.</p>\n",
       "toc": [
         {
           "id": "07-build-plan--v1--definition-of-done",
@@ -206,8 +550,32 @@
           "text": "M0 — Foundations"
         },
         {
-          "id": "07-build-plan--m1--first-real-milestone",
-          "text": "M1 — {{first real milestone}}"
+          "id": "07-build-plan--m1--cube-and-live-site",
+          "text": "M1 — Cube and live site"
+        },
+        {
+          "id": "07-build-plan--m2--beginner-levels",
+          "text": "M2 — Beginner levels"
+        },
+        {
+          "id": "07-build-plan--m3--game-layer",
+          "text": "M3 — Game layer"
+        },
+        {
+          "id": "07-build-plan--m4--solve-my-cube",
+          "text": "M4 — Solve my cube"
+        },
+        {
+          "id": "07-build-plan--m5--camera-scan",
+          "text": "M5 — Camera scan"
+        },
+        {
+          "id": "07-build-plan--m6--cfop-levels",
+          "text": "M6 — CFOP levels"
+        },
+        {
+          "id": "07-build-plan--m7--launch",
+          "text": "M7 — Launch"
         }
       ]
     },
@@ -215,46 +583,39 @@
       "id": "99-open-questions",
       "file": "docs/99-open-questions.md",
       "title": "99 — Open questions",
-      "html": "<h1 id=\"99-open-questions--99--open-questions\">99 — Open questions</h1>\n<p>Decisions deliberately deferred from v1, with their resolution triggers.</p>\n",
-      "toc": []
-    },
-    {
-      "id": "mission",
-      "file": "docs/mission.md",
-      "title": "Cube Solver — Mission Statement",
-      "html": "<h1 id=\"mission--cube-solver--mission-statement\">Cube Solver — Mission Statement</h1>\n<h2 id=\"mission--mission\">Mission</h2>\n<h2 id=\"mission--who-this-is-for\">Who this is for</h2>\n<h2 id=\"mission--what-the-tool-must-do\">What the tool must do</h2>\n<ol>\n<li>...</li>\n</ol>\n<h2 id=\"mission--hard-constraints\">Hard constraints</h2>\n<ul>\n<li>...</li>\n</ul>\n<h2 id=\"mission--decisions-eha-has-already-made\">Decisions EHA has already made</h2>\n<ul>\n<li>...</li>\n</ul>\n<h2 id=\"mission--scope-explicitly-out-of-v1\">Scope explicitly <em>out</em> of v1</h2>\n<ul>\n<li>...</li>\n</ul>\n<h2 id=\"mission--working-style-at-eha\">Working style at EHA</h2>\n<p>The team aligns on design before writing code. Decisions are recorded in version-controlled <code>docs/</code>. Deferred decisions are tracked explicitly with their resolution triggers. Unanticipated questions surfaced during implementation pause the work until the docs catch up — no silent decisions in code.</p>\n<p>Versions follow three-part semver, one PR per version. Release notes are cumulative under <code>Versions/v{major}/v{major}.{minor}.{patch}/</code>.</p>\n<hr>\n<h2 id=\"mission--what-this-brief-deliberately-does-not-prescribe\">What this brief deliberately does NOT prescribe</h2>\n<p>To keep the design space open for fresh evaluation:</p>\n<ul>\n<li>...</li>\n</ul>\n<p>A complete design needs to make calls on all of the above, but those calls are <em>outputs</em> of the design exercise, not constraints on it.</p>\n",
+      "html": "<h1 id=\"99-open-questions--99--open-questions\">99 — Open questions</h1>\n<p>Decisions not made yet, with what would force them.</p>\n<h2 id=\"99-open-questions--is-the-architecture-and-milestone-order-ok\">Is the architecture and milestone order OK?</h2>\n<p><strong>Status:</strong> resolved 2026-11-04\n<strong>Resolution trigger:</strong> before M1 starts.\n<strong>Notes:</strong> milestone order M1–M7 and the app parts in <a href=\"#design/01-architecture\"><code>01-architecture.md</code></a> both agreed 2026-11-04.</p>\n<h2 id=\"99-open-questions--should-colorblind-players-get-symbols-on-stickers\">Should colorblind players get symbols on stickers?</h2>\n<p><strong>Status:</strong> resolved 2026-11-04\n<strong>Resolution trigger:</strong> before the 3D cube (M1) and check-and-fix screen (M4).\n<strong>Notes:</strong> cube colors red/orange and green/blue are hard for colorblind players.\n<strong>Decision:</strong> stickers always keep their colors. An \"ADA support\" setting, off by default, adds a shape on each color (one shape per color).</p>\n<h2 id=\"99-open-questions--how-many-levels-and-what-does-each-teach\">How many levels, and what does each teach?</h2>\n<p><strong>Status:</strong> open\n<strong>Resolution trigger:</strong> before M2.</p>\n<h2 id=\"99-open-questions--what-are-the-xp-amounts-badges-and-unlock-rules\">What are the XP amounts, badges, and unlock rules?</h2>\n<p><strong>Status:</strong> open\n<strong>Resolution trigger:</strong> before M3.</p>\n<h2 id=\"99-open-questions--how-does-the-camera-read-colors\">How does the camera read colors?</h2>\n<p><strong>Status:</strong> open\n<strong>Resolution trigger:</strong> before M5.\n<strong>Notes:</strong> red vs. orange is the hard case under indoor light.</p>\n<h2 id=\"99-open-questions--should-the-solve-path-give-the-shortest-solution-or-the-beginner-method-one\">Should the solve path give the shortest solution, or the beginner-method one?</h2>\n<p><strong>Status:</strong> resolved 2026-11-04\n<strong>Resolution trigger:</strong> before M4.\n<strong>Notes:</strong> beginner-method moves match what the player learned; shortest is ~20 moves but hard to follow.\n<strong>Decision:</strong> guide with the method the player has learned (beginner or CFOP), step by step, each step explained. No shortest-solution option.</p>\n<h2 id=\"99-open-questions--keep-or-remove-the-docker-stub\">Keep or remove the Docker stub?</h2>\n<p><strong>Status:</strong> resolved 2026-11-04\n<strong>Resolution trigger:</strong> M0 close-out.\n<strong>Notes:</strong> the app is static files on GitHub Pages; Docker isn't needed to run it.\n<strong>Decision:</strong> keep it for local testing. The image builds the app and serves it with nginx on port 4027 (<code>make serve-image</code>).</p>\n<h2 id=\"99-open-questions--track-usage-on-the-public-site\">Track usage on the public site?</h2>\n<p><strong>Status:</strong> resolved 2026-11-04\n<strong>Resolution trigger:</strong> before M7.\n<strong>Notes:</strong> no tracking keeps the \"no personal data\" promise simple.\n<strong>Decision:</strong> no tracking of any kind.</p>\n",
       "toc": [
         {
-          "id": "mission--mission",
-          "text": "Mission"
+          "id": "99-open-questions--is-the-architecture-and-milestone-order-ok",
+          "text": "Is the architecture and milestone order OK?"
         },
         {
-          "id": "mission--who-this-is-for",
-          "text": "Who this is for"
+          "id": "99-open-questions--should-colorblind-players-get-symbols-on-stickers",
+          "text": "Should colorblind players get symbols on stickers?"
         },
         {
-          "id": "mission--what-the-tool-must-do",
-          "text": "What the tool must do"
+          "id": "99-open-questions--how-many-levels-and-what-does-each-teach",
+          "text": "How many levels, and what does each teach?"
         },
         {
-          "id": "mission--hard-constraints",
-          "text": "Hard constraints"
+          "id": "99-open-questions--what-are-the-xp-amounts-badges-and-unlock-rules",
+          "text": "What are the XP amounts, badges, and unlock rules?"
         },
         {
-          "id": "mission--decisions-eha-has-already-made",
-          "text": "Decisions EHA has already made"
+          "id": "99-open-questions--how-does-the-camera-read-colors",
+          "text": "How does the camera read colors?"
         },
         {
-          "id": "mission--scope-explicitly-out-of-v1",
-          "text": "Scope explicitly *out* of v1"
+          "id": "99-open-questions--should-the-solve-path-give-the-shortest-solution-or-the-beginner-method-one",
+          "text": "Should the solve path give the shortest solution, or the beginner-method one?"
         },
         {
-          "id": "mission--working-style-at-eha",
-          "text": "Working style at EHA"
+          "id": "99-open-questions--keep-or-remove-the-docker-stub",
+          "text": "Keep or remove the Docker stub?"
         },
         {
-          "id": "mission--what-this-brief-deliberately-does-not-prescribe",
-          "text": "What this brief deliberately does NOT prescribe"
+          "id": "99-open-questions--track-usage-on-the-public-site",
+          "text": "Track usage on the public site?"
         }
       ]
     }

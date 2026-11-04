@@ -20,6 +20,8 @@ Commit identity: Rob Rose <robmrose@me.com>
 
 ## Working norms for this project
 
+- **Standing go-ahead (Rob, 2026-11-04):** build M1–M7 without asking. For each milestone: commit, push, open the PR, merge to `main`, report after. Claude also decides the level list, XP/badge rules, and camera color reading, recorded in `docs/` for Rob to review.
+
 - **Design before code.** Decisions are aligned in conversation, recorded in `docs/`, then implemented. Don't write code that contradicts a doc — update the doc first.
 - **The build plan is authoritative.** `docs/07-build-plan.md` is the order of work and the source of truth for "are we done." Tick boxes as tasks land. Do not start a new milestone before the previous one's "Done when" is true.
 - **Surfacing unanticipated decisions.** If implementation reveals a question the design didn't answer, *stop coding*, update the relevant doc (or `99-open-questions.md`), then resume. No silent decisions in code.
@@ -42,6 +44,18 @@ Commit identity: Rob Rose <robmrose@me.com>
 ## Domain vocabulary
 
 <!-- One line per term: a dash, the term in bold, an em dash, then the plain-words meaning. `make catalog` puts these on Mission Control's Glossary tab. -->
+
+- **Beginner method** — the standard first way to solve a cube, one layer at a time, about 7 stages.
+- **CFOP** — the most common speedcubing method, named for its four steps: Cross, F2L, OLL, PLL.
+- **Cross** — first CFOP step: four edge pieces placed to make a plus sign on one face.
+- **Cube state** — the color of all 54 stickers; the one piece of data every part of the app passes around.
+- **F2L** — "first two layers": second CFOP step, solving the bottom two layers in pairs.
+- **Move notation** — standard letters for turns: R, L, U, D, F, B; an apostrophe means counter-clockwise, a 2 means a half turn.
+- **OLL** — "orient last layer": third CFOP step, making the top face one color. 57 cases.
+- **PLL** — "permute last layer": final CFOP step, moving top pieces into place. 21 cases.
+- **PWA** — progressive web app: a website that installs to the home screen and works offline.
+- **Scramble** — a random list of moves used to mix up a cube.
+- **XP** — experience points earned by passing levels.
 
 ## Subagents — when to delegate
 
@@ -147,7 +161,7 @@ make version-M1                       # minor bump, title auto-resolved from doc
 
 <!-- Fill these in after stack decisions are made. Keep this section short and definitive. -->
 
-- Language: TBD
-- Framework: TBD
-- Deployment: Docker image; AWS via Terraform (`infra/terraform/`)
-- LLM (if applicable): TBD
+- Language: TypeScript
+- Framework: none — Vite build, Three.js for 3D
+- Tests: Vitest
+- Deployment: static PWA on GitHub Pages
