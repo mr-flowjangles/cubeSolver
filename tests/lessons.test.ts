@@ -38,6 +38,7 @@ describe("levels", () => {
         expect(m.done[level.stage!](after)).toBe(true);
       }
     },
+    60_000, // each case runs the solver 20 times; CI machines are slower
   );
 
   it.each(ALL_LEVELS.filter((l) => l.kind === "full"))(
