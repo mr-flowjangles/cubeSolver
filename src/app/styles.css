@@ -66,7 +66,14 @@ body {
   accent-color: var(--accent);
 }
 
-.practice {
+.screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.practice,
+.lesson {
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -74,10 +81,160 @@ body {
   gap: 12px;
   padding-bottom: 16px;
 }
+.panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 12px;
+  min-height: 0;
+}
 .stage {
   flex: 1;
   min-height: 260px;
   touch-action: none;
+}
+.lesson .stage {
+  min-height: 300px;
+}
+a {
+  color: inherit;
+}
+.bar h1 a {
+  text-decoration: none;
+}
+.back {
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--accent);
+  white-space: nowrap;
+}
+.bar .back:not([hidden]) + h1 {
+  display: none;
+}
+
+/* Home */
+.lede {
+  color: var(--muted);
+  margin: 4px 0 16px;
+}
+.home h2 {
+  font-size: 1rem;
+  margin: 16px 0 8px;
+}
+.levels {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.level {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  text-decoration: none;
+}
+.level .text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.level small {
+  color: var(--muted);
+}
+.num {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+}
+.free .num {
+  background: var(--muted);
+}
+
+/* Lesson */
+.intro h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.2rem;
+  margin: 4px 0;
+}
+.goal {
+  margin: 4px 0 8px;
+  font-weight: 600;
+}
+.intro details {
+  color: var(--muted);
+}
+.intro summary {
+  cursor: pointer;
+  color: var(--fg);
+  font-weight: 600;
+  min-height: 32px;
+}
+.intro ul {
+  margin: 4px 0 8px;
+  padding-left: 20px;
+}
+.alg {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  margin: 6px 0;
+}
+.alg span {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.alg code {
+  font-size: 1.05rem;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+}
+.lesson .actions {
+  grid-template-columns: repeat(4, 1fr);
+}
+.lesson .actions.two {
+  grid-template-columns: 1fr 1fr;
+}
+.passed {
+  text-align: center;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--panel);
+  border: 2px solid var(--accent);
+}
+.passed p {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 0 0 12px;
+}
+.button {
+  display: inline-grid;
+  place-items: center;
+  min-height: 48px;
+  padding: 0 20px;
+  border-radius: 12px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.button.primary {
+  background: var(--accent);
+  color: #fff;
 }
 .stage canvas {
   width: 100%;
@@ -94,7 +251,7 @@ body {
 
 .pad {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(7, 1fr);
   gap: 8px;
 }
 .actions {

@@ -27,8 +27,9 @@ Format for each entry:
 
 ## How many levels, and what does each teach?
 
-**Status:** open
+**Status:** resolved 2026-11-04
 **Resolution trigger:** before M2.
+**Decision:** 9 beginner levels (0–8), listed in `02-levels.md`. Decided by Claude under the standing go-ahead; Rob to review.
 
 ## What are the XP amounts, badges, and unlock rules?
 

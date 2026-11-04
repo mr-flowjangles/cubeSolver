@@ -5,7 +5,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { type CubeState, type Face, type Move, STICKERS, moveTurn } from "../cube";
-import { STICKER_COLOR } from "./colors";
+import { STICKER_COLOR } from "../cube";
 import { ADA_SHAPE, drawShape } from "./shapes";
 
 const GAP = 1.02; // spacing between pieces
@@ -118,6 +118,12 @@ export class CubeView {
     // Keep the whole cube in view on narrow (phone) screens.
     this.camera.zoom = Math.min(1, w / h);
     this.camera.updateProjectionMatrix();
+  }
+
+  /** Look from slightly above (default) or below, e.g. to see a white cross on the bottom. */
+  lookFrom(side: "above" | "below") {
+    this.camera.position.set(5.2, side === "above" ? 4.4 : -4.4, 7.2);
+    this.controls.update();
   }
 
   setAda(on: boolean) {

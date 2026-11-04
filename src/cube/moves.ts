@@ -114,3 +114,28 @@ export function invertMove(m: Move): Move {
 export function invertMoves(moves: readonly Move[]): Move[] {
   return [...moves].reverse().map(invertMove);
 }
+
+/** For a move: target[i] = where the sticker at slot i ends up. */
+export function moveTargets(m: Move): number[] {
+  const { base, turns } = parseMove(m);
+  const q = QUARTER.get(base)!;
+  let t = STICKERS.map((s) => s.index);
+  for (let k = 0; k < turns; k++) t = t.map((i) => q[i]);
+  return t;
+}
+
+/** Merge turns of the same layer next to each other: "U U" → "U2", "R R'" → nothing. */
+export function simplifyMoves(moves: readonly Move[]): Move[] {
+  const out: { base: string; turns: number }[] = [];
+  for (const m of moves) {
+    const p = parseMove(m);
+    const last = out[out.length - 1];
+    if (last && last.base === p.base) {
+      last.turns = (last.turns + p.turns) % 4;
+      if (last.turns === 0) out.pop();
+    } else {
+      out.push({ base: p.base, turns: p.turns });
+    }
+  }
+  return out.map(({ base, turns }) => base + (turns === 3 ? "'" : turns === 2 ? "2" : ""));
+}
