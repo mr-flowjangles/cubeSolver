@@ -5,7 +5,8 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { type CubeState, type Face, type Move, STICKERS, moveTurn } from "../cube";
-import { ADA_SHAPE, STICKER_COLOR } from "./colors";
+import { STICKER_COLOR } from "./colors";
+import { ADA_SHAPE, drawShape } from "./shapes";
 
 const GAP = 1.02; // spacing between pieces
 const STICKER_SIZE = 0.84;
@@ -95,10 +96,7 @@ export class CubeView {
     g.fill();
     if (this.ada) {
       g.fillStyle = face === "U" || face === "D" ? "#222" : "#fff";
-      g.font = "bold 72px system-ui, sans-serif";
-      g.textAlign = "center";
-      g.textBaseline = "middle";
-      g.fillText(ADA_SHAPE[face], 64, 68);
+      drawShape(g, ADA_SHAPE[face], 64, 64, 34);
     }
     const t = new THREE.CanvasTexture(c);
     t.colorSpace = THREE.SRGBColorSpace;
