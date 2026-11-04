@@ -10,7 +10,7 @@ The **Now:** line below names the milestone(s) being worked on, comma-separated 
 
 **Status: milestone order M1–M7 agreed 2026-11-04.**
 
-**Now:** M1
+**Now:** M2
 
 ## v1 — Definition of Done
 
@@ -49,10 +49,10 @@ Goal: project skeleton and dev environment ready, no feature code yet.
 
 Goal: a 3D cube you can turn, live on GitHub Pages as an installable PWA.
 
-- [ ] Cube model: cube state, all moves, scramble. Fully tested.
-- [ ] 3D cube: draw, animate moves, spin the view.
-- [ ] PWA setup: offline, home-screen install.
-- [ ] GitHub Pages deploy on every push to `main`.
+- [x] Cube model: cube state, all moves, scramble. Fully tested.
+- [x] 3D cube: draw, animate moves, spin the view.
+- [x] PWA setup: offline, home-screen install.
+- [x] GitHub Pages deploy on every push to `main`.
 
 **Done when:** the live site shows a cube you can turn and scramble, on a phone, offline.
 
