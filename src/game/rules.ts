@@ -55,7 +55,7 @@ export interface Badge {
 }
 
 export const BADGES: Badge[] = [
-  { id: "first-turns", name: "First Turns", how: "Finish Meet the cube.", icon: "🔄" },
+  { id: "first-turns", name: "First Turns", how: "Finish Learn the controls.", icon: "🔄" },
   { id: "cross", name: "Cross Builder", how: "Pass White cross.", icon: "🎯" },
   { id: "first-layer", name: "First Layer", how: "Pass White corners.", icon: "🧱" },
   { id: "two-layers", name: "Two Layers", how: "Pass Middle edges.", icon: "🏗️" },

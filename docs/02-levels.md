@@ -10,7 +10,7 @@
 
 | # | Level | Passed when | Sequence taught |
 |---|---|---|---|
-| 0 | Meet the cube | 10 turns made as asked | — |
+| 0 | Learn the controls | 10 turns made as asked | — |
 | 1 | White cross | 4 white edges on the bottom, matching centers | none (intuitive) |
 | 2 | White corners | white layer done | `R U R' U'` (repeat) |
 | 3 | Middle edges | first two layers done | `U R U' R' U' F' U F` / `U' L' U L U F U' F'` |
