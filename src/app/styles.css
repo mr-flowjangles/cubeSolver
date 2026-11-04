@@ -750,3 +750,19 @@ button.small {
   min-height: 44px;
   padding: 0;
 }
+.pad button.glow {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  animation: glow 1.2s ease-in-out infinite;
+}
+@keyframes glow {
+  50% {
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 35%, transparent);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pad button.glow {
+    animation: none;
+  }
+}

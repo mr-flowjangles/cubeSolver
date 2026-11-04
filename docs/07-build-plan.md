@@ -22,7 +22,7 @@ v1 ships when **all** of the following are true:
 - [x] CFOP levels are playable.
 - [ ] Camera scan of a real cube leads to a guided solve.
 - [ ] All milestones below are checked.
-- [ ] `README.md` has a quickstart.
+- [x] `README.md` has a quickstart.
 
 ---
 
@@ -122,8 +122,8 @@ Goal: teach CFOP after the beginner method.
 
 Goal: polished and public.
 
-- [ ] Test on real iPhone and Android devices.
-- [ ] README quickstart.
+- [ ] Test on real iPhone and Android devices. *(blocked: needs Rob with real phones — see `05-phone-check.md`)*
+- [x] README quickstart.
 - [ ] v1 Definition of Done all checked.
 
 **Done when:** v1 Definition of Done is fully checked.

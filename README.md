@@ -2,9 +2,31 @@
 
 Game-style Rubik's cube tutorial PWA — beginner to CFOP, with camera scan to solve your own cube.
 
+## Play
+
+**https://mr-flowjangles.github.io/cubeSolver/**
+
+- Works on phones and computers. Add it to your home screen to install it.
+- Works offline after the first visit.
+- No account, no tracking. Progress is saved in your browser.
+
+## Quickstart (development)
+
+```
+make setup     # install dependencies
+make dev       # run the app at http://localhost:4026
+make test      # run the tests
+make lint      # type-check and check formatting
+make build     # build the app into dist/
+make site      # Mission Control at http://localhost:4025
+```
+
+- Every push to `main` runs lint, tests and build, then publishes to GitHub Pages.
+- `make serve-image` runs the built app in Docker at http://localhost:4027.
+
 ## Status
 
-**Design phase.** The architecture, decisions, and rationale are recorded in `docs/`. No application code yet. Implementation starts at milestone **M0** in `docs/07-build-plan.md`.
+**v0.7 — M1 to M6 shipped.** M7 (launch checks) in progress. See `docs/07-build-plan.md`.
 
 ## Where to start
 
@@ -19,12 +41,21 @@ Game-style Rubik's cube tutorial PWA — beginner to CFOP, with camera scan to s
 ├── CLAUDE.md                 # repo context for Claude sessions
 ├── README.md                 # this file
 ├── Makefile                  # `make help` for available targets
-├── Dockerfile                # ship target
+├── Dockerfile                # local test image (nginx serving the built app)
+├── index.html, vite.config.ts# app entry and build/PWA setup
+├── public/                   # icons
 ├── .claude/agents/           # custom subagents shipped with this project
 ├── docs/                     # design + build plan
 ├── scripts/                  # ceremony scripts (versioning, vendor fetch, etc.)
-├── infra/terraform/          # AWS deployment (defined when deployment is real)
-├── src/                      # application code
+├── site/                     # Mission Control
+├── src/
+│   ├── cube/                 # cube model: stickers, moves, checks
+│   ├── render/               # 3D cube
+│   ├── solver/               # beginner and CFOP solvers
+│   ├── lessons/              # level content
+│   ├── game/                 # XP, badges, saving
+│   ├── scan/                 # camera color reading
+│   └── app/                  # screens
 ├── tests/                    # test suite
 └── Versions/                 # one folder per version, with release-notes.md
 ```
@@ -37,4 +68,4 @@ Game-style Rubik's cube tutorial PWA — beginner to CFOP, with camera scan to s
 
 ## License
 
-Internal EHA project; license to be decided before any external distribution.
+Not chosen yet — see `docs/99-open-questions.md`.
