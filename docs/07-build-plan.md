@@ -10,7 +10,7 @@ The **Now:** line below names the milestone(s) being worked on, comma-separated 
 
 **Status: milestone order M1–M7 agreed 2026-11-04.**
 
-**Now:** M5
+**Now:** M6
 
 ## v1 — Definition of Done
 
@@ -98,9 +98,9 @@ Goal: enter a real cube and get guided through solving it.
 
 Goal: scan a real cube instead of entering it by hand.
 
-- [ ] Camera capture, one face at a time, with a framing guide.
-- [ ] Read sticker colors.
-- [ ] Hand off to the check-and-fix screen.
+- [x] Camera capture, one face at a time, with a framing guide.
+- [x] Read sticker colors.
+- [x] Hand off to the check-and-fix screen.
 
 **Done when:** a real cube scanned on iPhone and Android leads to a correct guided solve.
 

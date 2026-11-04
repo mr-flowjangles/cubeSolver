@@ -8,7 +8,7 @@ Commit identity: Rob Rose <robmrose@me.com>
 
 ## Current state
 
-**Building.** M1–M4 shipped, live at https://mr-flowjangles.github.io/cubeSolver/. Test hooks: `?moves=R%20U&instant=1#/play`, `?ada=1`, `?autoshow=1#/level/<id>`, `?cube=<54 letters>#/solve`, `?cube=…&finish=1#/solve/guide`.
+**Building.** M1–M5 shipped, live at https://mr-flowjangles.github.io/cubeSolver/. Test hooks: `?moves=R%20U&instant=1#/play`, `?ada=1`, `?autoshow=1#/level/<id>`, `?cube=<54 letters>#/solve`, `?cube=…&finish=1#/solve/guide`, `?autoscan=1#/solve/scan` (with Chrome's fake camera flags).
 
 ## How to read this repo
 
@@ -53,7 +53,9 @@ Commit identity: Rob Rose <robmrose@me.com>
 - **Cube state** — the color of all 54 stickers; the one piece of data every part of the app passes around.
 - **F2L** — "first two layers": second CFOP step, solving the bottom two layers in pairs.
 - **Move notation** — standard letters for turns: R, L, U, D, F, B; an apostrophe means counter-clockwise, a 2 means a half turn; y turns the whole cube.
+- **Camera scan** — pointing the phone camera at each face in turn so the app reads the cube's colors.
 - **Flat cube map** — all six faces laid out flat in a cross shape; you tap stickers to copy your cube's colors.
+- **Framing guide** — the 3×3 grid drawn over the camera view; line one face up inside it.
 - **Free play** — the screen where you turn and scramble the cube with no lesson.
 - **Guided solve** — after entering your cube, the app shows each move to make, one at a time, grouped by stage.
 - **Hint** — lesson button that says the next step in words and moves.
