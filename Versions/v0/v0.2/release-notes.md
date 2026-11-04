@@ -1,5 +1,37 @@
 # v0.2
 
+## v0.2.1 — Drawn ADA Shapes (2026-11-04)
+
+### Problem
+
+- ADA shapes were font characters. iPhones can show ✖ and ★ as color emoji.
+
+### Solution
+
+- Draw each shape with canvas paths, so it looks the same on every device.
+
+### New
+
+- **`src/render/shapes.ts`.** The six shapes and which color gets which.
+
+### Changed
+
+- **3D cube.** Uses the drawn shapes.
+- **`src/render/colors.ts`.** Shape list moved to `shapes.ts`.
+
+### Fixed
+
+- Possible emoji shapes on iPhone.
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `src/render/shapes.ts` | New — drawn shapes |
+| `src/render/cubeView.ts` | Uses drawn shapes |
+| `src/render/colors.ts` | Shape list removed |
+| `Versions/v0/v0.2/release-notes.md` | This entry |
+
 ## v0.2.0 — Cube and live site (2026-11-04)
 
 ### Problem

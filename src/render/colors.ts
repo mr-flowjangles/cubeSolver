@@ -20,13 +20,3 @@ export const COLOR_NAME: Record<Face, string> = {
   L: "orange",
   B: "blue",
 };
-
-/** Shape drawn on each color when ADA support is on. Agreed 2026-11-04. */
-export const ADA_SHAPE: Record<Face, string> = {
-  R: "●",
-  L: "▲",
-  F: "■",
-  B: "◆",
-  U: "✖",
-  D: "★",
-};
