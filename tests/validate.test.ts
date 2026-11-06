@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applyMoves, findProblems, fromString, solved, toString } from "../src/cube";
+import { applyMoves, findProblems, fromString, scramble, solved, toString } from "../src/cube";
 import { solveBeginner } from "../src/solver/beginner";
 
 const swap = (s: string, i: number, j: number) => {
@@ -53,5 +53,29 @@ describe("validate", () => {
     const swapped = fromString(s.join(""));
     expect(findProblems(swapped)).toEqual([]);
     expect(() => solveBeginner(swapped)).toThrow();
+  });
+});
+
+describe("validate: mirror-image corners", () => {
+  it("two stickers swapped on one corner is caught", () => {
+    // URF corner: U 8, R 9, F 20. Swap R and F stickers: a mirror-image corner.
+    const bad = fromString(swap(toString(solved()), 9, 20));
+    const p = findProblems(bad);
+    expect(p.some((x) => x.message.includes("order no real corner has"))).toBe(true);
+  });
+
+  it("red and orange mixed up everywhere except centers is caught", () => {
+    const s = toString(solved())
+      .split("")
+      .map((c, i) => (i % 9 === 4 ? c : c === "R" ? "L" : c === "L" ? "R" : c))
+      .join("");
+    const p = findProblems(fromString(s));
+    expect(p.filter((x) => x.message.includes("red and orange")).length).toBe(8);
+  });
+
+  it("real scrambled cubes never trip the corner-order check", () => {
+    for (let k = 0; k < 200; k++) {
+      expect(findProblems(applyMoves(solved(), scramble(25)))).toEqual([]);
+    }
   });
 });

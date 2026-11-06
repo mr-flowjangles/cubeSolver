@@ -61,7 +61,7 @@ Commit identity: Rob Rose <robmrose@me.com>
 - **Camera scan** — pointing the phone camera at each face in turn so the app reads the cube's colors.
 - **Flat cube map** — all six faces laid out flat in a cross shape; you tap stickers to copy your cube's colors.
 - **Framing guide** — the 3×3 grid drawn over the camera view; line one face up inside it.
-- **Center** — the middle square of a side. It never moves, so it tells you that side's color.
+- **Center** — the middle square of a side. It never moves when you turn a side, so it tells you that side's color.
 - **Daisy** — beginner way to start the white cross: put the 4 white edges around the yellow center on top, then turn each one down to the bottom.
 - **Free play** — the screen where you turn and scramble the cube with no lesson.
 - **Guided solve** — after entering your cube, the app shows each move to make, one at a time, grouped by stage.

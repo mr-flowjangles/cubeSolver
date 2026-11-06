@@ -57,7 +57,7 @@ export const FACE_HINT: Record<Face, string> = {
   R: "Right — red center, white on top",
   B: "Back — blue center, white on top",
   L: "Left — orange center, white on top",
-  D: "Bottom — yellow center; tip the cube toward you so green is at the top",
+  D: "Bottom — yellow center; tip the top away from you so green is at the top",
 };
 
 function stickerHtml(cell: Cell, i: number, ada: boolean) {

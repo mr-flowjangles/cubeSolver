@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { applyMoves, isSolved, parseMoves, solved } from "../src/cube";
+import { applyMoves, invertMoves, isSolved, parseMoves, slot, solved } from "../src/cube";
 import { BEGINNER_LEVELS, NOTATION_DRILL } from "../src/lessons/beginner";
 import { ALL_LEVELS, METHODS } from "../src/lessons/index";
-import { practicePosition } from "../src/lessons/position";
-import { solvePll } from "../src/solver/cfop";
+import { PRACTICE_RAMP, practicePosition } from "../src/lessons/position";
+import { STAGE_DONE, STAGES } from "../src/solver/beginner";
+import { CP_ALGS, EO_ALGS, solvePll } from "../src/solver/cfop";
 
 function seeded(seed: number) {
   return () => (seed = (seed * 1103515245 + 12345) % 2 ** 31) / 2 ** 31;
@@ -99,5 +100,39 @@ describe("notation drill", () => {
   it("only asks for turns that have a button", async () => {
     const { DEFAULT_PAD } = await import("../src/app/cubePanel");
     for (const m of NOTATION_DRILL) expect(DEFAULT_PAD).toContain(m);
+  });
+});
+
+describe("cube review fixes (v0.8.6)", () => {
+  const top = (s: readonly string[], name: string) => s[slot(name).stickers[0]] === s[4];
+
+  it("L shape alg solves an L held at front-right, as level 11 says", () => {
+    const l = ALL_LEVELS.find((x) => x.id === "cfopEo")!;
+    expect(l.teach.some((t) => t.includes("front-right"))).toBe(true);
+    const alg = parseMoves(EO_ALGS.find((a) => a.name === "L shape")!.moves);
+    const before = applyMoves(solved(), invertMoves(alg));
+    const up = ["UF", "UR", "UB", "UL"].filter((n) => top(before, n));
+    expect(up.sort()).toEqual(["UF", "UR"]);
+  });
+
+  it("T-perm solves headlights held on the left, as level 13 says", () => {
+    const l = ALL_LEVELS.find((x) => x.id === "cfopCp")!;
+    expect(l.teach.some((t) => t.includes("on the left"))).toBe(true);
+    const alg = parseMoves(CP_ALGS.find((a) => a.name.startsWith("T-perm"))!.moves);
+    const before = applyMoves(solved(), invertMoves(alg));
+    expect(before[36]).toBe(before[38]); // left side's top corners match: headlights
+    expect(before[9]).not.toBe(before[11]); // right side's don't
+  });
+
+  it("level 7 practice cubes always have every earlier stage done", () => {
+    const lv = ALL_LEVELS.find((x) => x.id === "yellowCornersTwist")!;
+    const r = seeded(4);
+    for (const left of PRACTICE_RAMP)
+      for (let k = 0; k < 15; k++) {
+        const p = practicePosition(lv, r, left);
+        for (const st of STAGES.slice(1, STAGES.indexOf("yellowCornersTwist")))
+          expect(STAGE_DONE[st](p), `${st} with ${left} left`).toBe(true);
+        expect(STAGE_DONE.yellowCornersTwist(p)).toBe(false);
+      }
   });
 });

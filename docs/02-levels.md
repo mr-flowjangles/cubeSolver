@@ -85,9 +85,19 @@ How the three parts are built (v0.8.4):
 - **See back** swings round to show the back; any turn swings back to the front first.
 - Based on a research pass of ruwix, J Perm, the official Rubik's guide and the cubing.js viewer.
 
+### Touch controls (planned — decided by Rob, 2026-11-06)
+
+- **Swipe on a sticker:** the row or column under your finger turns the way you swiped.
+- **Swipe on the background:** turns the whole cube.
+- **In free play** a background swipe is a real whole-cube turn: swipe left twice and the back becomes the front.
+- **In lessons** the cube springs back when you let go, because lesson steps need green in front.
+- **Buttons stay.** Lessons still show the move letters; See back stays as a one-tap look at the back.
+- This replaces the 40° view drag above once built.
+
 ## How a level works
 
 - Practice cube: a random scramble with every earlier stage already done.
+- Level 7 (twist yellow corners): easier practice cubes have fewer twisted corners, never a cube stopped part-way, because part-way the bottom is scrambled.
 - **Hint** shows the next step in words and moves.
 - **Show me** plays the next step on the cube.
 - **New cube** gives a fresh practice cube.
@@ -98,6 +108,6 @@ How the three parts are built (v0.8.4):
 - Cross: finds the fewest turns for each edge, one edge at a time.
 - Every later stage: tries short combinations of top turns, whole-cube turns and that stage's taught sequence.
 - So Hint and Show me only ever use what the level teaches.
-- Beginner: tested on 200 random scrambles; slowest under a quarter second.
-- CFOP: tested on 100 random scrambles; slowest about a third of a second.
+- Beginner: tested on 500 random scrambles; slowest about a quarter second.
+- CFOP: tested on 500 random scrambles; slowest about half a second. Times depend on the device.
 - Every CFOP sequence is checked by the cube model: last-layer ones keep the bottom two layers, and the 21 PLLs are all different cases.

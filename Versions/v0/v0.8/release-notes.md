@@ -1,5 +1,46 @@
 # v0.8
 
+## v0.8.6 — Cube review fixes (2026-11-06)
+
+### Problem
+
+A Rubik's cube review of the whole app found two CFOP lessons giving wrong advice, a cube check that missed mirror-image corners (e.g. red and orange mixed up), level 7 practice cubes with a scrambled bottom, and some wrong or stale text.
+
+### Solution
+
+Fixed each proven finding, with a test for each. Also wrote the planned touch controls into the design doc.
+
+### Fixed
+
+- Level 11 (OLL 1): "L shape: hold it at front-right" — back-left turned the L into a dot.
+- Level 13 (PLL 1): "Headlights: hold them on the left" — at the back, T-perm could not solve the corners.
+- Cube check now catches a corner whose colors are in a mirror-image order, and says red and orange are easy to mix up.
+- "Can't be solved" message now also names two swapped pieces.
+- Level 7 practice: easier cubes have fewer twisted corners instead of being stopped part-way with the bottom scrambled.
+- Solve my cube, bottom face: "tip the top away from you" (was "toward you").
+- Glossary: a center "never moves when you turn a side" (M moves centers).
+
+### Changed
+
+- docs/02-levels.md: solver timings updated to the review's 500-scramble runs.
+- docs/02-levels.md: new "Touch controls (planned)" section — swipe a sticker to turn its layer, swipe the background to turn the whole cube.
+
+### Not changed
+
+- The beginner "hold" step still skips turning to green-in-front when white is already down. Requiring green in front broke 5 tests: later stages turn the cube with y on purpose, so green is often not in front mid-solve.
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `src/lessons/cfop.ts` | L shape and Headlights hold text |
+| `src/cube/validate.ts` | Mirror-image corner check; unsolvable message |
+| `src/lessons/position.ts` | Level 7 easier practice cubes |
+| `src/app/solveMine.ts` | Bottom face tip direction |
+| `CLAUDE.md`, `site/catalog.json` | Center glossary entry |
+| `docs/02-levels.md` | Level 7 practice, timings, touch controls plan |
+| `tests/*.test.ts` | Tests for each fix |
+
 ## v0.8.5 — Show updates right away (2026-11-04)
 
 ### Problem
