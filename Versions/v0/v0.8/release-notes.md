@@ -1,5 +1,42 @@
 # v0.8
 
+## v0.8.10 — Letters on the cube (2026-11-09)
+
+### Problem
+
+Level 0 said "U means Up, the top" but there was no U on the cube. A letter only flashed after the move, and the small tags named just 3 sides.
+
+### Solution
+
+The letter now sits on the arrow in a big badge, and a tag at the top of the cube area names the side being turned. Design: docs/02-levels.md → Controls.
+
+### New
+
+- Big letter badge on the arrow (U, R', B …).
+- Side-name tag at the top of the cube area: LEFT · L, BACK · B, MIDDLE · M, WHOLE CUBE · y, and the rest.
+
+### Changed
+
+- The plain FRONT / TOP / RIGHT tags hide while an arrow shows, so nothing covers the arrow.
+- Arrows prefer the right side over the top; back turns now show on the right side's back column (the top's back row was edge-on and hard to see).
+- Level 0, B: "swipe the back edge the way the arrow shows".
+
+### Verification
+
+- 212 tests passed, lint clean.
+- Browser screenshots (keyboard events): U badge on the top row with TOP · U; L badge on the left column with LEFT · L, nothing overlapping; B badge on the right side's back column with BACK · B.
+- First tries put the side name on the cube; it covered the arrow or ran off a narrow screen, so it moved to a fixed tag.
+- Not checked on a real phone: needs a phone in hand.
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `src/render/cubeView.ts` | Letter badge; side-name tag; arrow face order |
+| `src/app/styles.css` | Side-name tag style |
+| `src/lessons/beginner.ts` | B sentence |
+| `docs/02-levels.md`, `site/catalog.json` | Design lines |
+
 ## v0.8.9 — Learn the letters (2026-11-09)
 
 ### Problem

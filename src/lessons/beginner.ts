@@ -199,7 +199,7 @@ export const NOTATION_STEPS: { move: string; say: string; did: string }[] = [
   },
   {
     move: "B",
-    say: "B means the Back. You can't see it, so swipe the top's back row the way the arrow shows.",
+    say: "B means the Back. You can't see it, so swipe the back edge the way the arrow shows.",
     did: "the back turned.",
   },
 ];

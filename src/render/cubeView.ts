@@ -57,7 +57,8 @@ export class CubeView {
   } | null = null;
   private raycaster = new THREE.Raycaster();
   private side: "above" | "below" = "above";
-  private arrow: THREE.Mesh | null = null;
+  private arrow: THREE.Group | null = null;
+  private sideName: HTMLElement;
 
   constructor(
     private container: HTMLElement,
@@ -67,6 +68,10 @@ export class CubeView {
     this.state = state;
     this.ada = options.ada ?? false;
     this.onSwipe = options.onSwipe;
+    this.sideName = document.createElement("div");
+    this.sideName.className = "side-name";
+    this.sideName.hidden = true;
+    container.appendChild(this.sideName);
     this.backgroundTurns = options.backgroundTurns ?? true;
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -231,9 +236,12 @@ export class CubeView {
       this.scene.remove(this.arrow);
       this.arrow = null;
     }
+    this.tags.forEach((t) => (t.visible = true));
+    this.sideName.hidden = true;
     if (!move) return;
     const place = this.arrowPlace(move);
     if (!place) return;
+    const group = new THREE.Group();
     const mesh = new THREE.Mesh(
       new THREE.PlaneGeometry(place.length, 0.62),
       new THREE.MeshBasicMaterial({ map: arrowTexture(), transparent: true, depthTest: false }),
@@ -243,8 +251,20 @@ export class CubeView {
     mesh.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(u, n.clone().cross(u), n));
     mesh.position.copy(place.at);
     mesh.renderOrder = 20;
-    this.arrow = mesh;
-    this.scene.add(mesh);
+    group.add(mesh);
+
+    // The move's letter, big, on the arrow, so the lesson's letter points at something.
+    const letter = letterSprite(move);
+    letter.position.copy(place.at).add(n.clone().multiplyScalar(0.05));
+    group.add(letter);
+
+    // The side being turned is named in a tag at the top of the cube area. The plain
+    // FRONT / TOP / RIGHT tags hide while an arrow shows, so nothing covers the arrow.
+    this.sideName.textContent = SIDE_LABEL[move[0]] ?? "";
+    this.sideName.hidden = !this.sideName.textContent;
+    this.tags.forEach((t) => (t.visible = false));
+    this.arrow = group;
+    this.scene.add(group);
   }
 
   /** Where the arrow goes: centre, direction it points (u) and the way it faces (n). */
@@ -270,8 +290,9 @@ export class CubeView {
         };
       return null;
     }
-    // On the cube: the strip of stickers in that layer, on the front, top/bottom or right face.
-    const faces = ["F", this.side === "above" ? "U" : "D", "R"];
+    // On the cube: the strip of stickers in that layer, on the front, right or top/bottom face.
+    // Front first, then right (it faces the camera more than the top does), then top/bottom.
+    const faces = ["F", "R", this.side === "above" ? "U" : "D"];
     for (const face of faces) {
       for (const s of STICKERS) {
         if (s.face !== face) continue;
@@ -401,25 +422,8 @@ export class CubeView {
       side === "above" ? ["TOP · U", [0, 2.1, 0]] : ["BOTTOM · D", [0, -2.1, 0]],
     ];
     this.tags = tags.map(([text, pos]) => {
-      const c = document.createElement("canvas");
-      c.width = 256;
-      c.height = 64;
-      const g = c.getContext("2d")!;
-      g.fillStyle = "rgba(20,22,27,0.75)";
-      g.beginPath();
-      g.roundRect(4, 8, 248, 48, 24);
-      g.fill();
-      g.fillStyle = "#fff";
-      g.font = "bold 28px system-ui, sans-serif";
-      g.textAlign = "center";
-      g.textBaseline = "middle";
-      g.fillText(text, 128, 33);
-      const tex = new THREE.CanvasTexture(c);
-      tex.colorSpace = THREE.SRGBColorSpace;
-      const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false }));
-      sprite.scale.set(1.6, 0.4, 1);
+      const sprite = labelSprite(text, "rgba(20,22,27,0.75)");
       sprite.position.set(...pos);
-      sprite.renderOrder = 10;
       this.scene.add(sprite);
       return sprite;
     });
@@ -510,6 +514,7 @@ export class CubeView {
   dispose() {
     this.renderer.setAnimationLoop(null);
     this.pointTo(null);
+    this.sideName.remove();
     this.container.removeEventListener("pointerdown", this.onDown, true);
     this.container.removeEventListener("pointermove", this.onPointerMove, true);
     this.container.removeEventListener("pointerup", this.onUp, true);
@@ -546,4 +551,68 @@ function arrowTexture(): THREE.CanvasTexture {
   ARROW = new THREE.CanvasTexture(c);
   ARROW.colorSpace = THREE.SRGBColorSpace;
   return ARROW;
+}
+
+/** Name of the side a move turns, shown with its letter. */
+const SIDE_LABEL: Record<string, string> = {
+  U: "TOP · U",
+  D: "BOTTOM · D",
+  R: "RIGHT · R",
+  L: "LEFT · L",
+  F: "FRONT · F",
+  B: "BACK · B",
+  M: "MIDDLE · M",
+  E: "MIDDLE · E",
+  S: "MIDDLE · S",
+  x: "WHOLE CUBE · x",
+  y: "WHOLE CUBE · y",
+  z: "WHOLE CUBE · z",
+};
+
+/** A rounded label that always faces the viewer and draws on top. */
+function labelSprite(text: string, fill: string): THREE.Sprite {
+  const c = document.createElement("canvas");
+  c.width = 320;
+  c.height = 64;
+  const g = c.getContext("2d")!;
+  g.fillStyle = fill;
+  g.beginPath();
+  g.roundRect(4, 8, 312, 48, 24);
+  g.fill();
+  g.fillStyle = "#fff";
+  g.font = "bold 28px system-ui, sans-serif";
+  g.textAlign = "center";
+  g.textBaseline = "middle";
+  g.fillText(text, 160, 33);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false }));
+  sprite.scale.set(2.0, 0.4, 1);
+  sprite.renderOrder = 10;
+  return sprite;
+}
+
+/** The move's letter in a round badge, drawn on top of the arrow. */
+function letterSprite(move: Move): THREE.Sprite {
+  const c = document.createElement("canvas");
+  c.width = c.height = 128;
+  const g = c.getContext("2d")!;
+  g.fillStyle = "#fff";
+  g.strokeStyle = "rgba(255, 47, 208, 1)";
+  g.lineWidth = 10;
+  g.beginPath();
+  g.arc(64, 64, 56, 0, Math.PI * 2);
+  g.fill();
+  g.stroke();
+  g.fillStyle = "#111";
+  g.font = `900 ${move.length > 1 ? 60 : 72}px system-ui, sans-serif`;
+  g.textAlign = "center";
+  g.textBaseline = "middle";
+  g.fillText(move, 64, 68);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false }));
+  sprite.scale.set(0.8, 0.8, 1);
+  sprite.renderOrder = 30;
+  return sprite;
 }

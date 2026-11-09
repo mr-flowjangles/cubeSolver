@@ -823,3 +823,20 @@ button.small {
 .move-log li:first-child {
   font-weight: 700;
 }
+
+/* Names the side the arrow turns, e.g. "LEFT · L". */
+.side-name {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgb(255, 47, 208);
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.15rem;
+  pointer-events: none;
+}
+.side-name[hidden] {
+  display: none;
+}

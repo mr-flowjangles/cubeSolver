@@ -92,6 +92,8 @@ How the three parts are built (v0.8.4):
 - **Swipe beside the cube:** turns the whole cube. Left or right is y, up or down is x. Swipe left twice and the back becomes the front.[1]
 - **Each turn flashes its letter** (R, U' …) over the cube, so players still learn the names.[1]
 - **Next move in a lesson:** an arrow on the cube along the row to swipe, plus the letter.[1] Whole-cube turns show the arrow beside the cube.
+- **The letter sits on the arrow**, big, and a tag at the top of the cube area names the side being turned (LEFT · L, BACK · B, MIDDLE · M, WHOLE CUBE · y), so every letter points at something.[3] The plain FRONT / TOP / RIGHT tags hide while an arrow shows, so nothing covers it.
+- Arrows go on the front first, then the right side, then the top or bottom. Back turns show on the right side's back column.
 - **Turning the whole cube in a lesson is fine.**[1] Walk through it renames the moves left for the new front. Hint and Show me plan from the cube as it is.
 - **Half turns** (U2) are two swipes.
 - **Two-layer turns** are two swipes: r is R then M', f is F then S.
@@ -123,3 +125,4 @@ How the three parts are built (v0.8.4):
 
 - [1] Design decision, 2026-11-09.
 - [2] Design decision, 2026-11-06.
+- [3] Design decision, 2026-11-09.
