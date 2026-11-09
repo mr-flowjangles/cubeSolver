@@ -89,6 +89,8 @@ export function mountCubePanel(
     /** Show side words under the letters (off for CFOP, to match outside tutorials). */
     words?: boolean;
     onMove?: (m: Move, p: CubePanel) => void;
+    /** Free play: swipes beside the cube turn it, and middle rows can be swiped. */
+    freePlay?: boolean;
   } = {},
 ): CubePanel {
   const groups = opts.groups ?? DEFAULT_GROUPS;
@@ -98,7 +100,11 @@ export function mountCubePanel(
       words ? `<small>${MOVE_LABEL[m] ?? ""}</small>` : ""
     }</button>`;
   root.innerHTML = `
-    <div class="stage" aria-label="3D cube. Drag to look around; it springs back to the front."></div>
+    <div class="stage" aria-label="3D cube. Swipe a row to turn it. ${
+      opts.freePlay
+        ? "Swipe beside the cube to turn the whole cube."
+        : "Drag beside the cube to look around; it springs back to the front."
+    }"></div>
     <p class="status" role="status"></p>
     <div class="pad ${words ? "" : "letters"}">
       ${groups
@@ -115,7 +121,20 @@ export function mountCubePanel(
         .join("")}
     </div>`;
   const status = root.querySelector<HTMLElement>(".status")!;
-  const view = new CubeView(root.querySelector(".stage")!, start, { ada: loadSettings().ada });
+  // A swipe makes only moves this screen's buttons have (free play also allows middle rows),
+  // so a lesson never gets a turn it doesn't teach.
+  const allowed = new Set([
+    ...groups.flatMap((g) => g.moves),
+    ...(opts.freePlay ? ["M", "M'", "E", "E'", "S", "S'", "x", "x'"] : []),
+  ]);
+  const view = new CubeView(root.querySelector(".stage")!, start, {
+    ada: loadSettings().ada,
+    backgroundTurns: opts.freePlay ?? false,
+    onSwipe: (m) => {
+      if (allowed.has(m)) panel.turn(m);
+      else panel.say("That row doesn't turn in this level. Use a row with a button below.");
+    },
+  });
 
   let state = [...start] as Face[];
   const history: Move[] = [];

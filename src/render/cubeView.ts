@@ -7,13 +7,24 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { type CubeState, type Face, type Move, STICKERS, moveTurn } from "../cube";
 import { STICKER_COLOR } from "../cube";
 import { ADA_SHAPE, drawShape } from "./shapes";
+import { backgroundMove, pickDirection, swipeDirections, swipeMove } from "./swipe";
 
 const GAP = 1.02; // spacing between pieces
 const STICKER_SIZE = 0.84;
 
 export interface CubeViewOptions {
   ada?: boolean;
+  /** A swipe on the cube asks for this move (the host decides whether to make it). */
+  onSwipe?: (move: Move) => void;
+  /**
+   * Free play: a swipe beside the cube turns the whole cube (y / x).
+   * Otherwise it looks around and springs back to the front.
+   */
+  backgroundTurns?: boolean;
 }
+
+/** How far a finger must move, in pixels, before a swipe counts. */
+const SWIPE_PX = 14;
 
 export class CubeView {
   private renderer: THREE.WebGLRenderer;
@@ -35,6 +46,16 @@ export class CubeView {
     null;
   private peeking = false;
   private tags: THREE.Sprite[] = [];
+  private onSwipe?: (move: Move) => void;
+  private backgroundTurns: boolean;
+  private gesture: {
+    id: number;
+    x: number;
+    y: number;
+    sticker: number | null;
+    done: boolean;
+  } | null = null;
+  private raycaster = new THREE.Raycaster();
 
   constructor(
     private container: HTMLElement,
@@ -43,6 +64,8 @@ export class CubeView {
   ) {
     this.state = state;
     this.ada = options.ada ?? false;
+    this.onSwipe = options.onSwipe;
+    this.backgroundTurns = options.backgroundTurns ?? false;
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     container.appendChild(this.renderer.domElement);
@@ -55,6 +78,12 @@ export class CubeView {
       if (!this.peeking) this.snapHome();
     });
     this.setHome(new THREE.Vector3(5.2, 4.4, 7.2));
+    if (this.backgroundTurns) this.controls.enabled = false;
+    // Capture on the container so a swipe on a sticker is seen before the look-around drag.
+    container.addEventListener("pointerdown", this.onDown, true);
+    container.addEventListener("pointermove", this.onPointerMove, true);
+    container.addEventListener("pointerup", this.onUp, true);
+    container.addEventListener("pointercancel", this.onUp, true);
 
     this.buildPieces();
     this.buildTags("above");
@@ -130,6 +159,67 @@ export class CubeView {
     this.camera.zoom = Math.min(1, w / h);
     this.camera.updateProjectionMatrix();
   }
+
+  // ---- Touch: swipe a sticker to turn its layer; swipe beside the cube to turn or look ----
+
+  private stickerUnder(e: PointerEvent): number | null {
+    const r = this.renderer.domElement.getBoundingClientRect();
+    const ndc = new THREE.Vector2(
+      ((e.clientX - r.left) / r.width) * 2 - 1,
+      -((e.clientY - r.top) / r.height) * 2 + 1,
+    );
+    this.raycaster.setFromCamera(ndc, this.camera);
+    const hit = this.raycaster.intersectObjects(this.stickers, false)[0];
+    return hit ? this.stickers.indexOf(hit.object as (typeof this.stickers)[number]) : null;
+  }
+
+  /** Where a point on the cube appears on screen, in pixels. */
+  private toScreen(v: THREE.Vector3): [number, number] {
+    const r = this.renderer.domElement.getBoundingClientRect();
+    const p = v.clone().project(this.camera);
+    return [((p.x + 1) / 2) * r.width, ((1 - p.y) / 2) * r.height];
+  }
+
+  private onDown = (e: PointerEvent) => {
+    if (!this.onSwipe || this.gesture || this.fly) return;
+    // Mid-turn the stickers aren't where the cube state says; wait for the turn to finish.
+    const sticker = this.animating ? null : this.stickerUnder(e);
+    if (sticker === null && !this.backgroundTurns) return; // look around (springs back)
+    this.controls.enabled = false;
+    this.gesture = { id: e.pointerId, x: e.clientX, y: e.clientY, sticker, done: false };
+    e.stopPropagation();
+    // Keep getting this finger's moves even if it slides off the cube.
+    this.renderer.domElement.setPointerCapture?.(e.pointerId);
+  };
+
+  private onPointerMove = (e: PointerEvent) => {
+    const g = this.gesture;
+    if (!g || g.done || e.pointerId !== g.id) return;
+    const dx = e.clientX - g.x;
+    const dy = e.clientY - g.y;
+    if (Math.hypot(dx, dy) < SWIPE_PX) return;
+    g.done = true;
+    if (g.sticker === null) {
+      this.onSwipe?.(backgroundMove(dx, dy));
+      return;
+    }
+    const s = STICKERS[g.sticker];
+    const at = new THREE.Vector3(...s.position)
+      .multiplyScalar(GAP)
+      .add(new THREE.Vector3(...s.normal).multiplyScalar(0.5));
+    const from = this.toScreen(at);
+    const options = swipeDirections(g.sticker).map((u) => {
+      const to = this.toScreen(at.clone().add(new THREE.Vector3(...u).multiplyScalar(0.5)));
+      return { u, screen: [to[0] - from[0], to[1] - from[1]] as const };
+    });
+    this.onSwipe?.(swipeMove(g.sticker, pickDirection([dx, dy], options)));
+  };
+
+  private onUp = (e: PointerEvent) => {
+    if (!this.gesture || e.pointerId !== this.gesture.id) return;
+    this.gesture = null;
+    this.controls.enabled = !this.backgroundTurns;
+  };
 
   /** Light up the stickers a move will turn and dim the rest; null clears it. */
   highlight(move: Move | null) {
@@ -350,6 +440,10 @@ export class CubeView {
 
   dispose() {
     this.renderer.setAnimationLoop(null);
+    this.container.removeEventListener("pointerdown", this.onDown, true);
+    this.container.removeEventListener("pointermove", this.onPointerMove, true);
+    this.container.removeEventListener("pointerup", this.onUp, true);
+    this.container.removeEventListener("pointercancel", this.onUp, true);
     this.resizeObserver.disconnect();
     this.controls.dispose();
     this.renderer.dispose();

@@ -1,5 +1,45 @@
 # v0.8
 
+## v0.8.7 — Touch controls (2026-11-09)
+
+### Problem
+
+Turning the cube meant tapping buttons below it. On a phone, Rob wanted to turn the cube by touching it.
+
+### Solution
+
+Swipe on the cube to turn the row or column under your finger. Swipe beside the cube in free play to turn the whole cube. Design: docs/02-levels.md → Controls → Touch controls (decided by Rob, 2026-11-06).
+
+### New
+
+- Swipe a sticker: its layer turns the way the finger went.
+- Free play: swipe beside the cube turns the whole cube (left/right y, up/down x); middle rows can be swiped.
+- Lessons: dragging beside the cube is still the look-around that springs back.
+- A swipe only makes moves the screen's buttons have; a middle-row swipe in a beginner level says to use a row with a button.
+
+### Changed
+
+- Free play hint and the cube's screen-reader label describe swiping.
+
+### Verification
+
+- 192 tests passed, including 4 new swipe tests.
+- Every sticker × every direction checked against the move engine: the sticker moves the way the finger went.
+- Lint clean; build clean.
+- Browser, simulated touch events: front right column swiped up made R; swipe beside the cube made x and y; middle-row swipe in level "Middle edges" showed the message.
+- Not checked on a real phone: needs a phone in hand.
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `src/render/swipe.ts` | New: which move a swipe makes |
+| `src/render/cubeView.ts` | Finger tracking, sticker hit test |
+| `src/app/cubePanel.ts` | Only allowed moves; free-play option; label |
+| `src/app/practice.ts` | Free play uses swipes; hint text |
+| `docs/02-levels.md`, `site/catalog.json` | Touch controls marked built, with rules |
+| `tests/swipe.test.ts` | New tests |
+
 ## v0.8.6 — Cube review fixes (2026-11-06)
 
 ### Problem
