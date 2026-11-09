@@ -37,7 +37,7 @@ export function mountPractice(root: HTMLElement): Screen {
     panel.setState(s.reduce<Face[]>((st, m) => applyMove(st, m), solved()));
     scrambled = true;
     refresh();
-    panel.say(`Scramble: ${s.join(" ")}`);
+    panel.say("Scrambled! Can you solve it?");
   });
   undoBtn.addEventListener("click", () => {
     panel.undo();

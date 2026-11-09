@@ -347,7 +347,7 @@ function corners(s: CubeState) {
     (x) => all(x, D_EDGES),
     6,
     () =>
-      "Put a white corner above its spot (front-right), then repeat R U R' U' until it drops in.",
+      "Put a white corner above its spot (front-right), then repeat the corner sequence until it drops in.",
   );
 }
 
@@ -382,8 +382,8 @@ function yellowCross(s: CubeState) {
     3,
     (n) =>
       n === 0
-        ? `Yellow dot: do ${ALGS.yellowCross}.`
-        : `Hold the yellow L at back-left (or line left-to-right), then do ${ALGS.yellowCross}.`,
+        ? "Yellow dot: do the sequence."
+        : "Hold the yellow L at back-left (or line left-to-right), then do the sequence.",
   );
 }
 
@@ -396,7 +396,7 @@ function yellowEdges(s: CubeState) {
     (x) => (yellowEdgesDone(x) ? 1 : 0),
     yellowCrossDone,
     6,
-    () => `Turn the top to match edges with centers, then swap with ${ALGS.yellowEdges}.`,
+    () => "Turn the top to match edges with centers, then swap them with the sequence.",
   );
 }
 
@@ -412,8 +412,7 @@ function yellowCornersPlace(s: CubeState) {
     (x) => (yellowCornersPlaced(x) ? 1 : 0),
     yellowEdgesDone,
     5,
-    () =>
-      `Hold a corner that is in its right spot at front-right, then do ${ALGS.yellowCornersPlace}.`,
+    () => "Hold a corner that is in its right spot at front-right, then do the sequence.",
   );
 }
 
@@ -434,7 +433,7 @@ function yellowCornersTwist(s: CubeState): SolveStep[] {
       out.push({
         stage: "yellowCornersTwist",
         moves: u,
-        say: `Bring the next twisted corner to front-right: ${u.join(" ")}`,
+        say: "Turn the top to bring the next twisted corner to front-right.",
       });
     }
     cur = here;
@@ -447,13 +446,13 @@ function yellowCornersTwist(s: CubeState): SolveStep[] {
     out.push({
       stage: "yellowCornersTwist",
       moves: seq(repeat(ALGS.twist, n)),
-      say: `Do ${ALGS.twist} ${n} times, until yellow is on top. The bottom will look messed up — keep going.`,
+      say: `Do the twist sequence ${n} times, until yellow is on top. The bottom will look messed up — keep going.`,
     });
   }
   for (const u of ["U", "U'", "U2"]) {
     if (isSolved(cur)) break;
     if (isSolved(applyMoves(cur, [u]))) {
-      out.push({ stage: "yellowCornersTwist", moves: [u], say: `Line up the top: ${u}` });
+      out.push({ stage: "yellowCornersTwist", moves: [u], say: "Turn the top to line it up." });
       cur = applyMoves(cur, [u]);
     }
   }

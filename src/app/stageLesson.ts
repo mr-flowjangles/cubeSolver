@@ -11,6 +11,7 @@ import { PRACTICE_RAMP, practicePosition } from "../lessons/position";
 import { type GuideMove, demoPosition, guideMoves, stageSteps } from "../lessons/walkthrough";
 import { WHOLE_CUBE, reorient, stickerMap } from "../render/swipe";
 import { type CubePanel, mountCubePanel } from "./cubePanel";
+import { HintArrows } from "./hintArrows";
 import { showPass } from "./reward";
 import type { Screen } from "./shell";
 
@@ -114,7 +115,7 @@ export function mountStageLesson(root: HTMLElement, level: Level, next?: Level):
       ? `${g.part} · step ${g.step + 1} of ${g.steps}`
       : `Step ${g.step + 1} of ${g.steps}`;
     $(".guide-say").textContent = g.say;
-    $(".guide-move").innerHTML = `<b>${shown(g)}</b> — ${g.why}`;
+    $(".guide-move").textContent = g.why;
     panel.view.pointTo(shown(g));
     light(g, panel.state);
   };
@@ -136,15 +137,17 @@ export function mountStageLesson(root: HTMLElement, level: Level, next?: Level):
           p.say("You turned the cube. The moves now match the new front.");
           present();
         } else {
-          p.say(`That was ${m}. Undoing it — swipe ${g ? shown(g) : ""} where the arrow shows.`);
+          p.say("That wasn't the arrow's move. Undoing it — follow the arrow.");
           setTimeout(() => p.undo(), 250);
         }
       } else {
+        hints.moved(m);
         p.say(`Moves: ${p.history.length}`);
         checkCube();
       }
     },
   });
+  const hints = new HintArrows(panel.view);
 
   // ---- Show it ----
   const playShow = async () => {
@@ -185,7 +188,7 @@ export function mountStageLesson(root: HTMLElement, level: Level, next?: Level):
     panel.setState(practicePosition(level, Math.random, left));
     panel.view.lookFrom(lookWork);
     panel.view.spotlight(null);
-    panel.view.pointTo(null);
+    hints.clear();
     plan = [];
     cubeDone = false;
     started = Date.now();
@@ -289,16 +292,20 @@ export function mountStageLesson(root: HTMLElement, level: Level, next?: Level):
       practice++;
       newCube();
     } else if (id === "fresh") newCube();
-    else if (id === "undo") panel.undo();
-    else if (id === "hint") {
+    else if (id === "undo") {
+      hints.clear();
+      panel.undo();
+    } else if (id === "hint") {
       usedHelp = true;
       const step = nextStep();
-      panel.say(step ? `${step.say}  →  ${step.moves.join(" ")}` : "Already done!");
+      panel.say(step ? `${step.say} Follow the arrow.` : "Already done!");
+      if (step) hints.start(step.moves);
     } else if (id === "show") {
       usedHelp = true;
       const step = nextStep();
       if (!step) return;
-      panel.say(`${step.say}  →  ${step.moves.join(" ")}`);
+      hints.clear();
+      panel.say(step.say);
       await panel.play(step.moves);
       checkCube();
     }

@@ -233,7 +233,7 @@ function lastLayer(
 const AUF = (s: CubeState): CfopStep[] => {
   for (const u of ["U", "U'", "U2"])
     if (isSolved(applyMoves(s, [u])))
-      return [{ stage: "ep", moves: [u], say: `Line up the top: ${u}` }];
+      return [{ stage: "ep", moves: [u], say: "Turn the top to line it up." }];
   return [];
 };
 

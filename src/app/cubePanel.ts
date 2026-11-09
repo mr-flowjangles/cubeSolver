@@ -44,9 +44,7 @@ export function mountCubePanel(
 ): CubePanel {
   const set = opts.turns ?? "beginner";
   root.innerHTML = `
-    <div class="stage" aria-label="3D cube. Swipe a row to turn it. Swipe beside the cube to turn the whole cube.">
-      <div class="move-letter" aria-hidden="true"></div>
-    </div>
+    <div class="stage" aria-label="3D cube. Swipe a row to turn it. Swipe beside the cube to turn the whole cube."></div>
     <p class="status" role="status"></p>`;
   const status = root.querySelector<HTMLElement>(".status")!;
   // A swipe makes only the turns this screen allows, so a lesson never gets one it doesn't teach.
@@ -58,16 +56,6 @@ export function mountCubePanel(
       else panel.say("Middle rows don't turn in beginner levels. Swipe an outer row.");
     },
   });
-
-  // Each turn flashes its letter over the cube, so players learn the names.
-  const letter = root.querySelector<HTMLElement>(".move-letter")!;
-  let letterTimer = 0;
-  const flash = (m: Move) => {
-    letter.textContent = m;
-    letter.classList.add("on");
-    clearTimeout(letterTimer);
-    letterTimer = window.setTimeout(() => letter.classList.remove("on"), 700);
-  };
 
   let state = [...start] as Face[];
   const history: Move[] = [];
@@ -82,7 +70,6 @@ export function mountCubePanel(
     view,
     turn(m, record = true) {
       state = applyMove(state, m);
-      flash(m);
       if (record) history.push(m);
       void view.animate(m, state);
       opts.onMove?.(m, panel);
@@ -92,7 +79,7 @@ export function mountCubePanel(
       for (const m of moves) {
         state = applyMove(state, m);
         history.push(m);
-        last = view.animate(m, state, ms).then(() => flash(m));
+        last = view.animate(m, state, ms);
       }
       await last;
     },

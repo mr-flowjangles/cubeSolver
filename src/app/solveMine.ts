@@ -20,6 +20,7 @@ import {
 import { type GuideStep, METHODS } from "../lessons/index";
 import { loadProgress } from "../game/storage";
 import { CubeView } from "../render/cubeView";
+import { WHOLE_CUBE, swipesFor } from "../render/swipe";
 import { ADA_SHAPE, shapeSvg } from "../render/shapes";
 import { solveBeginner } from "../solver/beginner";
 import { mountScan } from "./scan";
@@ -214,7 +215,7 @@ function mountGuide(root: HTMLElement): Screen {
       <div class="guide-head">
         <p class="stage-name"></p>
         <p class="step-say"></p>
-        <p class="step-moves"></p>
+        <p class="step-moves caption"></p>
       </div>
       <div class="stage"></div>
       <div class="bar-track"><div class="bar-fill"></div></div>
@@ -243,12 +244,23 @@ function mountGuide(root: HTMLElement): Screen {
       nameEl.textContent = "Solved! 🎉";
       sayEl.textContent = `${moves.length} moves. Nice work.`;
       movesEl.innerHTML = "";
+      view.pointTo(null);
       return;
     }
     const { si, mi } = moves[at];
     const step = steps[si];
     nameEl.textContent = `${method.stageTitle[step.stage]} · move ${at + 1} of ${moves.length}`;
-    sayEl.textContent = step.say;
+    const m = moves[at].m;
+    // Arrows only: the arrow shows the move; a half turn or two-layer turn says so in words.
+    const extra = m.endsWith("2")
+      ? WHOLE_CUBE.includes(m[0])
+        ? " Turn the whole cube twice, the way the arrow shows."
+        : " Turn it twice."
+      : swipesFor(m).length > 1
+        ? " Turn two layers together."
+        : "";
+    sayEl.textContent = step.say + extra;
+    view.pointTo(swipesFor(m)[0]);
     movesEl.innerHTML = step.moves
       .map((m, k) => `<span class="${k < mi ? "done" : k === mi ? "now" : ""}">${m}</span>`)
       .join(" ");

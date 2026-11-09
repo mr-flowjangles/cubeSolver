@@ -58,7 +58,6 @@ export class CubeView {
   private raycaster = new THREE.Raycaster();
   private side: "above" | "below" = "above";
   private arrow: THREE.Group | null = null;
-  private sideName: HTMLElement;
 
   constructor(
     private container: HTMLElement,
@@ -68,10 +67,6 @@ export class CubeView {
     this.state = state;
     this.ada = options.ada ?? false;
     this.onSwipe = options.onSwipe;
-    this.sideName = document.createElement("div");
-    this.sideName.className = "side-name";
-    this.sideName.hidden = true;
-    container.appendChild(this.sideName);
     this.backgroundTurns = options.backgroundTurns ?? true;
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -237,7 +232,6 @@ export class CubeView {
       this.arrow = null;
     }
     this.tags.forEach((t) => (t.visible = true));
-    this.sideName.hidden = true;
     if (!move) return;
     const place = this.arrowPlace(move);
     if (!place) return;
@@ -253,15 +247,7 @@ export class CubeView {
     mesh.renderOrder = 20;
     group.add(mesh);
 
-    // The move's letter, big, on the arrow, so the lesson's letter points at something.
-    const letter = letterSprite(move);
-    letter.position.copy(place.at).add(n.clone().multiplyScalar(0.05));
-    group.add(letter);
-
-    // The side being turned is named in a tag at the top of the cube area. The plain
-    // FRONT / TOP / RIGHT tags hide while an arrow shows, so nothing covers the arrow.
-    this.sideName.textContent = SIDE_LABEL[move[0]] ?? "";
-    this.sideName.hidden = !this.sideName.textContent;
+    // The plain FRONT / TOP / RIGHT tags hide while an arrow shows, so nothing covers it.
     this.tags.forEach((t) => (t.visible = false));
     this.arrow = group;
     this.scene.add(group);
@@ -288,6 +274,16 @@ export class CubeView {
           n: [0, 0, 1] as const,
           length: 2.8,
         };
+      if (quarter[0] === "z") {
+        // z follows F (clockwise as seen from the front): the top goes right.
+        const top = this.side === "above" ? 1 : -1;
+        return {
+          at: new THREE.Vector3(0, top * 2.15, 1.6),
+          u: [prime === (top === 1) ? -1 : 1, 0, 0] as const,
+          n: [0, 0, 1] as const,
+          length: 2.8,
+        };
+      }
       return null;
     }
     // On the cube: the strip of stickers in that layer, on the front, right or top/bottom face.
@@ -411,15 +407,15 @@ export class CubeView {
   }
 
   /**
-   * Labels fixed in space next to the faces: "FRONT · F", "TOP · U", "RIGHT · R".
-   * They don't turn with the cube, which shows that letters mean places, not colors.
+   * Labels fixed in space next to the faces: FRONT, TOP, RIGHT.
+   * They don't turn with the cube: they name places, not colors.
    */
   private buildTags(side: "above" | "below") {
     for (const t of this.tags) this.scene.remove(t);
     const tags: [string, [number, number, number]][] = [
-      ["FRONT · F", [0, 0, 2.35]],
-      ["RIGHT · R", [2.35, 0, 0]],
-      side === "above" ? ["TOP · U", [0, 2.1, 0]] : ["BOTTOM · D", [0, -2.1, 0]],
+      ["FRONT", [0, 0, 2.35]],
+      ["RIGHT", [2.35, 0, 0]],
+      side === "above" ? ["TOP", [0, 2.1, 0]] : ["BOTTOM", [0, -2.1, 0]],
     ];
     this.tags = tags.map(([text, pos]) => {
       const sprite = labelSprite(text, "rgba(20,22,27,0.75)");
@@ -514,7 +510,6 @@ export class CubeView {
   dispose() {
     this.renderer.setAnimationLoop(null);
     this.pointTo(null);
-    this.sideName.remove();
     this.container.removeEventListener("pointerdown", this.onDown, true);
     this.container.removeEventListener("pointermove", this.onPointerMove, true);
     this.container.removeEventListener("pointerup", this.onUp, true);
@@ -553,22 +548,6 @@ function arrowTexture(): THREE.CanvasTexture {
   return ARROW;
 }
 
-/** Name of the side a move turns, shown with its letter. */
-const SIDE_LABEL: Record<string, string> = {
-  U: "TOP · U",
-  D: "BOTTOM · D",
-  R: "RIGHT · R",
-  L: "LEFT · L",
-  F: "FRONT · F",
-  B: "BACK · B",
-  M: "MIDDLE · M",
-  E: "MIDDLE · E",
-  S: "MIDDLE · S",
-  x: "WHOLE CUBE · x",
-  y: "WHOLE CUBE · y",
-  z: "WHOLE CUBE · z",
-};
-
 /** A rounded label that always faces the viewer and draws on top. */
 function labelSprite(text: string, fill: string): THREE.Sprite {
   const c = document.createElement("canvas");
@@ -589,30 +568,5 @@ function labelSprite(text: string, fill: string): THREE.Sprite {
   const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false }));
   sprite.scale.set(2.0, 0.4, 1);
   sprite.renderOrder = 10;
-  return sprite;
-}
-
-/** The move's letter in a round badge, drawn on top of the arrow. */
-function letterSprite(move: Move): THREE.Sprite {
-  const c = document.createElement("canvas");
-  c.width = c.height = 128;
-  const g = c.getContext("2d")!;
-  g.fillStyle = "#fff";
-  g.strokeStyle = "rgba(255, 47, 208, 1)";
-  g.lineWidth = 10;
-  g.beginPath();
-  g.arc(64, 64, 56, 0, Math.PI * 2);
-  g.fill();
-  g.stroke();
-  g.fillStyle = "#111";
-  g.font = `900 ${move.length > 1 ? 60 : 72}px system-ui, sans-serif`;
-  g.textAlign = "center";
-  g.textBaseline = "middle";
-  g.fillText(move, 64, 68);
-  const tex = new THREE.CanvasTexture(c);
-  tex.colorSpace = THREE.SRGBColorSpace;
-  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false }));
-  sprite.scale.set(0.8, 0.8, 1);
-  sprite.renderOrder = 30;
   return sprite;
 }

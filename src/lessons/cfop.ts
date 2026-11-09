@@ -32,7 +32,7 @@ export const CFOP_LEVELS: Level[] = [
     teach: [
       "Find a white corner and the edge that belongs next to it.",
       "Join them in the top layer, then put them in their slot together.",
-      "Work at the front-right slot. Turn the whole cube (y) to choose a slot.",
+      "Work at the front-right slot. Turn the whole cube to choose a slot.",
       "Almost every pair is built from these short moves:",
     ],
     algs: F2L_TRIGGERS,
@@ -94,7 +94,7 @@ export const CFOP_LEVELS: Level[] = [
     teach: [
       "One side solved: hold it at the back, do Ua or Ub.",
       "No side solved: H (opposite swaps) or Z (side swaps).",
-      "M turns the middle layer, like L.",
+      "Some moves turn the middle layer, the same way as the left side.",
     ],
     algs: EP_ALGS,
   },

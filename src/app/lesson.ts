@@ -1,4 +1,4 @@
-// One level. Stage levels are tutorials (stageLesson.ts), level 0 is lettersLesson.ts; this file runs
+// One level. Stage levels are tutorials (stageLesson.ts), level 0 is controlsLesson.ts; this file runs
 // the PLL level and the full solve.
 
 import { type CubeState, applyMoves, isSolved, toString } from "../cube";
@@ -10,9 +10,10 @@ import { practicePosition } from "../lessons/position";
 import { solveBeginner } from "../solver/beginner";
 import { solvePll } from "../solver/cfop";
 import { type CubePanel, mountCubePanel } from "./cubePanel";
+import { HintArrows } from "./hintArrows";
 import { showPass } from "./reward";
 import type { Screen } from "./shell";
-import { mountLettersLesson } from "./lettersLesson";
+import { mountControlsLesson } from "./controlsLesson";
 import { mountStageLesson } from "./stageLesson";
 
 const algList = (level: Level) =>
@@ -59,7 +60,7 @@ export function mountLesson(root: HTMLElement, id: string): Screen {
   }
 
   if (level.kind === "stage") return mountStageLesson(root, level, next);
-  if (level.kind === "notation") return mountLettersLesson(root, level, next);
+  if (level.kind === "notation") return mountControlsLesson(root, level, next);
 
   root.innerHTML = `
     <main class="lesson">
@@ -109,10 +110,12 @@ export function mountLesson(root: HTMLElement, id: string): Screen {
   const panel = mountCubePanel(root.querySelector(".panel")!, practicePosition(level), {
     turns: level.method === "cfop" ? "cfop" : "beginner",
     onMove: (m, p) => {
+      hints.moved(m);
       p.say(`Moves: ${p.history.length}`);
       check(p);
     },
   });
+  const hints = new HintArrows(panel.view);
   panel.say("Hold white on the bottom. Use Hint if you get stuck.");
 
   // Follow one plan while the player stays on it. Re-planning mid-way would go wrong
@@ -138,21 +141,25 @@ export function mountLesson(root: HTMLElement, id: string): Screen {
   root.querySelector("#hint")?.addEventListener("click", () => {
     usedHelp = true;
     const step = nextStep();
-    panel.say(step ? `${step.say}  →  ${step.moves.join(" ")}` : "Already done!");
+    panel.say(step ? `${step.say} Follow the arrow.` : "Already done!");
+    if (step) hints.start(step.moves);
   });
   root.querySelector("#show")?.addEventListener("click", async () => {
     usedHelp = true;
     const step = nextStep();
     if (!step) return;
-    panel.say(`${step.say}  →  ${step.moves.join(" ")}`);
+    hints.clear();
+    panel.say(step.say);
     await panel.play(step.moves);
     check(panel);
   });
   root.querySelector("#undo")!.addEventListener("click", () => {
+    hints.clear();
     panel.undo();
   });
   root.querySelector("#fresh")!.addEventListener("click", () => {
     panel.setState(practicePosition(level));
+    hints.clear();
     done = false;
     usedHelp = false;
     started = Date.now();
