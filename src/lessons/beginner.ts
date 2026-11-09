@@ -22,7 +22,7 @@ export const BEGINNER_LEVELS: Level[] = [
     id: "meet",
     number: 0,
     title: "Learn the controls",
-    goal: "Learn the move letters. Every level uses them, and so does your real cube.",
+    goal: "Learn to turn the cube. Swipe where the arrow shows.",
     kind: "notation",
     method: "beginner",
     teach: [],
@@ -139,7 +139,7 @@ export const BEGINNER_LEVELS: Level[] = [
     teach: [
       "Hold a twisted corner at front-right.",
       "Repeat the sequence until yellow is on top. The bottom gets messy — that's normal.",
-      "Turn only the top (U) to bring the next twisted corner to front-right.",
+      "Turn only the top to bring the next twisted corner to front-right.",
       "Never turn the whole cube during this step.",
     ],
     algs: [{ name: "Twist", moves: ALGS.twist }],
@@ -160,47 +160,32 @@ export const BEGINNER_LEVELS: Level[] = [
 ];
 
 /**
- * Level 0, part 1: the letters, in order. Written for a 10-year-old.
- * `say` is what to do next; `did` is the line printed after the move is made.
+ * Level 0, part 1: ten swipes, in order. Written for a 10-year-old; no letters, the arrow shows
+ * each move. `say` is what to do next; `did` is the line printed after the move is made.
+ * `move` is the standard letter, used only by the app.
  */
 export const NOTATION_STEPS: { move: string; say: string; did: string }[] = [
-  { move: "R", say: "R means the Right side. Swipe it up.", did: "the right side went up." },
-  { move: "U", say: "U means Up, the top. Swipe it to the left.", did: "the top went left." },
-  {
-    move: "R'",
-    say: 'R\' (say "R prime") is the right side the other way. Swipe it down.',
-    did: "the right side went down.",
-  },
-  {
-    move: "U'",
-    say: "U' is the top the other way. Swipe it to the right.",
-    did: "the top went right.",
-  },
-  {
-    move: "F",
-    say: "F means the Front, the side facing you. Turn it the way a clock goes.",
-    did: "the front turned the way a clock goes.",
-  },
+  { move: "R", say: "Swipe the right side up.", did: "The right side went up." },
+  { move: "U", say: "Swipe the top to the left.", did: "The top went left." },
+  { move: "R'", say: "Swipe the right side down.", did: "The right side went down." },
+  { move: "U'", say: "Swipe the top to the right.", did: "The top went right." },
+  { move: "F", say: "Turn the front the way a clock goes.", did: "The front turned like a clock." },
   {
     move: "F'",
-    say: "F' is the front the other way, backwards round the clock.",
-    did: "the front turned backwards.",
+    say: "Turn the front backwards, the other way round the clock.",
+    did: "The front turned backwards.",
   },
-  { move: "L", say: "L means the Left side. Swipe it down.", did: "the left side went down." },
-  {
-    move: "D'",
-    say: "D means Down, the bottom. D' turns it to the left.",
-    did: "the bottom went left.",
-  },
+  { move: "L", say: "Swipe the left side down.", did: "The left side went down." },
+  { move: "D'", say: "Swipe the bottom to the left.", did: "The bottom went left." },
   {
     move: "y",
-    say: "y turns the whole cube. Swipe next to the cube, to the left.",
-    did: "the whole cube turned. Now you see a new front.",
+    say: "Turn the whole cube: swipe next to the cube, to the left.",
+    did: "The whole cube turned. Now you see a new side.",
   },
   {
     move: "B",
-    say: "B means the Back. You can't see it, so swipe the top's back row the way the arrow shows.",
-    did: "the back turned.",
+    say: "Turn the back. You can't see it, so swipe where the arrow shows.",
+    did: "The back turned.",
   },
 ];
 export const NOTATION_DRILL = NOTATION_STEPS.map((s) => s.move);
@@ -211,8 +196,8 @@ export const MAGIC_ROUNDS = 6;
 
 /** What each move of the trick did, printed after it's made. */
 export const MAGIC_DID: Record<string, string> = {
-  R: "the right side went up.",
-  U: "the top went left.",
-  "R'": "the right side went down.",
-  "U'": "the top went right.",
+  R: "The right side went up.",
+  U: "The top went left.",
+  "R'": "The right side went down.",
+  "U'": "The top went right.",
 };

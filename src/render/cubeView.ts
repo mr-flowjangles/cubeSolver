@@ -57,7 +57,7 @@ export class CubeView {
   } | null = null;
   private raycaster = new THREE.Raycaster();
   private side: "above" | "below" = "above";
-  private arrow: THREE.Mesh | null = null;
+  private arrow: THREE.Group | null = null;
 
   constructor(
     private container: HTMLElement,
@@ -231,9 +231,11 @@ export class CubeView {
       this.scene.remove(this.arrow);
       this.arrow = null;
     }
+    this.tags.forEach((t) => (t.visible = true));
     if (!move) return;
     const place = this.arrowPlace(move);
     if (!place) return;
+    const group = new THREE.Group();
     const mesh = new THREE.Mesh(
       new THREE.PlaneGeometry(place.length, 0.62),
       new THREE.MeshBasicMaterial({ map: arrowTexture(), transparent: true, depthTest: false }),
@@ -243,8 +245,12 @@ export class CubeView {
     mesh.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(u, n.clone().cross(u), n));
     mesh.position.copy(place.at);
     mesh.renderOrder = 20;
-    this.arrow = mesh;
-    this.scene.add(mesh);
+    group.add(mesh);
+
+    // The plain FRONT / TOP / RIGHT tags hide while an arrow shows, so nothing covers it.
+    this.tags.forEach((t) => (t.visible = false));
+    this.arrow = group;
+    this.scene.add(group);
   }
 
   /** Where the arrow goes: centre, direction it points (u) and the way it faces (n). */
@@ -268,10 +274,21 @@ export class CubeView {
           n: [0, 0, 1] as const,
           length: 2.8,
         };
+      if (quarter[0] === "z") {
+        // z follows F (clockwise as seen from the front): the top goes right.
+        const top = this.side === "above" ? 1 : -1;
+        return {
+          at: new THREE.Vector3(0, top * 2.15, 1.6),
+          u: [prime === (top === 1) ? -1 : 1, 0, 0] as const,
+          n: [0, 0, 1] as const,
+          length: 2.8,
+        };
+      }
       return null;
     }
-    // On the cube: the strip of stickers in that layer, on the front, top/bottom or right face.
-    const faces = ["F", this.side === "above" ? "U" : "D", "R"];
+    // On the cube: the strip of stickers in that layer, on the front, right or top/bottom face.
+    // Front first, then right (it faces the camera more than the top does), then top/bottom.
+    const faces = ["F", "R", this.side === "above" ? "U" : "D"];
     for (const face of faces) {
       for (const s of STICKERS) {
         if (s.face !== face) continue;
@@ -390,36 +407,19 @@ export class CubeView {
   }
 
   /**
-   * Labels fixed in space next to the faces: "FRONT · F", "TOP · U", "RIGHT · R".
-   * They don't turn with the cube, which shows that letters mean places, not colors.
+   * Labels fixed in space next to the faces: FRONT, TOP, RIGHT.
+   * They don't turn with the cube: they name places, not colors.
    */
   private buildTags(side: "above" | "below") {
     for (const t of this.tags) this.scene.remove(t);
     const tags: [string, [number, number, number]][] = [
-      ["FRONT · F", [0, 0, 2.35]],
-      ["RIGHT · R", [2.35, 0, 0]],
-      side === "above" ? ["TOP · U", [0, 2.1, 0]] : ["BOTTOM · D", [0, -2.1, 0]],
+      ["FRONT", [0, 0, 2.35]],
+      ["RIGHT", [2.35, 0, 0]],
+      side === "above" ? ["TOP", [0, 2.1, 0]] : ["BOTTOM", [0, -2.1, 0]],
     ];
     this.tags = tags.map(([text, pos]) => {
-      const c = document.createElement("canvas");
-      c.width = 256;
-      c.height = 64;
-      const g = c.getContext("2d")!;
-      g.fillStyle = "rgba(20,22,27,0.75)";
-      g.beginPath();
-      g.roundRect(4, 8, 248, 48, 24);
-      g.fill();
-      g.fillStyle = "#fff";
-      g.font = "bold 28px system-ui, sans-serif";
-      g.textAlign = "center";
-      g.textBaseline = "middle";
-      g.fillText(text, 128, 33);
-      const tex = new THREE.CanvasTexture(c);
-      tex.colorSpace = THREE.SRGBColorSpace;
-      const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false }));
-      sprite.scale.set(1.6, 0.4, 1);
+      const sprite = labelSprite(text, "rgba(20,22,27,0.75)");
       sprite.position.set(...pos);
-      sprite.renderOrder = 10;
       this.scene.add(sprite);
       return sprite;
     });
@@ -546,4 +546,27 @@ function arrowTexture(): THREE.CanvasTexture {
   ARROW = new THREE.CanvasTexture(c);
   ARROW.colorSpace = THREE.SRGBColorSpace;
   return ARROW;
+}
+
+/** A rounded label that always faces the viewer and draws on top. */
+function labelSprite(text: string, fill: string): THREE.Sprite {
+  const c = document.createElement("canvas");
+  c.width = 320;
+  c.height = 64;
+  const g = c.getContext("2d")!;
+  g.fillStyle = fill;
+  g.beginPath();
+  g.roundRect(4, 8, 312, 48, 24);
+  g.fill();
+  g.fillStyle = "#fff";
+  g.font = "bold 28px system-ui, sans-serif";
+  g.textAlign = "center";
+  g.textBaseline = "middle";
+  g.fillText(text, 160, 33);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false }));
+  sprite.scale.set(2.0, 0.4, 1);
+  sprite.renderOrder = 10;
+  return sprite;
 }

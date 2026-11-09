@@ -1,6 +1,7 @@
-// Level 0, the move letters, for a 10-year-old (docs/02-levels.md → Level 0).
-//   Part 1  10 swipes, one letter each; the arrow shows where, one sentence says what it means
-//   Part 2  the trick: R U R' U' six times takes a solved cube apart and back to solved
+// Level 0, learn to turn the cube, for a 10-year-old (docs/02-levels.md → Level 0).
+// No letters: the arrow shows every move.
+//   Part 1  10 swipes; the arrow shows where, one sentence says what to do
+//   Part 2  the trick: the same 4 moves (R U R' U') six times take a solved cube apart and back
 // Every move prints a line in a list under the cube.
 
 import { type Move, isSolved, solved } from "../cube";
@@ -9,10 +10,10 @@ import { mountCubePanel } from "./cubePanel";
 import { showPass } from "./reward";
 import type { Screen } from "./shell";
 
-const LETTERS = NOTATION_STEPS.length;
+const SWIPES = NOTATION_STEPS.length;
 const TRICK = MAGIC.length * MAGIC_ROUNDS;
 
-export function mountLettersLesson(root: HTMLElement, level: Level, next?: Level): Screen {
+export function mountControlsLesson(root: HTMLElement, level: Level, next?: Level): Screen {
   root.innerHTML = `
     <main class="lesson letters">
       <section class="intro">
@@ -36,31 +37,31 @@ export function mountLettersLesson(root: HTMLElement, level: Level, next?: Level
   const task = root.querySelector<HTMLElement>(".task")!;
   const log = root.querySelector<HTMLOListElement>(".move-log")!;
   const passedEl = root.querySelector<HTMLElement>(".passed")!;
-  let at = 0; // 0..LETTERS-1: the letters; LETTERS..LETTERS+TRICK-1: the trick
+  let at = 0; // 0..SWIPES-1: the letters; SWIPES..SWIPES+TRICK-1: the trick
   let started = Date.now();
   let done = false;
 
   /** The move asked for now. */
   const wanted = (): Move | undefined =>
-    at < LETTERS
+    at < SWIPES
       ? NOTATION_STEPS[at].move
-      : at < LETTERS + TRICK
-        ? MAGIC[(at - LETTERS) % MAGIC.length]
+      : at < SWIPES + TRICK
+        ? MAGIC[(at - SWIPES) % MAGIC.length]
         : undefined;
 
   const prompt = () => {
     const m = wanted();
-    panel.view.highlight(m ?? null);
     panel.view.pointTo(m ?? null);
-    if (at < LETTERS) {
-      task.textContent = `${NOTATION_STEPS[at].say}  (${at + 1} of ${LETTERS})`;
+    if (at < SWIPES) {
+      task.textContent = `${NOTATION_STEPS[at].say}  (${at + 1} of ${SWIPES})`;
     } else if (m) {
-      const k = at - LETTERS;
+      const k = at - SWIPES;
       const round = Math.floor(k / MAGIC.length) + 1;
-      task.textContent = `Trick, round ${round} of ${MAGIC_ROUNDS}: swipe ${m}. Keep going. Watch what happens!`;
+      task.textContent = `Trick, round ${round} of ${MAGIC_ROUNDS}. Follow the arrow. Watch what happens!`;
     } else {
-      task.textContent =
-        "It's solved again! R U R' U' six times always brings the cube back. That's what a sequence is: moves you can count on.";
+      task.innerHTML =
+        "It's solved again! The same 4 moves, 6 times, always bring the cube back. That's a sequence: moves you can count on." +
+        ` <small class="caption">Cube books write these 4 moves as ${MAGIC.join(" ")}.</small>`;
     }
   };
 
@@ -73,7 +74,7 @@ export function mountLettersLesson(root: HTMLElement, level: Level, next?: Level
   const startTrick = () => {
     panel.setState(solved());
     print("Trick time: a fresh, solved cube.");
-    panel.say("Now a trick. R U R' U' six times. The cube will get mixed up. Don't stop!");
+    panel.say("Now a trick: the same 4 moves, 6 times. The cube will get mixed up. Don't stop!");
   };
 
   const panel = mountCubePanel(root.querySelector(".panel")!, solved(), {
@@ -81,23 +82,23 @@ export function mountLettersLesson(root: HTMLElement, level: Level, next?: Level
     onMove: (m, p) => {
       if (done) return;
       if (m !== wanted()) {
-        p.say(`Oops, that was ${m}. Try again where the arrow shows.`);
+        p.say("Oops, that was a different move. Try again where the arrow shows.");
         setTimeout(() => p.undo(), 250);
         return;
       }
-      const did = at < LETTERS ? NOTATION_STEPS[at].did : MAGIC_DID[m];
-      print(`${m}: ${did}`);
+      const did = at < SWIPES ? NOTATION_STEPS[at].did : MAGIC_DID[m];
+      print(did);
       at++;
-      p.say(at < LETTERS + TRICK ? "Good!" : "");
-      if (at === LETTERS) startTrick();
-      else if (at > LETTERS && (at - LETTERS) % MAGIC.length === 0 && at < LETTERS + TRICK)
-        print(`Round ${(at - LETTERS) / MAGIC.length} of ${MAGIC_ROUNDS} done.`);
-      if (at === LETTERS + TRICK && isSolved(p.state)) {
+      p.say(at < SWIPES + TRICK ? "Good!" : "");
+      if (at === SWIPES) startTrick();
+      else if (at > SWIPES && (at - SWIPES) % MAGIC.length === 0 && at < SWIPES + TRICK)
+        print(`Round ${(at - SWIPES) / MAGIC.length} of ${MAGIC_ROUNDS} done.`);
+      if (at === SWIPES + TRICK && isSolved(p.state)) {
         done = true;
         print("Solved again! 🎉");
         showPass(passedEl, level, {
           usedHelp: false,
-          moves: LETTERS + TRICK,
+          moves: SWIPES + TRICK,
           seconds: Math.round((Date.now() - started) / 1000),
         });
       }
@@ -118,7 +119,7 @@ export function mountLettersLesson(root: HTMLElement, level: Level, next?: Level
 
   root.querySelector("#undo")!.addEventListener("click", () => {
     // Undo can't go back past the fresh cube at the start of the trick.
-    if (done || at === 0 || at === LETTERS || !panel.history.length) return;
+    if (done || at === 0 || at === SWIPES || !panel.history.length) return;
     panel.undo();
     at--;
     if (log.firstElementChild?.textContent?.startsWith("Round")) log.firstElementChild.remove();

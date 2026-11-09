@@ -1,5 +1,91 @@
 # v0.8
 
+## v0.8.11 — Arrows only (2026-11-09)
+
+### Problem
+
+The move letters made no sense on screen: "R' is the right side" pointed at one thing while the arrow sat on another, and dimming made the colors look wrong.
+
+### Solution
+
+Arrows only. The arrow on the cube shows every move; letters stay only as a small caption under sequences. Design: docs/02-levels.md → Controls and Level 0.
+
+### New
+
+- Hint puts the arrow on the cube for each move of the step, one at a time (`src/app/hintArrows.ts`).
+- Guided solve of your own cube shows the arrow for each move, including whole-cube turns (z added).
+
+### Changed
+
+- Removed from the cube: letter badge, side-name tag, the flashing letter, the dimming in level 0.
+- FRONT / TOP / RIGHT tags lost their letters.
+- Level 0 rewritten without letters ("Swipe the right side up."); file renamed `controlsLesson.ts`.
+- Walk through it shows the reason only, no bold letter; wrong-move message says "follow the arrow".
+- Solver hint sentences rewritten in words ("Turn the top to line it up." instead of "Line up the top: U2").
+- Sequences on level pages and the guided solve's move list are a small, faded caption.
+- Free play scramble says "Scrambled! Can you solve it?" instead of listing letters.
+
+### Fixed
+
+- The lesson's step box showed during Try it: `.guide` display beat the hidden attribute.
+
+### Verification
+
+- 216 tests passed, lint clean, build clean.
+- New tests: no move letters in level 0 text or in any hint sentence from both solvers (20 scrambles each); hint arrows follow each swipe and clear on a different move.
+- Browser screenshots: level 0 with arrow only, no dimming, printed lines without letters; White corners Hint shows the arrow; step box hidden in Try it; guided solve arrows for z2 and F'.
+- Not checked on a real phone: needs a phone in hand.
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `src/app/hintArrows.ts` | New: hint arrows |
+| `src/app/controlsLesson.ts` | Level 0 without letters (renamed from lettersLesson.ts) |
+| `src/render/cubeView.ts` | Letter badge and side tag removed; z arrow; tags without letters |
+| `src/app/cubePanel.ts`, `src/app/stageLesson.ts`, `src/app/lesson.ts`, `src/app/solveMine.ts`, `src/app/practice.ts` | Arrows instead of letters |
+| `src/solver/beginner.ts`, `src/solver/cfop.ts`, `src/lessons/beginner.ts`, `src/lessons/cfop.ts` | Text in words |
+| `src/app/styles.css` | Caption style; hidden step box; removed letter styles |
+| `docs/02-levels.md`, `site/catalog.json` | Arrows-only design |
+| `tests/arrows.test.ts` | New tests |
+
+## v0.8.10 — Letters on the cube (2026-11-09)
+
+### Problem
+
+Level 0 said "U means Up, the top" but there was no U on the cube. A letter only flashed after the move, and the small tags named just 3 sides.
+
+### Solution
+
+The letter now sits on the arrow in a big badge, and a tag at the top of the cube area names the side being turned. Design: docs/02-levels.md → Controls.
+
+### New
+
+- Big letter badge on the arrow (U, R', B …).
+- Side-name tag at the top of the cube area: LEFT · L, BACK · B, MIDDLE · M, WHOLE CUBE · y, and the rest.
+
+### Changed
+
+- The plain FRONT / TOP / RIGHT tags hide while an arrow shows, so nothing covers the arrow.
+- Arrows prefer the right side over the top; back turns now show on the right side's back column (the top's back row was edge-on and hard to see).
+- Level 0, B: "swipe the back edge the way the arrow shows".
+
+### Verification
+
+- 212 tests passed, lint clean.
+- Browser screenshots (keyboard events): U badge on the top row with TOP · U; L badge on the left column with LEFT · L, nothing overlapping; B badge on the right side's back column with BACK · B.
+- First tries put the side name on the cube; it covered the arrow or ran off a narrow screen, so it moved to a fixed tag.
+- Not checked on a real phone: needs a phone in hand.
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `src/render/cubeView.ts` | Letter badge; side-name tag; arrow face order |
+| `src/app/styles.css` | Side-name tag style |
+| `src/lessons/beginner.ts` | B sentence |
+| `docs/02-levels.md`, `site/catalog.json` | Design lines |
+
 ## v0.8.9 — Learn the letters (2026-11-09)
 
 ### Problem

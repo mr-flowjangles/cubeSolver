@@ -38,7 +38,7 @@ How the three parts are built (v0.8.4):
 
 | # | Level | Passed when | Sequence taught |
 |---|---|---|---|
-| 0 | Learn the controls | 10 letter swipes, then `R U R' U'` six times | `R U R' U'` (6 times brings the cube back) |
+| 0 | Learn the controls | 10 swipes, then the trick: the same 4 moves six times | `R U R' U'` (6 times brings the cube back) |
 | 1 | White cross | 4 white edges on the bottom, matching centers | none — the daisy, then F2 for each edge |
 | 2 | White corners | white layer done | `R U R' U'` (repeat) |
 | 3 | Middle edges | first two layers done | `U R U' R' U' F' U F` / `U' L' U L U F U' F'` |
@@ -48,14 +48,14 @@ How the three parts are built (v0.8.4):
 | 7 | Twist yellow corners | cube solved | `R' D' R D` (repeat) |
 | 8 | Full solve | cube solved from a full scramble | all of the above |
 
-### Level 0: the move letters[1]
+### Level 0: learn to turn the cube[1]
 
-- Written for a 10-year-old.
-- One line at the top: "Learn the move letters. Every level uses them, and so does your real cube." No goal paragraph, no list.
-- **Part 1, the letters:** 10 swipes (R, U, R', U', F, F', L, D', y, B). The arrow shows each one; one plain sentence says what the letter means.
-- **Every move prints a line** in a list under the cube, e.g. "R: the right side went up."
-- **Part 2, the trick:** a fresh solved cube. Do `R U R' U'` six times (24 swipes). The cube gets mixed up, then comes back solved.
-- The trick works because `R U R' U'` six times always returns the cube to where it started (checked by the app's own cube model in the tests).
+- Written for a 10-year-old. No letters: the arrow shows every move.
+- One line at the top: "Learn to turn the cube. Swipe where the arrow shows." No goal paragraph, no list.
+- **Part 1:** 10 swipes, one plain sentence each, e.g. "Swipe the right side up."
+- **Every move prints a line** in a list under the cube, e.g. "The right side went up."
+- **Part 2, the trick:** a fresh solved cube. Follow the arrows for the same 4 moves, 6 times (24 swipes). The cube gets mixed up, then comes back solved.
+- The trick is `R U R' U'` six times, which always returns the cube to where it started (checked by the app's own cube model in the tests). The letters show only as a small caption.
 - Passing the level means finishing the trick.
 
 ## CFOP (M6)
@@ -90,16 +90,20 @@ How the three parts are built (v0.8.4):
 - **No buttons.** You turn the cube by swiping on it.[1]
 - **Swipe a sticker:** the row or column under your finger turns the way you swiped.[2]
 - **Swipe beside the cube:** turns the whole cube. Left or right is y, up or down is x. Swipe left twice and the back becomes the front.[1]
-- **Each turn flashes its letter** (R, U' …) over the cube, so players still learn the names.[1]
-- **Next move in a lesson:** an arrow on the cube along the row to swipe, plus the letter.[1] Whole-cube turns show the arrow beside the cube.
+- **Arrows only, no letters.**[1] The arrow on the cube shows every move: in lessons, in Hint, and in the guided solve of your own cube. Whole-cube turns show the arrow beside the cube.
+- **Letters stay only as a small caption** under each sequence on a level page and in the guided solve, for anyone who wants them for a real cube.[1]
+- **Hint** says the step in words and puts the arrow on the cube for each move of it.[1]
+- **No dimming.** The cube keeps its real colors while an arrow shows; lessons still light the piece being moved and where it goes.[1]
+- The FRONT / TOP / RIGHT tags hide while an arrow shows, so nothing covers it.
+- Arrows go on the front first, then the right side, then the top or bottom. Back turns show on the right side's back column.
 - **Turning the whole cube in a lesson is fine.**[1] Walk through it renames the moves left for the new front. Hint and Show me plan from the cube as it is.
 - **Half turns** (U2) are two swipes.
 - **Two-layer turns** are two swipes: r is R then M', f is F then S.
 - **Beginner levels have no middle rows**, since turning one moves the centers. Swiping one says so. CFOP levels and free play allow middle rows.
 - **Keyboard:** a letter turns clockwise, Shift+letter the other way: U R F D L B, y, x, and M in CFOP.
-- FRONT · F, TOP · U and RIGHT · R tags float next to the cube and never turn: letters mean places, not colors.
+- FRONT, TOP and RIGHT tags float next to the cube and never turn: they name places, not colors.
 - A swipe that starts while the cube is turning is ignored, because the stickers aren't in place yet.
-- Move letters follow a research pass of ruwix, J Perm, the official Rubik's guide and the cubing.js viewer.
+- Caption letters follow standard notation, from a research pass of ruwix, J Perm, the official Rubik's guide and the cubing.js viewer.
 
 ## How a level works
 
