@@ -1,10 +1,10 @@
-// One level. Stage levels are tutorials (stageLesson.ts); this file runs the controls drill,
+// One level. Stage levels are tutorials (stageLesson.ts), level 0 is lettersLesson.ts; this file runs
 // the PLL level and the full solve.
 
 import { type CubeState, applyMoves, isSolved, toString } from "../cube";
 import { isUnlocked } from "../game/rules";
 import { loadProgress } from "../game/storage";
-import { type Level, NOTATION_DRILL, NOTATION_STEPS } from "../lessons/beginner";
+import type { Level } from "../lessons/beginner";
 import { ALL_LEVELS, type GuideStep, LEVEL_IDS, METHODS, stageDoneAnyHold } from "../lessons/index";
 import { practicePosition } from "../lessons/position";
 import { solveBeginner } from "../solver/beginner";
@@ -12,6 +12,7 @@ import { solvePll } from "../solver/cfop";
 import { type CubePanel, mountCubePanel } from "./cubePanel";
 import { showPass } from "./reward";
 import type { Screen } from "./shell";
+import { mountLettersLesson } from "./lettersLesson";
 import { mountStageLesson } from "./stageLesson";
 
 const algList = (level: Level) =>
@@ -19,8 +20,7 @@ const algList = (level: Level) =>
     .map((a) => `<p class="alg"><span>${a.name}</span><code>${a.moves}</code></p>`)
     .join("");
 
-function passed(level: Level, p: CubePanel, drillIndex: number): boolean {
-  if (level.kind === "notation") return drillIndex >= NOTATION_DRILL.length;
+function passed(level: Level, p: CubePanel): boolean {
   if (level.kind === "full" || level.kind === "pll") return isSolved(p.state);
   return stageDoneAnyHold(level, p.state);
 }
@@ -42,7 +42,6 @@ export function pllSteps(s: CubeState): GuideStep[] {
 export function mountLesson(root: HTMLElement, id: string): Screen {
   const level = ALL_LEVELS.find((l) => l.id === id) ?? ALL_LEVELS[0];
   const next = ALL_LEVELS[ALL_LEVELS.indexOf(level) + 1];
-  const isDrill = level.kind === "notation";
   const method = METHODS[level.method];
 
   // Test hooks ?autoshow=1 and ?unlock=1 skip the lock (headless checks).
@@ -60,13 +59,13 @@ export function mountLesson(root: HTMLElement, id: string): Screen {
   }
 
   if (level.kind === "stage") return mountStageLesson(root, level, next);
+  if (level.kind === "notation") return mountLettersLesson(root, level, next);
 
   root.innerHTML = `
     <main class="lesson">
       <section class="intro">
         <h2><span class="num">${level.number}</span> ${level.title}</h2>
         <p class="goal">${level.goal}</p>
-        ${isDrill ? `<p class="task">Swipe where the arrow shows. 10 swipes and you're done.</p>` : ""}
         <details ${level.number <= 1 || level.number === 9 ? "open" : ""}>
           <summary>How it works</summary>
           <ul>${level.teach.map((t) => `<li>${t}</li>`).join("")}</ul>
@@ -78,10 +77,10 @@ export function mountLesson(root: HTMLElement, id: string): Screen {
         }
       </section>
       <div class="panel"></div>
-      <div class="actions ${isDrill ? "two" : ""}">
-        ${isDrill ? "" : `<button id="hint">Hint</button><button id="show">Show me</button>`}
+      <div class="actions">
+        <button id="hint">Hint</button><button id="show">Show me</button>
         <button id="undo">Undo</button>
-        <button id="fresh">${isDrill ? "Start over" : "New cube"}</button>
+        <button id="fresh">New cube</button>
       </div>
       <div class="passed" hidden>
         <p>Level passed! 🎉</p>
@@ -91,26 +90,12 @@ export function mountLesson(root: HTMLElement, id: string): Screen {
     </main>`;
 
   const passedEl = root.querySelector<HTMLElement>(".passed")!;
-  let drill = 0;
   let done = false;
   let usedHelp = false;
   let started = Date.now();
 
-  // Drill: say what the next turn does, light up that side, point the arrow at the swipe.
-  const drillPrompt = () => {
-    const st = NOTATION_STEPS[drill];
-    return st
-      ? `Swipe ${st.move}: ${st.side} — ${st.how}.  (${drill + 1} of ${NOTATION_STEPS.length})`
-      : "";
-  };
-  const showDrill = (p: CubePanel) => {
-    const st = NOTATION_STEPS[drill];
-    p.view.highlight(st ? st.move : null);
-    p.view.pointTo(st ? st.move : null);
-  };
-
   const check = (p: CubePanel) => {
-    if (!done && passed(level, p, drill)) {
+    if (!done && passed(level, p)) {
       done = true;
       showPass(passedEl, level, {
         usedHelp,
@@ -124,23 +109,11 @@ export function mountLesson(root: HTMLElement, id: string): Screen {
   const panel = mountCubePanel(root.querySelector(".panel")!, practicePosition(level), {
     turns: level.method === "cfop" ? "cfop" : "beginner",
     onMove: (m, p) => {
-      if (isDrill) {
-        if (m === NOTATION_DRILL[drill]) {
-          drill++;
-          if (drill < NOTATION_DRILL.length) p.say(`Good! ${drillPrompt()}`);
-          showDrill(p);
-        } else {
-          p.say(`That was ${m}. Swipe ${NOTATION_DRILL[drill]} where the arrow shows.`);
-          setTimeout(() => p.undo(), 250);
-        }
-      } else {
-        p.say(`Moves: ${p.history.length}`);
-      }
+      p.say(`Moves: ${p.history.length}`);
       check(p);
     },
   });
-  panel.say(isDrill ? drillPrompt() : "Hold white on the bottom. Use Hint if you get stuck.");
-  if (isDrill) showDrill(panel);
+  panel.say("Hold white on the bottom. Use Hint if you get stuck.");
 
   // Follow one plan while the player stays on it. Re-planning mid-way would go wrong
   // in the twist stage, where the bottom is meant to look broken until it's done.
@@ -176,27 +149,20 @@ export function mountLesson(root: HTMLElement, id: string): Screen {
     check(panel);
   });
   root.querySelector("#undo")!.addEventListener("click", () => {
-    if (isDrill && drill > 0 && panel.history.length) drill--;
     panel.undo();
-    if (isDrill) {
-      panel.say(drillPrompt());
-      showDrill(panel);
-    }
   });
   root.querySelector("#fresh")!.addEventListener("click", () => {
     panel.setState(practicePosition(level));
-    drill = 0;
     done = false;
     usedHelp = false;
     started = Date.now();
     passedEl.hidden = true;
-    panel.say(isDrill ? drillPrompt() : "New cube. Hold white on the bottom.");
-    if (isDrill) showDrill(panel);
+    panel.say("New cube. Hold white on the bottom.");
   });
 
   // Test hook: ?autoshow=1 applies every "Show me" step instantly until the level is passed.
   // Instant because headless browsers may not run animation frames.
-  if (new URLSearchParams(location.search).get("autoshow") === "1" && !isDrill) {
+  if (new URLSearchParams(location.search).get("autoshow") === "1") {
     usedHelp = true;
     for (let i = 0; i < 40 && !done; i++) {
       const step = nextStep();

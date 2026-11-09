@@ -1,5 +1,46 @@
 # v0.8
 
+## v0.8.9 — Learn the letters (2026-11-09)
+
+### Problem
+
+Level 0 just moved pieces around. It didn't say why the letters matter, and the text at the top was distracting.
+
+### Solution
+
+Rebuilt level 0 for a 10-year-old: one line at the top, a sentence per letter, a printed line for every move, and a payoff trick: `R U R' U'` six times brings a solved cube back to solved. Design: docs/02-levels.md → Level 0.
+
+### New
+
+- Top of the level is one line: "Learn the move letters. Every level uses them, and so does your real cube."
+- Part 1: 10 letters, each with one plain sentence and the arrow.
+- Every move prints a line under the cube, newest on top.
+- Part 2, the trick: a fresh solved cube, `R U R' U'` six times, round counter, "Solved again!".
+- Passing the level means finishing the trick.
+
+### Changed
+
+- Removed the goal paragraph, task box and "How it works" list from level 0.
+- Level 0 has its own screen (`src/app/lettersLesson.ts`); `src/app/lesson.ts` lost the old drill code.
+
+### Verification
+
+- 212 tests passed, lint clean.
+- New tests: the trick returns any cube to where it started and mixes it on the way; every letter has a sentence and a printed line; the top is one line.
+- Browser, keyboard events: all 10 letters, then 6 rounds of the trick; the cube ended solved, the level passed, 41 lines printed.
+- Not checked on a real phone: needs a phone in hand.
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `src/app/lettersLesson.ts` | New: level 0 screen |
+| `src/lessons/beginner.ts` | Level 0 text for a 10-year-old; the trick |
+| `src/app/lesson.ts` | Level 0 routed to its own screen; drill code removed |
+| `src/app/styles.css` | Printed move list |
+| `docs/02-levels.md`, `site/catalog.json` | Level 0 design |
+| `tests/lessons.test.ts` | Level 0 tests |
+
 ## v0.8.8 — Swipe only (2026-11-09)
 
 ### Problem

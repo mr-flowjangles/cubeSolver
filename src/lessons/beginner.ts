@@ -22,16 +22,10 @@ export const BEGINNER_LEVELS: Level[] = [
     id: "meet",
     number: 0,
     title: "Learn the controls",
-    goal: "This level teaches the moves. Each letter turns one side of the cube. You'll need these for every level after this.",
+    goal: "Learn the move letters. Every level uses them, and so does your real cube.",
     kind: "notation",
     method: "beginner",
-    teach: [
-      "Each letter is a side of the cube: Up (top), Down (bottom), Right, Left, Front, Back.",
-      "The front is whatever side faces you. Letters are places, not colors.",
-      "A plain letter turns that side clockwise, as if you were looking straight at it. The ' turns it back.",
-      "y turns the whole cube like the top. The colors move; the FRONT / TOP / RIGHT tags stay put.",
-      "Swipe a row to turn it. Swipe beside the cube to turn the whole cube.",
-    ],
+    teach: [],
     algs: [],
   },
   {
@@ -165,17 +159,60 @@ export const BEGINNER_LEVELS: Level[] = [
   },
 ];
 
-/** Turns the notation level asks for, in order, each with what it does in plain words. */
-export const NOTATION_STEPS: { move: string; side: string; how: string }[] = [
-  { move: "R", side: "Right side", how: "turns so its front edge goes up" },
-  { move: "U", side: "Top", how: "turns so its front edge goes to the left" },
-  { move: "R'", side: "Right side, the other way", how: "its front edge goes down" },
-  { move: "U'", side: "Top, the other way", how: "its front edge goes to the right" },
-  { move: "F", side: "Front", how: "turns clockwise, like a clock hand" },
-  { move: "F'", side: "Front, the other way", how: "turns counter-clockwise" },
-  { move: "L", side: "Left side", how: "turns so its front edge goes down" },
-  { move: "D'", side: "Bottom, the other way", how: "its front edge goes to the left" },
-  { move: "y", side: "Whole cube", how: "turns like the top, so you see a new front" },
-  { move: "B", side: "Back", how: "turns so its top edge goes to the left" },
+/**
+ * Level 0, part 1: the letters, in order. Written for a 10-year-old.
+ * `say` is what to do next; `did` is the line printed after the move is made.
+ */
+export const NOTATION_STEPS: { move: string; say: string; did: string }[] = [
+  { move: "R", say: "R means the Right side. Swipe it up.", did: "the right side went up." },
+  { move: "U", say: "U means Up, the top. Swipe it to the left.", did: "the top went left." },
+  {
+    move: "R'",
+    say: 'R\' (say "R prime") is the right side the other way. Swipe it down.',
+    did: "the right side went down.",
+  },
+  {
+    move: "U'",
+    say: "U' is the top the other way. Swipe it to the right.",
+    did: "the top went right.",
+  },
+  {
+    move: "F",
+    say: "F means the Front, the side facing you. Turn it the way a clock goes.",
+    did: "the front turned the way a clock goes.",
+  },
+  {
+    move: "F'",
+    say: "F' is the front the other way, backwards round the clock.",
+    did: "the front turned backwards.",
+  },
+  { move: "L", say: "L means the Left side. Swipe it down.", did: "the left side went down." },
+  {
+    move: "D'",
+    say: "D means Down, the bottom. D' turns it to the left.",
+    did: "the bottom went left.",
+  },
+  {
+    move: "y",
+    say: "y turns the whole cube. Swipe next to the cube, to the left.",
+    did: "the whole cube turned. Now you see a new front.",
+  },
+  {
+    move: "B",
+    say: "B means the Back. You can't see it, so swipe the top's back row the way the arrow shows.",
+    did: "the back turned.",
+  },
 ];
 export const NOTATION_DRILL = NOTATION_STEPS.map((s) => s.move);
+
+/** Level 0, part 2: the trick. This sequence done 6 times brings any cube back to where it started. */
+export const MAGIC = ["R", "U", "R'", "U'"];
+export const MAGIC_ROUNDS = 6;
+
+/** What each move of the trick did, printed after it's made. */
+export const MAGIC_DID: Record<string, string> = {
+  R: "the right side went up.",
+  U: "the top went left.",
+  "R'": "the right side went down.",
+  "U'": "the top went right.",
+};
