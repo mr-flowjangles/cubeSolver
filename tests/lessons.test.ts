@@ -83,23 +83,24 @@ describe("levels", () => {
   });
 });
 
-describe("move buttons", () => {
-  it("every CFOP sequence can be made with the CFOP buttons", async () => {
-    const { CFOP_PAD } = await import("../src/app/cubePanel");
-    for (const l of ALL_LEVELS.filter((x) => x.method === "cfop"))
+describe("swipes", () => {
+  it("every sequence in a level can be swiped with that level's turns", async () => {
+    const { allowedSwipes } = await import("../src/app/cubePanel");
+    const { swipesFor } = await import("../src/render/swipe");
+    for (const l of ALL_LEVELS) {
+      const allowed = allowedSwipes(l.method === "cfop" ? "cfop" : "beginner");
       for (const a of l.algs)
-        for (const m of parseMoves(a.moves)) {
-          // A half turn can be made as two quarter turns.
-          const ok = CFOP_PAD.includes(m) || (m.endsWith("2") && CFOP_PAD.includes(m[0]));
-          expect(ok, `${l.title}: ${a.name} needs ${m}`).toBe(true);
-        }
+        for (const m of parseMoves(a.moves))
+          for (const s of swipesFor(m))
+            expect(allowed, `${l.title}: ${a.name} needs ${m}`).toContain(s);
+    }
   });
 });
 
 describe("notation drill", () => {
-  it("only asks for turns that have a button", async () => {
-    const { DEFAULT_PAD } = await import("../src/app/cubePanel");
-    for (const m of NOTATION_DRILL) expect(DEFAULT_PAD).toContain(m);
+  it("only asks for turns a beginner can swipe", async () => {
+    const { allowedSwipes } = await import("../src/app/cubePanel");
+    for (const m of NOTATION_DRILL) expect(allowedSwipes("beginner")).toContain(m);
   });
 });
 

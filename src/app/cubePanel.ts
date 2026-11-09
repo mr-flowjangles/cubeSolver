@@ -1,71 +1,24 @@
-// A 3D cube with a status line and move buttons. Shared by free play and lessons.
+// A 3D cube you turn by swiping, with a status line. Shared by free play and lessons.
 
 import { type CubeState, type Face, type Move, applyMove, invertMove } from "../cube";
 import { CubeView } from "../render/cubeView";
 import { loadSettings } from "./settings";
 
-// Buttons are grouped by side. Each shows the standard letter (what every cube guide uses),
-// the side's name, and an arrow for which way the front edge moves (as seen from the front).
-export interface PadGroup {
-  title: string;
-  moves: Move[];
-  wide?: boolean; // takes a whole row
+// Turns are made by swiping (docs/02-levels.md → Controls). Which turns a screen allows:
+//   beginner  the six sides and whole-cube turns (no middle rows: they move the centers)
+//   cfop      also the middle rows, used by M, r and f
+//   free      everything
+export type TurnSet = "beginner" | "cfop" | "free";
+
+const SIDES = ["U", "R", "F", "D", "L", "B"];
+const MIDDLES = ["M", "E", "S"];
+const WHOLE = ["x", "y", "z"];
+const both = (bases: string[]) => bases.flatMap((b) => [b, b + "'"]);
+
+/** The single swipes a screen allows (quarter turns only; U2 is two swipes). */
+export function allowedSwipes(set: TurnSet): Move[] {
+  return both([...SIDES, ...WHOLE, ...(set === "beginner" ? [] : MIDDLES)]);
 }
-
-export const MOVE_LABEL: Record<string, string> = {
-  U: "Top ←",
-  "U'": "Top →",
-  U2: "Top ×2",
-  D: "Bottom →",
-  "D'": "Bottom ←",
-  R: "Right ↑",
-  "R'": "Right ↓",
-  L: "Left ↓",
-  "L'": "Left ↑",
-  F: "Front ↻",
-  "F'": "Front ↺",
-  B: "Back ↺",
-  "B'": "Back ↻",
-  y: "Turn ←",
-  "y'": "Turn →",
-  x: "Tilt ↑",
-  "x'": "Tilt ↓",
-  M: "Middle ↓",
-  "M'": "Middle ↑",
-  M2: "Middle ×2",
-  r: "Right 2 ↑",
-  "r'": "Right 2 ↓",
-  f: "Front 2 ↻",
-  "f'": "Front 2 ↺",
-};
-
-const SIDES: PadGroup[] = [
-  { title: "Top", moves: ["U", "U'"] },
-  { title: "Right", moves: ["R", "R'"] },
-  { title: "Front", moves: ["F", "F'"] },
-  { title: "Bottom", moves: ["D", "D'"] },
-  { title: "Left", moves: ["L", "L'"] },
-  { title: "Back", moves: ["B", "B'"] },
-];
-
-export const DEFAULT_GROUPS: PadGroup[] = [
-  ...SIDES,
-  { title: "Whole cube", moves: ["y", "y'"], wide: true },
-];
-
-/** CFOP sequences also use middle-layer (M), two-layer (r, f) and whole-cube (x) turns. */
-export const CFOP_GROUPS: PadGroup[] = [
-  ...SIDES,
-  {
-    title: "Middle and two-layer turns",
-    moves: ["M", "M'", "M2", "r", "r'", "f", "f'"],
-    wide: true,
-  },
-  { title: "Whole cube", moves: ["y", "y'", "x", "x'"], wide: true },
-];
-
-export const DEFAULT_PAD: Move[] = DEFAULT_GROUPS.flatMap((g) => g.moves);
-export const CFOP_PAD: Move[] = CFOP_GROUPS.flatMap((g) => g.moves);
 
 export interface CubePanel {
   readonly state: Face[];
@@ -85,56 +38,36 @@ export function mountCubePanel(
   root: HTMLElement,
   start: CubeState,
   opts: {
-    groups?: PadGroup[];
-    /** Show side words under the letters (off for CFOP, to match outside tutorials). */
-    words?: boolean;
+    turns?: TurnSet;
     onMove?: (m: Move, p: CubePanel) => void;
-    /** Free play: swipes beside the cube turn it, and middle rows can be swiped. */
-    freePlay?: boolean;
   } = {},
 ): CubePanel {
-  const groups = opts.groups ?? DEFAULT_GROUPS;
-  const words = opts.words ?? true;
-  const button = (m: Move) =>
-    `<button class="move" data-move="${m}" aria-label="${m}: ${MOVE_LABEL[m] ?? m}"><b>${m}</b>${
-      words ? `<small>${MOVE_LABEL[m] ?? ""}</small>` : ""
-    }</button>`;
+  const set = opts.turns ?? "beginner";
   root.innerHTML = `
-    <div class="stage" aria-label="3D cube. Swipe a row to turn it. ${
-      opts.freePlay
-        ? "Swipe beside the cube to turn the whole cube."
-        : "Drag beside the cube to look around; it springs back to the front."
-    }"></div>
-    <p class="status" role="status"></p>
-    <div class="pad ${words ? "" : "letters"}">
-      ${groups
-        .map(
-          (g) => `<div class="group ${g.wide ? "wide" : ""}">
-            <span class="group-title">${g.title}</span>
-            <div class="group-buttons">${g.moves.map(button).join("")}${
-              g.title === "Whole cube"
-                ? `<button class="peek" aria-pressed="false">👁 See back</button>`
-                : ""
-            }</div>
-          </div>`,
-        )
-        .join("")}
-    </div>`;
+    <div class="stage" aria-label="3D cube. Swipe a row to turn it. Swipe beside the cube to turn the whole cube.">
+      <div class="move-letter" aria-hidden="true"></div>
+    </div>
+    <p class="status" role="status"></p>`;
   const status = root.querySelector<HTMLElement>(".status")!;
-  // A swipe makes only moves this screen's buttons have (free play also allows middle rows),
-  // so a lesson never gets a turn it doesn't teach.
-  const allowed = new Set([
-    ...groups.flatMap((g) => g.moves),
-    ...(opts.freePlay ? ["M", "M'", "E", "E'", "S", "S'", "x", "x'"] : []),
-  ]);
+  // A swipe makes only the turns this screen allows, so a lesson never gets one it doesn't teach.
+  const allowed = new Set(allowedSwipes(set));
   const view = new CubeView(root.querySelector(".stage")!, start, {
     ada: loadSettings().ada,
-    backgroundTurns: opts.freePlay ?? false,
     onSwipe: (m) => {
       if (allowed.has(m)) panel.turn(m);
-      else panel.say("That row doesn't turn in this level. Use a row with a button below.");
+      else panel.say("Middle rows don't turn in beginner levels. Swipe an outer row.");
     },
   });
+
+  // Each turn flashes its letter over the cube, so players learn the names.
+  const letter = root.querySelector<HTMLElement>(".move-letter")!;
+  let letterTimer = 0;
+  const flash = (m: Move) => {
+    letter.textContent = m;
+    letter.classList.add("on");
+    clearTimeout(letterTimer);
+    letterTimer = window.setTimeout(() => letter.classList.remove("on"), 700);
+  };
 
   let state = [...start] as Face[];
   const history: Move[] = [];
@@ -148,8 +81,8 @@ export function mountCubePanel(
     },
     view,
     turn(m, record = true) {
-      if (view.isPeeking) unpeek();
       state = applyMove(state, m);
+      flash(m);
       if (record) history.push(m);
       void view.animate(m, state);
       opts.onMove?.(m, panel);
@@ -159,7 +92,7 @@ export function mountCubePanel(
       for (const m of moves) {
         state = applyMove(state, m);
         history.push(m);
-        last = view.animate(m, state, ms);
+        last = view.animate(m, state, ms).then(() => flash(m));
       }
       await last;
     },
@@ -183,30 +116,15 @@ export function mountCubePanel(
     },
   };
 
-  const peekBtn = root.querySelector<HTMLButtonElement>(".peek")!;
-  const unpeek = () => {
-    if (view.isPeeking) view.togglePeek();
-    peekBtn.textContent = "👁 See back";
-    peekBtn.setAttribute("aria-pressed", "false");
-  };
-  peekBtn.addEventListener("click", () => {
-    const on = view.togglePeek();
-    peekBtn.textContent = on ? "👁 See front" : "👁 See back";
-    peekBtn.setAttribute("aria-pressed", String(on));
-  });
-
-  root.querySelector(".pad")!.addEventListener("click", (e) => {
-    const m = (e.target as HTMLElement).closest<HTMLElement>("[data-move]")?.dataset.move;
-    if (m) panel.turn(m);
-  });
-
   // Keyboard: letter turns clockwise, Shift+letter counter-clockwise.
   const onKey = (e: KeyboardEvent) => {
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     const k = e.key.length === 1 ? e.key : "";
     const f = k.toUpperCase();
-    if ("URFDLB".includes(f) && f) panel.turn(e.shiftKey ? f + "'" : f);
-    else if (f === "Y") panel.turn(e.shiftKey ? "y'" : "y");
+    const m = "URFDLBM".includes(f) && f ? f : "XY".includes(f) && f ? f.toLowerCase() : "";
+    if (!m) return;
+    const move = e.shiftKey ? m + "'" : m;
+    if (allowed.has(move)) panel.turn(move);
   };
   window.addEventListener("keydown", onKey);
 

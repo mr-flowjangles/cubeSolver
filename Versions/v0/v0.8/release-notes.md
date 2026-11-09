@@ -1,5 +1,52 @@
 # v0.8
 
+## v0.8.8 — Swipe only (2026-11-09)
+
+### Problem
+
+The move buttons under the cube were not good. With swiping built in v0.8.7, they were in the way.
+
+### Solution
+
+Removed the buttons everywhere. The cube is turned only by swiping (plus the keyboard). Lessons point an arrow at the next swipe, and each turn flashes its letter. Design: docs/02-levels.md → Controls.
+
+### New
+
+- Arrow on the cube along the row to swipe next; whole-cube turns show the arrow beside the cube.
+- Each turn flashes its letter over the cube.
+- Swiping beside the cube turns the whole cube in lessons too.
+- Walk through it renames the moves left after a whole-cube turn (after x, U becomes B).
+- Pass checks work however the cube is held; the PLL level first turns white to the bottom.
+- Half turns are two swipes; two-layer turns are two swipes (r is R then M').
+- Keyboard: x and M added.
+
+### Changed
+
+- Removed: move buttons, See back button, the look-around drag.
+- Level 0 text: teaches the moves by swiping.
+- Beginner levels refuse middle-row swipes with a message; CFOP and free play allow them.
+- docs/02-levels.md Controls rewritten, with footnotes for design decisions; docs/07-build-plan.md ticked.
+
+### Verification
+
+- 209 tests passed, lint clean, build clean.
+- New tests: every move's swipes equal the move; renamed moves equal the original after whole-cube turns; every level's walk-through still finishes with whole-cube turns mixed in; Hint and Show me finish every level after any whole-cube turn.
+- Browser, simulated touch events: level 0 arrow on R, swipe R accepted, arrow moved to U; in Middle edges, y swipe accepted, extra x renamed the next move U to B.
+- Not checked on a real phone: needs a phone in hand.
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `src/render/swipe.ts` | Moves as swipes; renaming after whole-cube turns |
+| `src/render/cubeView.ts` | Next-move arrow; whole-cube swipes everywhere |
+| `src/app/cubePanel.ts` | Buttons removed; letter flash; allowed turns |
+| `src/app/stageLesson.ts`, `src/app/lesson.ts` | Arrow instead of glowing button; renaming; any-hold pass checks |
+| `src/lessons/walkthrough.ts`, `src/lessons/index.ts`, `src/lessons/beginner.ts` | Guide split into swipes; any-hold check; level 0 text |
+| `src/app/practice.ts`, `src/app/styles.css` | Free play turn set; button styles removed, letter style added |
+| `docs/02-levels.md`, `docs/07-build-plan.md`, `site/catalog.json` | Controls design |
+| `tests/*.test.ts` | New and updated tests |
+
 ## v0.8.7 — Touch controls (2026-11-09)
 
 ### Problem
@@ -8,7 +55,7 @@ Turning the cube meant tapping buttons below it. On a phone, Rob wanted to turn 
 
 ### Solution
 
-Swipe on the cube to turn the row or column under your finger. Swipe beside the cube in free play to turn the whole cube. Design: docs/02-levels.md → Controls → Touch controls (decided by Rob, 2026-11-06).
+Swipe on the cube to turn the row or column under your finger. Swipe beside the cube in free play to turn the whole cube. Design: docs/02-levels.md → Controls → Touch controls (design decision, 2026-11-06).
 
 ### New
 

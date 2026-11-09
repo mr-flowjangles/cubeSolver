@@ -5,10 +5,11 @@ import { type CubeState, applyMoves, isSolved, toString } from "../cube";
 import { isUnlocked } from "../game/rules";
 import { loadProgress } from "../game/storage";
 import { type Level, NOTATION_DRILL, NOTATION_STEPS } from "../lessons/beginner";
-import { ALL_LEVELS, type GuideStep, LEVEL_IDS, METHODS } from "../lessons/index";
+import { ALL_LEVELS, type GuideStep, LEVEL_IDS, METHODS, stageDoneAnyHold } from "../lessons/index";
 import { practicePosition } from "../lessons/position";
+import { solveBeginner } from "../solver/beginner";
 import { solvePll } from "../solver/cfop";
-import { CFOP_GROUPS, type CubePanel, mountCubePanel } from "./cubePanel";
+import { type CubePanel, mountCubePanel } from "./cubePanel";
 import { showPass } from "./reward";
 import type { Screen } from "./shell";
 import { mountStageLesson } from "./stageLesson";
@@ -21,7 +22,21 @@ const algList = (level: Level) =>
 function passed(level: Level, p: CubePanel, drillIndex: number): boolean {
   if (level.kind === "notation") return drillIndex >= NOTATION_DRILL.length;
   if (level.kind === "full" || level.kind === "pll") return isSolved(p.state);
-  return METHODS[level.method].done[level.stage!](p.state);
+  return stageDoneAnyHold(level, p.state);
+}
+
+/** PLL from any hold: first turn white to the bottom (the player may have turned the cube). */
+export function pllSteps(s: CubeState): GuideStep[] {
+  const hold = solveBeginner(s, "hold").filter((x) => x.stage === "hold" && x.moves.length);
+  return [
+    ...hold,
+    ...solvePll(
+      applyMoves(
+        s,
+        hold.flatMap((x) => x.moves),
+      ),
+    ),
+  ];
 }
 
 export function mountLesson(root: HTMLElement, id: string): Screen {
@@ -51,7 +66,7 @@ export function mountLesson(root: HTMLElement, id: string): Screen {
       <section class="intro">
         <h2><span class="num">${level.number}</span> ${level.title}</h2>
         <p class="goal">${level.goal}</p>
-        ${isDrill ? `<p class="task">Tap the glowing button. 10 taps and you're done.</p>` : ""}
+        ${isDrill ? `<p class="task">Swipe where the arrow shows. 10 swipes and you're done.</p>` : ""}
         <details ${level.number <= 1 || level.number === 9 ? "open" : ""}>
           <summary>How it works</summary>
           <ul>${level.teach.map((t) => `<li>${t}</li>`).join("")}</ul>
@@ -81,19 +96,17 @@ export function mountLesson(root: HTMLElement, id: string): Screen {
   let usedHelp = false;
   let started = Date.now();
 
-  // Drill: say what the next button does, light up that side, make that button glow.
+  // Drill: say what the next turn does, light up that side, point the arrow at the swipe.
   const drillPrompt = () => {
     const st = NOTATION_STEPS[drill];
     return st
-      ? `Tap ${st.move}: ${st.side} — ${st.how}.  (${drill + 1} of ${NOTATION_STEPS.length})`
+      ? `Swipe ${st.move}: ${st.side} — ${st.how}.  (${drill + 1} of ${NOTATION_STEPS.length})`
       : "";
   };
   const showDrill = (p: CubePanel) => {
     const st = NOTATION_STEPS[drill];
     p.view.highlight(st ? st.move : null);
-    root.querySelectorAll<HTMLElement>(".pad [data-move]").forEach((b) => {
-      b.classList.toggle("glow", !!st && b.dataset.move === st.move);
-    });
+    p.view.pointTo(st ? st.move : null);
   };
 
   const check = (p: CubePanel) => {
@@ -109,8 +122,7 @@ export function mountLesson(root: HTMLElement, id: string): Screen {
   };
 
   const panel = mountCubePanel(root.querySelector(".panel")!, practicePosition(level), {
-    groups: level.method === "cfop" ? CFOP_GROUPS : undefined,
-    words: level.method !== "cfop",
+    turns: level.method === "cfop" ? "cfop" : "beginner",
     onMove: (m, p) => {
       if (isDrill) {
         if (m === NOTATION_DRILL[drill]) {
@@ -118,7 +130,7 @@ export function mountLesson(root: HTMLElement, id: string): Screen {
           if (drill < NOTATION_DRILL.length) p.say(`Good! ${drillPrompt()}`);
           showDrill(p);
         } else {
-          p.say(`That was ${m}. Tap the glowing ${NOTATION_DRILL[drill]} button.`);
+          p.say(`That was ${m}. Swipe ${NOTATION_DRILL[drill]} where the arrow shows.`);
           setTimeout(() => p.undo(), 250);
         }
       } else {
@@ -140,7 +152,7 @@ export function mountLesson(root: HTMLElement, id: string): Screen {
     let s: CubeState = panel.state;
     const steps =
       level.kind === "pll"
-        ? solvePll(s)
+        ? pllSteps(s)
         : method.solve(s, level.kind === "full" ? undefined : level.stage);
     plan = steps.map((step) => {
       const at = toString(s);
