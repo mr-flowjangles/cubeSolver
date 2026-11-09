@@ -47,7 +47,7 @@ export const CFOP_LEVELS: Level[] = [
     stage: "eo",
     teach: [
       "Line: hold it left-to-right, do Line.",
-      "L shape: hold it at back-left, do L shape.",
+      "L shape: hold it at front-right, do L shape.",
       "Dot: do Line, then L shape.",
     ],
     algs: EO_ALGS,
@@ -78,7 +78,7 @@ export const CFOP_LEVELS: Level[] = [
     stage: "cp",
     teach: [
       "Look for headlights: two corners on one side with the same color.",
-      "Headlights: hold them at the back, do T-perm.",
+      "Headlights: hold them on the left, do T-perm.",
       "No headlights anywhere: do Y-perm.",
     ],
     algs: CP_ALGS,

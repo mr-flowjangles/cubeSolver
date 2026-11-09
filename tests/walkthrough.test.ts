@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { applyMoves, findPiece, scramble, slot, slotSolved, solved } from "../src/cube";
+import {
+  CORNER_SLOTS,
+  applyMoves,
+  center,
+  findPiece,
+  scramble,
+  slot,
+  slotSolved,
+  solved,
+} from "../src/cube";
 import { ALL_LEVELS, METHODS } from "../src/lessons/index";
 import { PRACTICE_RAMP, practicePosition } from "../src/lessons/position";
 import {
@@ -103,7 +112,14 @@ describe("practice cubes get harder", () => {
       for (const left of PRACTICE_RAMP) {
         const pos = practicePosition(level, random, left);
         expect(m.done[level.stage!](pos)).toBe(false);
-        if (left !== undefined) expect(stageSteps(level, pos).length).toBeLessThanOrEqual(2 * left); // about that many
+        if (left === undefined) continue;
+        if (level.stage === "yellowCornersTwist") {
+          // Easier here means fewer twisted corners, never a cube stopped part-way.
+          const twisted = CORNER_SLOTS.filter(
+            (s) => s.name[0] === "U" && pos[s.stickers[0]] !== center(pos, "U"),
+          ).length;
+          expect(twisted).toBeLessThanOrEqual(Math.max(2, left));
+        } else expect(stageSteps(level, pos).length).toBeLessThanOrEqual(2 * left); // about that many
       }
     },
     60_000,

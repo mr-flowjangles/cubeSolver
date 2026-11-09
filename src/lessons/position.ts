@@ -1,6 +1,15 @@
 // Practice positions for a level.
 
-import { type CubeState, applyMoves, invertMoves, parseMoves, scramble, solved } from "../cube";
+import {
+  CORNER_SLOTS,
+  type CubeState,
+  applyMoves,
+  center,
+  invertMoves,
+  parseMoves,
+  scramble,
+  solved,
+} from "../cube";
 import { PLL_ALGS } from "../solver/cfop";
 import type { Level } from "./beginner";
 import { METHODS, stateAfter } from "./index";
@@ -28,6 +37,15 @@ export function practicePosition(
     const before = method.stages[method.stages.indexOf(level.stage!) - 1];
     let pos = stateAfter(method, mixed, before);
     if (method.done[level.stage!](pos)) continue;
+    if (stepsLeft !== undefined && level.stage === "yellowCornersTwist") {
+      // Stopping part-way through this stage leaves the bottom scrambled, so an easier
+      // cube is one with fewer twisted corners instead (at least 2 are always twisted).
+      const twisted = CORNER_SLOTS.filter(
+        (s) => s.name[0] === "U" && pos[s.stickers[0]] !== center(pos, "U"),
+      ).length;
+      if (twisted > Math.max(2, stepsLeft)) continue;
+      return pos;
+    }
     if (stepsLeft !== undefined) {
       const steps = method
         .solve(pos, level.stage)
