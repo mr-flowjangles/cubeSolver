@@ -28,7 +28,7 @@ How the three parts are built (v0.8.4):
 - The daisy never knocks a white edge off the top on the way.
 - White edges already finished on the bottom stay there.
 - **Try it** has 3 practice cubes: one step left, about three steps left, then fully mixed. The level passes on the third.
-- Levels after White cross already run in three parts. Their per-move reasons are still generic ("Move 2 of 4") until rebuilt.
+- Levels after White cross already run in three parts. A move with no reason of its own says what it does in words, e.g. "The right side goes up."[1]
 
 ## Beginner method (M2)
 
@@ -57,6 +57,12 @@ How the three parts are built (v0.8.4):
 - **Part 2, the trick:** a fresh solved cube. Follow the arrows for the same 4 moves, 6 times (24 swipes). The cube gets mixed up, then comes back solved.
 - The trick is `R U R' U'` six times, which always returns the cube to where it started (checked by the app's own cube model in the tests). The letters show only as a small caption.
 - Passing the level means finishing the trick.
+
+### Level words checked by a kid test[1]
+
+- Each level's words were written as code and run on 200 practice cubes, as a 10-year-old who knows only what the screen says. A test repeats it on 20 cubes per level.
+- Every step the words left out is now said: how to lift an edge into the daisy, turning the whole cube so the spot is at front-right, which center means Edge right, how to pop out a stuck edge, and the last top turn.
+- Full solve lists every sequence, so it can be done without Hint.
 
 ## CFOP (M6)
 
@@ -92,6 +98,7 @@ How the three parts are built (v0.8.4):
 - **Swipe beside the cube:** turns the whole cube. Left or right is y, up or down is x. Swipe left twice and the back becomes the front.[1]
 - **Arrows only, no letters.**[1] The arrow on the cube shows every move: in lessons, in Hint, and in the guided solve of your own cube. Whole-cube turns show the arrow beside the cube.
 - **Letters stay only as a small caption** under each sequence on a level page and in the guided solve, for anyone who wants them for a real cube.[1]
+- **Tap a sequence and the arrow walks you through it** on the cube, one move at a time, so a player never has to read the letters.[1] It works in Try it and on the PLL and full-solve levels, and doesn't count as help.
 - **Hint** says the step in words and puts the arrow on the cube for each move of it.[1]
 - **No dimming.** The cube keeps its real colors while an arrow shows; lessons still light the piece being moved and where it goes.[1]
 - The FRONT / TOP / RIGHT tags hide while an arrow shows, so nothing covers it.

@@ -88,9 +88,11 @@ describe("CFOP solver", () => {
     let longest = 0;
     for (let n = 0; n < 100; n++) {
       const start = applyMoves(solved(), scramble(25, random));
-      const t0 = performance.now();
+      // CPU time of this test process, not the wall clock: other test files share the machine.
+      const t0 = process.cpuUsage();
       const steps = solveCfop(start);
-      slowest = Math.max(slowest, performance.now() - t0);
+      const used = process.cpuUsage(t0);
+      slowest = Math.max(slowest, (used.user + used.system) / 1000);
       let cur = start;
       let idx = 0;
       for (const st of steps) {

@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 
@@ -39,4 +40,7 @@ export default defineConfig({
       },
     }),
   ],
+  // The solver tests solve hundreds of random cubes (CFOP's 100-scramble test takes ~27 s alone,
+  // its slowest cube ~3 s). Test files run side by side and share the CPU, so allow 3 minutes.
+  test: { testTimeout: 180_000 },
 });

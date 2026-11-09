@@ -9,8 +9,8 @@ import { practicePosition } from "./position";
 
 export interface GuideMove {
   move: Move;
-  /** Why this move, in plain words. */
-  why: string;
+  /** Why this move, in plain words. Missing: the screen says what the move does (moveWords). */
+  why?: string;
   /** What the whole step is doing, e.g. "Bring the white–red edge up…". */
   say: string;
   part?: string;
@@ -42,7 +42,7 @@ export function guideMoves(steps: GuideStep[]): GuideMove[] {
   const out: GuideMove[] = [];
   steps.forEach((st, k) => {
     st.moves.forEach((m, j) => {
-      const why = st.why?.[j] ?? `Move ${j + 1} of ${st.moves.length} in this step.`;
+      const why = st.why?.[j];
       for (const t of swipesFor(m))
         out.push({
           move: t,

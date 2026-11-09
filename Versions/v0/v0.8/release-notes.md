@@ -1,5 +1,55 @@
 # v0.8
 
+## v0.8.12 — Kid test fixes (2026-11-09)
+
+### Problem
+
+A kid test (each level's words followed literally, as a 10-year-old who knows only the screen) found the steps can't solve a cube:
+
+- Level 2 never said to turn the whole cube so the corner's spot is at front-right; done word for word it never drops in.
+- Level 3 had the same gap, and didn't say which center means Edge right or how to pop out a stuck edge.
+- Level 1 never said how to lift a white edge into the daisy.
+- Level 7 never said to turn the top at the end.
+- Sequences from level 3 on were letters only, which the app never teaches. Level 8 listed no sequences.
+- Walk-through moves with no reason said "Move 2 of 4 in this step."
+
+### Solution
+
+Every missing step is now in the words, sequences are buttons the arrow walks you through, and a test follows each level's words literally on practice cubes. Design: docs/02-levels.md → Controls and "Level words checked by a kid test".
+
+### New
+
+- Tap a sequence: the arrow walks you through it on the cube (Try it, PLL and full-solve levels). Doesn't count as help.
+- A walk-through move with no reason says what it does, e.g. "The right side goes up."
+- Kid test: levels 1–7 and a full solve, done only by following the words, on 20 practice cubes each.
+
+### Changed
+
+- Level words for 1, 2, 3, 4 and 7 (see Problem).
+- Level 8 lists all 7 beginner sequences.
+- Tests time out at 3 minutes instead of 5 s. CFOP's 100-scramble test takes ~27 s alone and ran past 60 s when test files shared the CPU (traced, not a hang).
+
+### Fixed
+
+- Following level 2 or 3's words literally no longer gets stuck.
+- The CFOP speed check failed under load: the same cube took 673 ms alone and 4,993 ms while other test files ran. It now measures the test's own CPU time.
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `docs/02-levels.md` | Sequence buttons, move words, kid test |
+| `site/catalog.json` | Regenerated from the docs |
+| `src/lessons/beginner.ts` | Level words; level 8 sequences |
+| `src/lessons/moveWords.ts` | New: one move in plain words |
+| `src/lessons/walkthrough.ts` | No more "Move 2 of 4" filler |
+| `src/app/algButtons.ts` | New: sequences as buttons |
+| `src/app/stageLesson.ts`, `src/app/lesson.ts` | Sequence buttons start the arrow |
+| `src/app/styles.css` | Sequence button style |
+| `vite.config.ts` | Test timeout |
+| `tests/kidWords.test.ts`, `tests/moveWords.test.ts` | New tests |
+| `tests/cfop.test.ts` | Speed check uses CPU time |
+
 ## v0.8.11 — Arrows only (2026-11-09)
 
 ### Problem
