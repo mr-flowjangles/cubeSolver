@@ -9,6 +9,7 @@ import { ALL_LEVELS, type GuideStep, LEVEL_IDS, METHODS, stageDoneAnyHold } from
 import { practicePosition } from "../lessons/position";
 import { solveBeginner } from "../solver/beginner";
 import { solvePll } from "../solver/cfop";
+import { algButtonsHtml, onAlgTap } from "./algButtons";
 import { type CubePanel, mountCubePanel } from "./cubePanel";
 import { HintArrows } from "./hintArrows";
 import { showPass } from "./reward";
@@ -16,10 +17,7 @@ import type { Screen } from "./shell";
 import { mountControlsLesson } from "./controlsLesson";
 import { mountStageLesson } from "./stageLesson";
 
-const algList = (level: Level) =>
-  level.algs
-    .map((a) => `<p class="alg"><span>${a.name}</span><code>${a.moves}</code></p>`)
-    .join("");
+const algList = (level: Level) => algButtonsHtml(level.algs);
 
 function passed(level: Level, p: CubePanel): boolean {
   if (level.kind === "full" || level.kind === "pll") return isSolved(p.state);
@@ -137,6 +135,11 @@ export function mountLesson(root: HTMLElement, id: string): Screen {
     });
     return plan[0]?.step;
   };
+
+  onAlgTap(root.querySelector(".intro")!, (name, moves) => {
+    hints.start(moves);
+    panel.say(`${name}: follow the arrow.`);
+  });
 
   root.querySelector("#hint")?.addEventListener("click", () => {
     usedHelp = true;

@@ -191,9 +191,15 @@ a {
   gap: 8px;
   margin: 6px 0;
 }
+/* A sequence is a button: tap it and the arrow walks through it. */
+button.alg {
+  width: 100%;
+  min-height: 44px;
+  padding: 6px 12px;
+  text-align: left;
+}
 .alg span {
-  color: var(--muted);
-  font-size: 0.9rem;
+  font-size: 0.95rem;
 }
 .alg code {
   font-size: 1.05rem;

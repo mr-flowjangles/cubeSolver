@@ -7,9 +7,11 @@
 import { type CubeState, type Move, applyMoves, findPiece, slot, toString } from "../cube";
 import type { Level } from "../lessons/beginner";
 import { type GuideStep, METHODS, stageDoneAnyHold } from "../lessons/index";
+import { moveWords } from "../lessons/moveWords";
 import { PRACTICE_RAMP, practicePosition } from "../lessons/position";
 import { type GuideMove, demoPosition, guideMoves, stageSteps } from "../lessons/walkthrough";
 import { WHOLE_CUBE, reorient, stickerMap } from "../render/swipe";
+import { algButtonsHtml, onAlgTap } from "./algButtons";
 import { type CubePanel, mountCubePanel } from "./cubePanel";
 import { HintArrows } from "./hintArrows";
 import { showPass } from "./reward";
@@ -48,7 +50,7 @@ export function mountStageLesson(root: HTMLElement, level: Level, next?: Level):
           <summary>How it works</summary>
           <ul>${level.teach.map((t) => `<li>${t}</li>`).join("")}</ul>
         </details>
-        ${level.algs.map((a) => `<p class="alg"><span>${a.name}</span><code>${a.moves}</code></p>`).join("")}
+        ${algButtonsHtml(level.algs)}
       </section>
       <nav class="phases" aria-label="Lesson parts">
         ${(["show", "walk", "try"] as Phase[])
@@ -115,7 +117,7 @@ export function mountStageLesson(root: HTMLElement, level: Level, next?: Level):
       ? `${g.part} · step ${g.step + 1} of ${g.steps}`
       : `Step ${g.step + 1} of ${g.steps}`;
     $(".guide-say").textContent = g.say;
-    $(".guide-move").textContent = g.why;
+    $(".guide-move").textContent = g.why ?? moveWords(shown(g));
     panel.view.pointTo(shown(g));
     light(g, panel.state);
   };
@@ -309,6 +311,13 @@ export function mountStageLesson(root: HTMLElement, level: Level, next?: Level):
       await panel.play(step.moves);
       checkCube();
     }
+  });
+  // Tap a sequence: the arrow walks through it. Practice only, so the demo cube stays as shown.
+  onAlgTap($(".intro"), (name, moves) => {
+    if (phase !== "try")
+      return panel.say("Press Try it, then tap a sequence to follow its arrows.");
+    hints.start(moves);
+    panel.say(`${name}: follow the arrow.`);
   });
   root.querySelector(".phases")!.addEventListener("click", (e) => {
     const p = (e.target as HTMLElement).closest<HTMLElement>("[data-phase]")?.dataset.phase;
