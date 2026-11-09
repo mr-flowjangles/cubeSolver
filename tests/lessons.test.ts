@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { applyMoves, invertMoves, isSolved, parseMoves, slot, solved } from "../src/cube";
-import { BEGINNER_LEVELS, NOTATION_DRILL } from "../src/lessons/beginner";
+import {
+  BEGINNER_LEVELS,
+  MAGIC,
+  MAGIC_DID,
+  MAGIC_ROUNDS,
+  NOTATION_DRILL,
+  NOTATION_STEPS,
+} from "../src/lessons/beginner";
 import { ALL_LEVELS, METHODS } from "../src/lessons/index";
 import { PRACTICE_RAMP, practicePosition } from "../src/lessons/position";
 import { STAGE_DONE, STAGES } from "../src/solver/beginner";
@@ -135,5 +142,33 @@ describe("cube review fixes (v0.8.6)", () => {
           expect(STAGE_DONE[st](p), `${st} with ${left} left`).toBe(true);
         expect(STAGE_DONE.yellowCornersTwist(p)).toBe(false);
       }
+  });
+});
+
+describe("level 0: the letters and the trick", () => {
+  it("the trick brings any cube back to where it started", () => {
+    const trick = Array.from({ length: MAGIC_ROUNDS }, () => MAGIC).flat();
+    expect(isSolved(applyMoves(solved(), trick))).toBe(true);
+    const mixed = applyMoves(solved(), "F L2 D' B R U2");
+    expect(applyMoves(mixed, trick)).toEqual(mixed);
+    // and it really mixes the cube up on the way
+    expect(isSolved(applyMoves(solved(), trick.slice(0, 12)))).toBe(false);
+  });
+
+  it("every letter and every trick move has a sentence and a printed line", async () => {
+    const { allowedSwipes } = await import("../src/app/cubePanel");
+    for (const s of NOTATION_STEPS) {
+      expect(s.say.length).toBeGreaterThan(0);
+      expect(s.did.length).toBeGreaterThan(0);
+    }
+    for (const m of MAGIC) {
+      expect(MAGIC_DID[m]).toBeTruthy();
+      expect(allowedSwipes("beginner")).toContain(m);
+    }
+  });
+
+  it("the top of level 0 is one line", () => {
+    expect(BEGINNER_LEVELS[0].teach).toEqual([]);
+    expect(BEGINNER_LEVELS[0].goal.split(". ").length).toBeLessThanOrEqual(2);
   });
 });

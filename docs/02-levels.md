@@ -38,7 +38,7 @@ How the three parts are built (v0.8.4):
 
 | # | Level | Passed when | Sequence taught |
 |---|---|---|---|
-| 0 | Learn the controls | 10 turns made as asked | — |
+| 0 | Learn the controls | 10 letter swipes, then `R U R' U'` six times | `R U R' U'` (6 times brings the cube back) |
 | 1 | White cross | 4 white edges on the bottom, matching centers | none — the daisy, then F2 for each edge |
 | 2 | White corners | white layer done | `R U R' U'` (repeat) |
 | 3 | Middle edges | first two layers done | `U R U' R' U' F' U F` / `U' L' U L U F U' F'` |
@@ -47,6 +47,16 @@ How the three parts are built (v0.8.4):
 | 6 | Yellow corners into place | top corners in the right spots | `U R U' L' U R' U' L` |
 | 7 | Twist yellow corners | cube solved | `R' D' R D` (repeat) |
 | 8 | Full solve | cube solved from a full scramble | all of the above |
+
+### Level 0: the move letters[1]
+
+- Written for a 10-year-old.
+- One line at the top: "Learn the move letters. Every level uses them, and so does your real cube." No goal paragraph, no list.
+- **Part 1, the letters:** 10 swipes (R, U, R', U', F, F', L, D', y, B). The arrow shows each one; one plain sentence says what the letter means.
+- **Every move prints a line** in a list under the cube, e.g. "R: the right side went up."
+- **Part 2, the trick:** a fresh solved cube. Do `R U R' U'` six times (24 swipes). The cube gets mixed up, then comes back solved.
+- The trick works because `R U R' U'` six times always returns the cube to where it started (checked by the app's own cube model in the tests).
+- Passing the level means finishing the trick.
 
 ## CFOP (M6)
 

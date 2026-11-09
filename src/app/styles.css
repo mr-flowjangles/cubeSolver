@@ -806,3 +806,20 @@ button.small {
   min-width: 2.2em;
   font-size: 1.1rem;
 }
+
+/* Level 0: every move prints a line, newest on top. */
+.move-log {
+  margin: 8px 0;
+  padding-left: 0;
+  list-style: none;
+  max-height: 9.5em;
+  overflow-y: auto;
+  font-size: 0.95rem;
+}
+.move-log li {
+  padding: 3px 0;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+}
+.move-log li:first-child {
+  font-weight: 700;
+}
