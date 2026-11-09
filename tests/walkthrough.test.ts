@@ -7,6 +7,7 @@ import {
   scramble,
   slot,
   slotSolved,
+  invertMoves,
   solved,
 } from "../src/cube";
 import { ALL_LEVELS, METHODS } from "../src/lessons/index";
@@ -18,7 +19,8 @@ import {
   seeded,
   stageSteps,
 } from "../src/lessons/walkthrough";
-import { DEFAULT_PAD, CFOP_PAD } from "../src/app/cubePanel";
+import { allowedSwipes } from "../src/app/cubePanel";
+import { reorient } from "../src/render/swipe";
 import { STAGE_DONE, solveBeginner } from "../src/solver/beginner";
 
 const STAGE_LEVELS = ALL_LEVELS.filter((l) => l.kind === "stage");
@@ -27,19 +29,42 @@ describe("walk-through", () => {
   it.each(STAGE_LEVELS)(
     "$title: following every move finishes the stage",
     (level) => {
-      const pad = level.method === "cfop" ? CFOP_PAD : DEFAULT_PAD;
+      const allowed = allowedSwipes(level.method === "cfop" ? "cfop" : "beginner");
       const pos = demoPosition(level);
-      const moves = guideMoves(stageSteps(level, pos), pad);
+      const moves = guideMoves(stageSteps(level, pos));
       expect(moves.length).toBeGreaterThan(0);
-      for (const g of moves) expect(pad).toContain(g.move); // every move has a button
+      for (const g of moves) expect(allowed).toContain(g.move); // every move is one allowed swipe
       expect(METHODS[level.method].done[level.stage!](afterGuide(pos, moves))).toBe(true);
     },
     60_000,
   );
 
-  it("splits a half turn into two taps", () => {
-    const g = guideMoves([{ stage: "cross", moves: ["U2", "F"], say: "x" }], DEFAULT_PAD);
-    expect(g.map((m) => m.move)).toEqual(["U", "U", "F"]);
+  it.each(STAGE_LEVELS)(
+    "$title: turning the whole cube mid-way, the renamed moves still finish the stage",
+    (level) => {
+      const pos = demoPosition(level);
+      const moves = guideMoves(stageSteps(level, pos));
+      const turns = ["y", "x", "y'", "x'", "y"];
+      let s = pos;
+      const turned: string[] = [];
+      moves.forEach((g, i) => {
+        if (i % 3 === 1) {
+          const t = turns[turned.length % turns.length];
+          turned.push(t);
+          s = applyMoves(s, [t]);
+        }
+        s = applyMoves(s, [reorient(g.move, turned)]);
+      });
+      // The stage checks expect white on the bottom, so turn the cube back first.
+      s = applyMoves(s, invertMoves(turned));
+      expect(METHODS[level.method].done[level.stage!](s)).toBe(true);
+    },
+    60_000,
+  );
+
+  it("splits a half turn into two swipes, and r into R then M'", () => {
+    const g = guideMoves([{ stage: "cross", moves: ["U2", "F", "r"], say: "x" }]);
+    expect(g.map((m) => m.move)).toEqual(["U", "U", "F", "R", "M'"]);
   });
 });
 

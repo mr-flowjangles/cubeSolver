@@ -1,6 +1,22 @@
 import { describe, expect, it } from "vitest";
-import { STICKERS, type Vec3, moveTargets, moveTurn } from "../src/cube";
-import { backgroundMove, pickDirection, swipeDirections, swipeMove } from "../src/render/swipe";
+import {
+  STICKERS,
+  type Vec3,
+  applyMoves,
+  moveTargets,
+  moveTurn,
+  solved,
+  toString,
+} from "../src/cube";
+import {
+  backgroundMove,
+  pickDirection,
+  reorient,
+  stickerMap,
+  swipeDirections,
+  swipeMove,
+  swipesFor,
+} from "../src/render/swipe";
 
 const sub = (a: Vec3, b: Vec3) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]] as const;
 const dot = (a: readonly number[], b: readonly number[]) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
@@ -60,5 +76,59 @@ describe("swipe beside the cube (free play)", () => {
     expect(backgroundMove(50, 5)).toBe("y'");
     expect(backgroundMove(3, -50)).toBe("x");
     expect(backgroundMove(3, 50)).toBe("x'");
+  });
+});
+
+describe("moves as swipes", () => {
+  const all = [
+    "R",
+    "L",
+    "U",
+    "D",
+    "F",
+    "B",
+    "M",
+    "E",
+    "S",
+    "r",
+    "l",
+    "u",
+    "d",
+    "f",
+    "b",
+    "Rw",
+    "x",
+    "y",
+    "z",
+  ];
+  const variants = all.flatMap((b) => [b, b + "'", b + "2"]);
+
+  it("every move's swipes do the same as the move, one layer per swipe", () => {
+    for (const m of variants) {
+      const swipes = swipesFor(m);
+      expect(toString(applyMoves(solved(), swipes)), m).toBe(toString(applyMoves(solved(), [m])));
+      for (const s of swipes) expect(moveTurn(s).turns === 2, `${m} → ${s}`).toBe(false);
+    }
+    expect(swipesFor("r")).toEqual(["R", "M'"]);
+    expect(swipesFor("U2")).toEqual(["U", "U"]);
+  });
+
+  it("after a whole-cube turn, the renamed move does the same thing", () => {
+    expect(reorient("R", ["y"])).toBe("F");
+    expect(reorient("U", ["y"])).toBe("U");
+    const start = applyMoves(solved(), "R U F' L2 D B");
+    for (const turned of [["y"], ["y", "y"], ["x"], ["x'", "y"]])
+      for (const m of variants) {
+        const a = applyMoves(applyMoves(start, [m]), turned);
+        const b = applyMoves(applyMoves(start, turned), [reorient(m, turned)]);
+        expect(toString(b), `${m} after ${turned}`).toBe(toString(a));
+      }
+  });
+
+  it("stickerMap follows whole-cube turns", () => {
+    const map = stickerMap(["y"]);
+    const s = applyMoves(solved(), "R U");
+    const t = applyMoves(s, ["y"]);
+    for (let i = 0; i < 54; i++) expect(t[map(i)]).toBe(s[i]);
   });
 });

@@ -77,25 +77,19 @@ How the three parts are built (v0.8.4):
 
 ## Controls
 
-- Buttons are grouped by side: Top, Right, Front, Bottom, Left, Back, Whole cube.
-- Each button shows the standard letter (what every cube guide uses), the side's name, and an arrow for which way the front edge moves.
-- CFOP levels show letters only, plus Middle and two-layer turns (M, r, f) and x.
+- **No buttons.** You turn the cube by swiping on it.[1]
+- **Swipe a sticker:** the row or column under your finger turns the way you swiped.[2]
+- **Swipe beside the cube:** turns the whole cube. Left or right is y, up or down is x. Swipe left twice and the back becomes the front.[1]
+- **Each turn flashes its letter** (R, U' …) over the cube, so players still learn the names.[1]
+- **Next move in a lesson:** an arrow on the cube along the row to swipe, plus the letter.[1] Whole-cube turns show the arrow beside the cube.
+- **Turning the whole cube in a lesson is fine.**[1] Walk through it renames the moves left for the new front. Hint and Show me plan from the cube as it is.
+- **Half turns** (U2) are two swipes.
+- **Two-layer turns** are two swipes: r is R then M', f is F then S.
+- **Beginner levels have no middle rows**, since turning one moves the centers. Swiping one says so. CFOP levels and free play allow middle rows.
+- **Keyboard:** a letter turns clockwise, Shift+letter the other way: U R F D L B, y, x, and M in CFOP.
 - FRONT · F, TOP · U and RIGHT · R tags float next to the cube and never turn: letters mean places, not colors.
-- Dragging the view is limited to about 40° and springs back to the front on release.
-- **See back** swings round to show the back; any turn swings back to the front first.
-- Based on a research pass of ruwix, J Perm, the official Rubik's guide and the cubing.js viewer.
-
-### Touch controls (decided by Rob, 2026-11-06; built in v0.8.7)
-
-- **Swipe on a sticker:** the row or column under your finger turns the way you swiped.
-- **Swipe on the background:** turns the whole cube.
-- **In free play** a background swipe is a real whole-cube turn: swipe left twice and the back becomes the front.
-- **In lessons** the cube springs back when you let go, because lesson steps need green in front.
-- **Buttons stay.** Lessons still show the move letters; See back stays as a one-tap look at the back.
-- In lessons, dragging beside the cube is still the 40° look-around that springs back.
-- A swipe only makes moves the screen's buttons have, so a lesson never gets a turn it doesn't teach. Swiping a middle row in a beginner level says to use a row with a button.
-- Free play also allows middle rows (M, E, S) and up/down whole-cube turns (x).
 - A swipe that starts while the cube is turning is ignored, because the stickers aren't in place yet.
+- Move letters follow a research pass of ruwix, J Perm, the official Rubik's guide and the cubing.js viewer.
 
 ## How a level works
 
@@ -114,3 +108,8 @@ How the three parts are built (v0.8.4):
 - Beginner: tested on 500 random scrambles; slowest about a quarter second.
 - CFOP: tested on 500 random scrambles; slowest about half a second. Times depend on the device.
 - Every CFOP sequence is checked by the cube model: last-layer ones keep the bottom two layers, and the 21 PLLs are all different cases.
+
+## Footnotes
+
+- [1] Design decision, 2026-11-09.
+- [2] Design decision, 2026-11-06.

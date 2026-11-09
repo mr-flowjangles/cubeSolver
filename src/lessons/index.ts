@@ -64,3 +64,12 @@ export function stateAfter(method: Method, s: CubeState, stage: string): CubeSta
 }
 
 export type { Level };
+
+/**
+ * The level's stage is done, however the cube is held: the player may have turned the
+ * whole cube, so turn it white-down first, then check.
+ */
+export function stageDoneAnyHold(level: Level, s: CubeState): boolean {
+  const hold = solveBeginner(s, "hold").flatMap((x) => (x.stage === "hold" ? x.moves : []));
+  return METHODS[level.method].done[level.stage!](applyMoves(s, hold));
+}

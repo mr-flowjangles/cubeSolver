@@ -1,15 +1,16 @@
 // A stage level as a tutorial, in three parts:
 //   1 Show it          the app does the stage on a demo cube, slowly, saying why each move is made
-//   2 Walk through it  the player does the same moves; the right button glows, wrong turns are undone
+//   2 Walk through it  the player does the same moves; an arrow shows each swipe, wrong turns are undone
 //   3 Try it           practice cubes on their own, easy first, with Hint and Show me
 // See docs/02-levels.md → "Every level is a tutorial".
 
 import { type CubeState, type Move, applyMoves, findPiece, slot, toString } from "../cube";
 import type { Level } from "../lessons/beginner";
-import { type GuideStep, METHODS } from "../lessons/index";
+import { type GuideStep, METHODS, stageDoneAnyHold } from "../lessons/index";
 import { PRACTICE_RAMP, practicePosition } from "../lessons/position";
 import { type GuideMove, demoPosition, guideMoves, stageSteps } from "../lessons/walkthrough";
-import { CFOP_GROUPS, CFOP_PAD, type CubePanel, DEFAULT_PAD, mountCubePanel } from "./cubePanel";
+import { WHOLE_CUBE, reorient, stickerMap } from "../render/swipe";
+import { type CubePanel, mountCubePanel } from "./cubePanel";
 import { showPass } from "./reward";
 import type { Screen } from "./shell";
 
@@ -22,7 +23,7 @@ const PHASE_TITLE: Record<Phase, string> = {
 };
 const PHASE_HELP: Record<Phase, string> = {
   show: "Watch the app do it. Lit squares are the piece being moved and where it goes.",
-  walk: "Now you do it. Tap the glowing button. Each move says why.",
+  walk: "Now you do it. Swipe where the arrow shows. Each move says why.",
   try: "On your own now. Three cubes: the first is nearly done, the last is fully mixed.",
 };
 
@@ -31,9 +32,8 @@ const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 export function mountStageLesson(root: HTMLElement, level: Level, next?: Level): Screen {
   const method = METHODS[level.method];
   const cfop = level.method === "cfop";
-  const pad = cfop ? CFOP_PAD : DEFAULT_PAD;
   const demo = demoPosition(level);
-  const guide = guideMoves(stageSteps(level, demo), pad);
+  const guide = guideMoves(stageSteps(level, demo));
   // White cross is built on top (the daisy), then shows on the bottom when done.
   const lookWork = ["corners", "f2l"].includes(level.stage!) ? "below" : "above";
   const lookDone = ["cross", "corners", "f2l"].includes(level.stage!) ? "below" : "above";
@@ -82,19 +82,19 @@ export function mountStageLesson(root: HTMLElement, level: Level, next?: Level):
   let started = Date.now();
   let passed = false;
   let cubeDone = false;
-
-  const glow = (m: Move | null) =>
-    root.querySelectorAll<HTMLElement>(".pad [data-move]").forEach((b) => {
-      b.classList.toggle("glow", b.dataset.move === m);
-    });
+  // Whole-cube turns the player made during Walk through it. The moves left are renamed
+  // for the new front, so the player can turn the cube whenever they like.
+  let turned: Move[] = [];
+  const shown = (g: GuideMove) => reorient(g.move, turned);
 
   const light = (g: GuideMove | undefined, s: CubeState) => {
     if (!g?.piece) return panel.view.spotlight(null);
-    const lit = [...findPiece(s, g.piece).stickers, ...(g.to ? slot(g.to).stickers : [])];
+    const map = stickerMap(turned);
+    const lit = [...findPiece(s, g.piece).stickers, ...(g.to ? slot(g.to).stickers.map(map) : [])];
     panel.view.spotlight(lit);
   };
 
-  /** Say what the next guide move is, light its piece, make its button glow. */
+  /** Say what the next guide move is, light its piece, point the arrow at the swipe. */
   const present = () => {
     const g = guide[at];
     guideEl.hidden = false;
@@ -105,7 +105,7 @@ export function mountStageLesson(root: HTMLElement, level: Level, next?: Level):
         phase === "show"
           ? "Now you do it: press Walk through it."
           : "You did it! Now press Try it.";
-      glow(null);
+      panel.view.pointTo(null);
       panel.view.spotlight(null);
       panel.view.lookFrom(lookDone);
       return;
@@ -114,26 +114,29 @@ export function mountStageLesson(root: HTMLElement, level: Level, next?: Level):
       ? `${g.part} · step ${g.step + 1} of ${g.steps}`
       : `Step ${g.step + 1} of ${g.steps}`;
     $(".guide-say").textContent = g.say;
-    $(".guide-move").innerHTML = `<b>${g.move}</b> — ${g.why}`;
-    glow(g.move);
+    $(".guide-move").innerHTML = `<b>${shown(g)}</b> — ${g.why}`;
+    panel.view.pointTo(shown(g));
     light(g, panel.state);
   };
 
   const panel: CubePanel = mountCubePanel($(".panel"), demo, {
-    groups: cfop ? CFOP_GROUPS : undefined,
-    words: !cfop,
+    turns: cfop ? "cfop" : "beginner",
     onMove: (m, p) => {
       if (phase === "show") {
         p.say("Just watch for now. Press Walk through it to do it yourself.");
         setTimeout(() => p.undo(), 250);
       } else if (phase === "walk") {
         const g = guide[at];
-        if (g && m === g.move) {
+        if (g && m === shown(g)) {
           at++;
           p.say(at < guide.length ? "Good!" : "");
           present();
+        } else if (WHOLE_CUBE.includes(m)) {
+          turned.push(m);
+          p.say("You turned the cube. The moves now match the new front.");
+          present();
         } else {
-          p.say(`That was ${m}. Undoing it — tap the glowing ${g?.move ?? ""} button.`);
+          p.say(`That was ${m}. Undoing it — swipe ${g ? shown(g) : ""} where the arrow shows.`);
           setTimeout(() => p.undo(), 250);
         }
       } else {
@@ -169,6 +172,7 @@ export function mountStageLesson(root: HTMLElement, level: Level, next?: Level):
   const restartDemo = () => {
     playing = false;
     at = 0;
+    turned = [];
     panel.setState(demo);
     panel.view.lookFrom(lookWork);
     panel.say("");
@@ -181,7 +185,7 @@ export function mountStageLesson(root: HTMLElement, level: Level, next?: Level):
     panel.setState(practicePosition(level, Math.random, left));
     panel.view.lookFrom(lookWork);
     panel.view.spotlight(null);
-    glow(null);
+    panel.view.pointTo(null);
     plan = [];
     cubeDone = false;
     started = Date.now();
@@ -196,7 +200,7 @@ export function mountStageLesson(root: HTMLElement, level: Level, next?: Level):
   };
 
   const checkCube = () => {
-    if (cubeDone || !method.done[level.stage!](panel.state)) return;
+    if (cubeDone || !stageDoneAnyHold(level, panel.state)) return;
     cubeDone = true;
     panel.view.lookFrom(lookDone);
     if (practice < PRACTICE_RAMP.length - 1) {

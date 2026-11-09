@@ -2,6 +2,7 @@
 // moves that finish the level's stage on it, each with a plain-words reason.
 
 import { type CubeState, type Face, type Move, applyMoves } from "../cube";
+import { swipesFor } from "../render/swipe";
 import type { Level } from "./beginner";
 import { type GuideStep, METHODS } from "./index";
 import { practicePosition } from "./position";
@@ -36,17 +37,13 @@ export function demoPosition(level: Level): CubeState {
   return practicePosition(level, seeded(level.number * 31 + 7));
 }
 
-/**
- * One entry per button tap. A half turn the buttons don't have (U2) becomes two taps.
- * `pad` is the list of buttons on screen.
- */
-export function guideMoves(steps: GuideStep[], pad: readonly Move[]): GuideMove[] {
+/** One entry per swipe. A half turn (U2) is two swipes; a two-layer turn (r) is R then M'. */
+export function guideMoves(steps: GuideStep[]): GuideMove[] {
   const out: GuideMove[] = [];
   steps.forEach((st, k) => {
     st.moves.forEach((m, j) => {
       const why = st.why?.[j] ?? `Move ${j + 1} of ${st.moves.length} in this step.`;
-      const taps = !pad.includes(m) && m.endsWith("2") ? [m.slice(0, -1), m.slice(0, -1)] : [m];
-      for (const t of taps)
+      for (const t of swipesFor(m))
         out.push({
           move: t,
           why,

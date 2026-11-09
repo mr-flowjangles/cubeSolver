@@ -19,7 +19,7 @@ export function mountPractice(root: HTMLElement): Screen {
   const undoBtn = root.querySelector<HTMLButtonElement>("#undo")!;
   const refresh = () => (undoBtn.disabled = panel.history.length === 0);
   const panel = mountCubePanel(root.querySelector(".panel")!, solved(), {
-    freePlay: true,
+    turns: "free",
     onMove: (_m, p) => {
       refresh();
       if (scrambled && isSolved(p.state)) {

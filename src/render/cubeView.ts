@@ -7,7 +7,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { type CubeState, type Face, type Move, STICKERS, moveTurn } from "../cube";
 import { STICKER_COLOR } from "../cube";
 import { ADA_SHAPE, drawShape } from "./shapes";
-import { backgroundMove, pickDirection, swipeDirections, swipeMove } from "./swipe";
+import { WHOLE_CUBE, backgroundMove, pickDirection, swipeDirections, swipeMove } from "./swipe";
 
 const GAP = 1.02; // spacing between pieces
 const STICKER_SIZE = 0.84;
@@ -17,8 +17,8 @@ export interface CubeViewOptions {
   /** A swipe on the cube asks for this move (the host decides whether to make it). */
   onSwipe?: (move: Move) => void;
   /**
-   * Free play: a swipe beside the cube turns the whole cube (y / x).
-   * Otherwise it looks around and springs back to the front.
+   * A swipe beside the cube turns the whole cube (y / x). Default on; off makes it a
+   * look-around that springs back to the front.
    */
   backgroundTurns?: boolean;
 }
@@ -56,6 +56,8 @@ export class CubeView {
     done: boolean;
   } | null = null;
   private raycaster = new THREE.Raycaster();
+  private side: "above" | "below" = "above";
+  private arrow: THREE.Mesh | null = null;
 
   constructor(
     private container: HTMLElement,
@@ -65,7 +67,7 @@ export class CubeView {
     this.state = state;
     this.ada = options.ada ?? false;
     this.onSwipe = options.onSwipe;
-    this.backgroundTurns = options.backgroundTurns ?? false;
+    this.backgroundTurns = options.backgroundTurns ?? true;
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     container.appendChild(this.renderer.domElement);
@@ -221,6 +223,72 @@ export class CubeView {
     this.controls.enabled = !this.backgroundTurns;
   };
 
+  // ---- Next move: an arrow along the row to swipe ----
+
+  /** Show an arrow for the next swipe (one layer or the whole cube); null hides it. */
+  pointTo(move: Move | null) {
+    if (this.arrow) {
+      this.scene.remove(this.arrow);
+      this.arrow = null;
+    }
+    if (!move) return;
+    const place = this.arrowPlace(move);
+    if (!place) return;
+    const mesh = new THREE.Mesh(
+      new THREE.PlaneGeometry(place.length, 0.62),
+      new THREE.MeshBasicMaterial({ map: arrowTexture(), transparent: true, depthTest: false }),
+    );
+    const u = new THREE.Vector3(...place.u);
+    const n = new THREE.Vector3(...place.n);
+    mesh.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(u, n.clone().cross(u), n));
+    mesh.position.copy(place.at);
+    mesh.renderOrder = 20;
+    this.arrow = mesh;
+    this.scene.add(mesh);
+  }
+
+  /** Where the arrow goes: centre, direction it points (u) and the way it faces (n). */
+  private arrowPlace(move: Move) {
+    const quarter = move.replace("2", "");
+    if (WHOLE_CUBE.includes(quarter)) {
+      // Beside the cube, where the player swipes. y follows U (front goes left); x follows R (front goes up).
+      const prime = quarter.endsWith("'");
+      const low = this.side === "above" ? -1 : 1;
+      if (quarter[0] === "y")
+        return {
+          at: new THREE.Vector3(0, low * 2.15, 1.6),
+          u: [prime ? 1 : -1, 0, 0] as const,
+          n: [0, 0, 1] as const,
+          length: 2.8,
+        };
+      if (quarter[0] === "x")
+        return {
+          at: new THREE.Vector3(2.25, 0, 1.6),
+          u: [0, prime ? -1 : 1, 0] as const,
+          n: [0, 0, 1] as const,
+          length: 2.8,
+        };
+      return null;
+    }
+    // On the cube: the strip of stickers in that layer, on the front, top/bottom or right face.
+    const faces = ["F", this.side === "above" ? "U" : "D", "R"];
+    for (const face of faces) {
+      for (const s of STICKERS) {
+        if (s.face !== face) continue;
+        for (const u of swipeDirections(s.index)) {
+          if (swipeMove(s.index, u) !== quarter) continue;
+          const along = s.position[0] * u[0] + s.position[1] * u[1] + s.position[2] * u[2];
+          if (along !== 0) continue; // the middle sticker of the strip
+          const at = new THREE.Vector3(...s.position)
+            .multiplyScalar(GAP)
+            .add(new THREE.Vector3(...s.normal).multiplyScalar(0.53));
+          return { at, u, n: s.normal, length: 2.9 };
+        }
+      }
+    }
+    return null;
+  }
+
   /** Light up the stickers a move will turn and dim the rest; null clears it. */
   highlight(move: Move | null) {
     const turn = move ? moveTurn(move) : null;
@@ -242,6 +310,7 @@ export class CubeView {
 
   /** Look from slightly above (default) or below, e.g. to see a white cross on the bottom. */
   lookFrom(side: "above" | "below") {
+    this.side = side;
     this.setHome(new THREE.Vector3(5.2, side === "above" ? 4.4 : -4.4, 7.2));
     this.buildTags(side);
   }
@@ -440,6 +509,7 @@ export class CubeView {
 
   dispose() {
     this.renderer.setAnimationLoop(null);
+    this.pointTo(null);
     this.container.removeEventListener("pointerdown", this.onDown, true);
     this.container.removeEventListener("pointermove", this.onPointerMove, true);
     this.container.removeEventListener("pointerup", this.onUp, true);
@@ -449,4 +519,31 @@ export class CubeView {
     this.renderer.dispose();
     this.renderer.domElement.remove();
   }
+}
+
+let ARROW: THREE.CanvasTexture | null = null;
+/** A wide arrow pointing right (+x of the plane), drawn once. */
+function arrowTexture(): THREE.CanvasTexture {
+  if (ARROW) return ARROW;
+  const c = document.createElement("canvas");
+  c.width = 512;
+  c.height = 110;
+  const g = c.getContext("2d")!;
+  g.beginPath();
+  g.moveTo(14, 38);
+  g.lineTo(380, 38);
+  g.lineTo(380, 8);
+  g.lineTo(500, 55);
+  g.lineTo(380, 102);
+  g.lineTo(380, 72);
+  g.lineTo(14, 72);
+  g.closePath();
+  g.fillStyle = "rgba(255, 47, 208, 0.95)";
+  g.strokeStyle = "#111";
+  g.lineWidth = 8;
+  g.stroke();
+  g.fill();
+  ARROW = new THREE.CanvasTexture(c);
+  ARROW.colorSpace = THREE.SRGBColorSpace;
+  return ARROW;
 }

@@ -22,7 +22,7 @@ export const BEGINNER_LEVELS: Level[] = [
     id: "meet",
     number: 0,
     title: "Learn the controls",
-    goal: "This level teaches the buttons. Each letter turns one side of the cube. You'll need these for every level after this.",
+    goal: "This level teaches the moves. Each letter turns one side of the cube. You'll need these for every level after this.",
     kind: "notation",
     method: "beginner",
     teach: [
@@ -30,7 +30,7 @@ export const BEGINNER_LEVELS: Level[] = [
       "The front is whatever side faces you. Letters are places, not colors.",
       "A plain letter turns that side clockwise, as if you were looking straight at it. The ' turns it back.",
       "y turns the whole cube like the top. The colors move; the FRONT / TOP / RIGHT tags stay put.",
-      "Drag to look around. The cube springs back to the front when you let go.",
+      "Swipe a row to turn it. Swipe beside the cube to turn the whole cube.",
     ],
     algs: [],
   },
