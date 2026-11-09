@@ -65,7 +65,7 @@ export function mountLesson(root: HTMLElement, id: string): Screen {
       <section class="intro">
         <h2><span class="num">${level.number}</span> ${level.title}</h2>
         <p class="goal">${level.goal}</p>
-        <details ${level.number <= 1 || level.number === 9 ? "open" : ""}>
+        <details ${level.number <= 1 || level.number === 9 || level.kind === "full" ? "open" : ""}>
           <summary>How it works</summary>
           <ul>${level.teach.map((t) => `<li>${t}</li>`).join("")}</ul>
         </details>

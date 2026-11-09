@@ -32,9 +32,22 @@ export function stageSteps(level: Level, pos: CubeState): GuideStep[] {
     .filter((s) => s.stage === level.stage && s.moves.length > 0);
 }
 
+/**
+ * Seed offsets for beginner demos: the shortest of 40 cubes whose demo plays every sequence the
+ * level teaches (docs/02-levels.md → "Every level is a tutorial"). Checked in tests/walkthrough.test.ts.
+ */
+export const DEMO_SEED: Record<string, number> = {
+  corners: 29,
+  middle: 10,
+  yellowCross: 33,
+  yellowEdges: 5,
+  yellowCornersPlace: 5,
+  yellowCornersTwist: 8,
+};
+
 /** The same demo cube every time, so "Show it" and "Walk through it" match. */
 export function demoPosition(level: Level): CubeState {
-  return practicePosition(level, seeded(level.number * 31 + 7));
+  return practicePosition(level, seeded(level.number * 31 + 7 + (DEMO_SEED[level.id] ?? 0)));
 }
 
 /** One entry per swipe. A half turn (U2) is two swipes; a two-layer turn (r) is R then M'. */
