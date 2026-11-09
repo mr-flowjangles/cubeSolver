@@ -85,14 +85,17 @@ How the three parts are built (v0.8.4):
 - **See back** swings round to show the back; any turn swings back to the front first.
 - Based on a research pass of ruwix, J Perm, the official Rubik's guide and the cubing.js viewer.
 
-### Touch controls (planned — decided by Rob, 2026-11-06)
+### Touch controls (decided by Rob, 2026-11-06; built in v0.8.7)
 
 - **Swipe on a sticker:** the row or column under your finger turns the way you swiped.
 - **Swipe on the background:** turns the whole cube.
 - **In free play** a background swipe is a real whole-cube turn: swipe left twice and the back becomes the front.
 - **In lessons** the cube springs back when you let go, because lesson steps need green in front.
 - **Buttons stay.** Lessons still show the move letters; See back stays as a one-tap look at the back.
-- This replaces the 40° view drag above once built.
+- In lessons, dragging beside the cube is still the 40° look-around that springs back.
+- A swipe only makes moves the screen's buttons have, so a lesson never gets a turn it doesn't teach. Swiping a middle row in a beginner level says to use a row with a button.
+- Free play also allows middle rows (M, E, S) and up/down whole-cube turns (x).
+- A swipe that starts while the cube is turning is ignored, because the stickers aren't in place yet.
 
 ## How a level works
 

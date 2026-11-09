@@ -19,6 +19,7 @@ export function mountPractice(root: HTMLElement): Screen {
   const undoBtn = root.querySelector<HTMLButtonElement>("#undo")!;
   const refresh = () => (undoBtn.disabled = panel.history.length === 0);
   const panel = mountCubePanel(root.querySelector(".panel")!, solved(), {
+    freePlay: true,
     onMove: (_m, p) => {
       refresh();
       if (scrambled && isSolved(p.state)) {
@@ -29,7 +30,7 @@ export function mountPractice(root: HTMLElement): Screen {
       }
     },
   });
-  panel.say("Drag the cube to look around. Tap a move to turn.");
+  panel.say("Swipe a row to turn it. Swipe beside the cube to turn the whole cube.");
 
   root.querySelector("#scramble")!.addEventListener("click", () => {
     const s = scramble();
