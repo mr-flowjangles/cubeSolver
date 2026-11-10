@@ -16,7 +16,7 @@ import {
 import { BEGINNER_LEVELS } from "../src/lessons/beginner";
 import { practicePosition } from "../src/lessons/position";
 import { seeded } from "../src/lessons/walkthrough";
-import { ALGS, STAGE_DONE } from "../src/solver/beginner";
+import { ALGS, STAGE_DONE, solveBeginner } from "../src/solver/beginner";
 
 const N = 20;
 const lv = (id: string) => BEGINNER_LEVELS.find((l) => l.id === id)!;
@@ -242,5 +242,42 @@ describe("the kid test: following the words finishes each level", () => {
         .algs.map((a) => a.moves)
         .sort(),
     ).toEqual(Object.values(ALGS).sort());
+  });
+});
+
+// Round 3: Hint, Show me and the demo do what the words say, at the moment each sequence starts.
+describe("the kid test: Hint follows the words", () => {
+  const before = (id: string, check: (s: CubeState, name: string, say: string) => void) => {
+    const rnd = seeded(300);
+    for (let i = 0; i < 20; i++) {
+      let s = practicePosition(lv(id), rnd);
+      for (const st of solveBeginner(s, lv(id).stage as never).filter(
+        (x) => x.stage === lv(id).stage,
+      )) {
+        const k = st.why!.findIndex((w) => / sequence/.test(w));
+        if (k >= 0) check(applyMoves(s, st.moves.slice(0, k)), st.why![k], st.say);
+        s = applyMoves(s, st.moves);
+      }
+    }
+  };
+
+  it("level 2: Corner starts with a white corner at front-right", () => {
+    before("corners", (s) => {
+      const fr = [...slot("URF").stickers, ...slot("DFR").stickers].map((i) => s[i]);
+      expect(fr).toContain(center(s, "D"));
+    });
+  });
+
+  it("level 3: a stuck edge pops out with Edge right", () => {
+    before("middle", (s, name, say) => {
+      if (/stuck/.test(say)) expect(name).toMatch(/^Edge right/);
+    });
+  });
+
+  it("level 5: Swap edges starts with two edges matching", () => {
+    before("yellowEdges", (s) => {
+      const m = SIDES.filter((f) => s[slot(TOP_EDGE[f]).stickers[1]] === center(s, f));
+      expect(m.length).toBeGreaterThanOrEqual(2);
+    });
   });
 });

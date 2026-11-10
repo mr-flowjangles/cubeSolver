@@ -127,7 +127,9 @@ export function mountStageLesson(root: HTMLElement, level: Level, next?: Level):
       ? `${g.part} · step ${g.step + 1} of ${g.steps}`
       : `Step ${g.step + 1} of ${g.steps}`;
     $(".guide-say").textContent = g.say;
-    $(".guide-move").textContent = g.why ?? moveWords(shown(g));
+    // The reason, then the words for the arrow's move. The words come from the move as shown, so
+    // they stay right after the player turns the whole cube.
+    $(".guide-move").textContent = [g.why, moveWords(shown(g))].filter(Boolean).join(" ");
     panel.view.pointTo(shown(g));
     light(g, panel.state);
   };

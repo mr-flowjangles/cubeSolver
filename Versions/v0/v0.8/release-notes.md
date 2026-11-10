@@ -1,5 +1,49 @@
 # v0.8
 
+## v0.8.14 — Kid test round 3 (2026-11-10)
+
+### Problem
+
+A third kid test found a 10-year-old could solve the cube from the words, but:
+
+- Walk through it: after the player turned the whole cube, the words described the old move (v0.8.13 put the move's words inside the reason, and only the arrow got renamed).
+- Hint, Show me and the demo broke the level's rules: Swap edges with 0–1 edges matching (162 of 380), Corner with no white corner at front-right (102 of 1,180), and Edge left to pop out a stuck edge.
+- Level 6's "in place" read strictly got stuck on 228 of 240 cubes. Level 7's "until yellow is on top" allowed stopping mid-sequence.
+- Level 1's make-room rule contradicted itself for an edge already on top. A half turn's reason showed on both swipes.
+- Demos skipped the harder cases; "twisted corner" and front-right were unclear; level 8's recap left out special cases.
+
+### Solution
+
+Hint, Show me and the demo for levels 2, 3, 5 and 6 now follow the level's words step for step. The screen shows the reason and the arrow's own words separately. Design: docs/02-levels.md → "Level words checked by a kid test".
+
+### New
+
+- Tests: Corner starts with a white corner at front-right, a stuck edge pops out with Edge right, Swap edges starts with two edges matching.
+- Tests: demos show the harder cases; a half turn's reason says which swipe.
+
+### Changed
+
+- Level 2, 3, 5 and 6 planning: rules from the words instead of a search.
+- Demo cubes: shortest of 200 that shows the harder cases (lift-out, pop-out, dot).
+- Words: levels 1, 2, 6, 7 and the level 8 recap.
+- Cross reasons say "this side" instead of naming a side.
+
+### Fixed
+
+- Walk-through words stay right after a whole-cube turn.
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `docs/02-levels.md` | Third-round rules, footnote [3] |
+| `site/catalog.json` | Regenerated from the docs |
+| `src/solver/beginner.ts` | Rule-based levels 2, 3, 5, 6; reasons without move words |
+| `src/lessons/beginner.ts` | Level words, level 8 recap |
+| `src/lessons/walkthrough.ts` | Demo seeds; swipe 1 of 2 |
+| `src/app/stageLesson.ts` | Reason plus the arrow's own words |
+| `tests/kidWords.test.ts`, `tests/walkthrough.test.ts` | New checks |
+
 ## v0.8.13 — Kid test round 2 (2026-11-09)
 
 ### Problem

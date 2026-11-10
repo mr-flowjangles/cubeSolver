@@ -33,16 +33,17 @@ export function stageSteps(level: Level, pos: CubeState): GuideStep[] {
 }
 
 /**
- * Seed offsets for beginner demos: the shortest of 40 cubes whose demo plays every sequence the
- * level teaches (docs/02-levels.md → "Every level is a tutorial"). Checked in tests/walkthrough.test.ts.
+ * Seed offsets for beginner demos: the shortest of 200 cubes whose demo plays every sequence the
+ * level teaches and shows its harder cases (docs/02-levels.md → kid test). Checked in
+ * tests/walkthrough.test.ts.
  */
 export const DEMO_SEED: Record<string, number> = {
-  corners: 29,
-  middle: 10,
-  yellowCross: 33,
-  yellowEdges: 5,
-  yellowCornersPlace: 5,
-  yellowCornersTwist: 8,
+  corners: 181, // a corner lifted out, and Corner repeated
+  middle: 31, // a stuck edge popped out, Edge right and Edge left
+  yellowCross: 12, // dot, L, line, cross
+  yellowEdges: 28,
+  yellowCornersPlace: 3,
+  yellowCornersTwist: 0,
 };
 
 /** The same demo cube every time, so "Show it" and "Walk through it" match. */
@@ -56,17 +57,20 @@ export function guideMoves(steps: GuideStep[]): GuideMove[] {
   steps.forEach((st, k) => {
     st.moves.forEach((m, j) => {
       const why = st.why?.[j];
-      for (const t of swipesFor(m))
+      const swipes = swipesFor(m);
+      swipes.forEach((t, n) =>
         out.push({
           move: t,
-          why,
+          // A half turn is two swipes; say which one, so "drops to the bottom" isn't read after the first.
+          why: why && swipes.length > 1 ? `${why} (Swipe ${n + 1} of ${swipes.length}.)` : why,
           say: st.say,
           part: st.part,
           piece: st.piece,
           to: st.to,
           step: k,
           steps: steps.length,
-        });
+        }),
+      );
     });
   });
   return out;

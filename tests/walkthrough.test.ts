@@ -181,10 +181,26 @@ describe("beginner demos teach (kid test, round 2)", () => {
       for (const st of stageSteps(level, s)) {
         expect(st.piece).toBeTruthy();
         s = applyMoves(s, st.moves);
-        expect(slotSolved(s, homeSlot(s, st.piece!))).toBe(true);
+        // A stuck piece being lifted out is lit too, but doesn't end at home yet.
+        if (!/stuck/.test(st.say)) expect(slotSolved(s, homeSlot(s, st.piece!))).toBe(true);
       }
     },
   );
+
+  it.each([
+    ["corners", [/stuck in the bottom/, /Corner \d+ times/]],
+    ["middle", [/stuck in the middle/, /Edge right\.$/, /Edge left\.$/]],
+    ["yellowCross", [/^Yellow dot/]],
+  ] as const)("%s: the demo shows the harder cases", (id, cases) => {
+    const level = BEGINNER_STAGES.find((l) => l.id === id)!;
+    const says = stageSteps(level, demoPosition(level)).map((s) => s.say);
+    for (const c of cases) expect(says.some((t) => c.test(t))).toBe(true);
+  });
+
+  it("a half turn's reason says which swipe it is", () => {
+    const g = guideMoves([{ stage: "cross", moves: ["F2"], say: "", why: ["Drop it."] }]);
+    expect(g.map((x) => x.why)).toEqual(["Drop it. (Swipe 1 of 2.)", "Drop it. (Swipe 2 of 2.)"]);
+  });
 
   it("no level's words say 'hold' except holding the cube white-down", () => {
     for (const l of BEGINNER_LEVELS)
