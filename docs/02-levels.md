@@ -69,7 +69,8 @@ How the three parts are built (v0.8.4):
 - Every move in Show it and Walk through it gives a reason, e.g. "Corner sequence, round 2 of 3, move 3 of 4: the right side goes down."
 - Levels 2 and 3 light the piece being placed and its home. Levels 4–7 move many pieces at once, so nothing lights, and Show it doesn't promise it.
 - Each beginner demo cube is the shortest of 200 that plays every sequence the level teaches and shows the level's harder cases: a corner lifted out and Corner repeated (level 2), a stuck edge popped out (level 3), the dot case (level 4).
-- **Third round.**[3] Hint, Show me and the demo for levels 2, 3, 5 and 6 follow the level's words step for step, so they never do what the words don't say.
+- **Third round.**[3] Hint, Show me and the demo for levels 1, 2, 3, 5 and 6 follow the level's words step for step, so they never do what the words don't say.
+- Level 1's words keep the daisy to the front, top and right: a middle-row edge is first turned to front-right, and part 2 turns the cube so the edge's side faces you, then turns the front twice.
 - A move's reason and its words are shown separately. The words come from the arrow's move, so they stay right after the player turns the whole cube.
 - A half turn's reason says which of its two swipes it is.
 - "In its right spot" says the colors don't have to face the right way yet; level 7 says to check only after a whole sequence.

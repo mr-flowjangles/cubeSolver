@@ -56,8 +56,22 @@ function cross() {
       if (e.name[0] === "D") makeRoom(wFace);
       go(wFace);
     } else {
-      // "White edge in the middle row: turn the side next to it so it goes up, white facing up."
-      const side = [...e.name].find((f) => f !== wFace)!;
+      // "White edge in the middle row: turn the whole cube so it's at front-right."
+      const cols = e.stickers
+        .map((k) => cur[k])
+        .sort()
+        .join("");
+      turnCubeUntil(
+        () =>
+          slot("FR")
+            .stickers.map((k) => cur[k])
+            .sort()
+            .join("") === cols,
+      );
+      const fr = slot("FR");
+      const wf = "URFDLB"[Math.floor(fr.stickers.find((k) => cur[k] === white())! / 9)];
+      // "Its white faces one side; turn the other side it touches, so the edge goes up."
+      const side = wf === "F" ? "R" : "F";
       makeRoom(side);
       go(
         [side, `${side}'`].find(
@@ -73,7 +87,10 @@ function cross() {
         return up === white() && side === center(cur, f);
       });
       if (f) {
-        go(`${f}2`);
+        // "Turn the whole cube so that side faces you, then turn the front twice."
+        const col = center(cur, f);
+        turnCubeUntil(() => center(cur, "F") === col);
+        go("F2");
         break;
       }
       go("U");

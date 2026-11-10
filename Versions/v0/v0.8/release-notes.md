@@ -46,8 +46,8 @@ Hint, Show me and the demo for levels 2, 3, 5 and 6 now follow the level's words
 | Level 1 make-room line came after the moves it covers | Wording | Level 1 | Tutorial player |
 | Level 3 "right center", "stuck" unclear | Wording | Level 3 | Tutorial player |
 | Daisy reason "it goes back next" wrong (6/300); level 4 top-turn reason vague | Wording | Show it / Walk, levels 1 and 4 | — |
-| Not changed: "Turn this side out of the way" isn't taught (2/300 cubes, Hint only; the arrow shows it) | Wording | Level 1 Hint | — |
-| Not changed: level 1 has 12 bullets | Wording | Level 1 | — |
+| "Turn this side out of the way" isn't taught (2/300 cubes) | Wrong help | Level 1 Hint, Show me, demo | Level 1 Hint now follows the words step for step; `walkthrough.test.ts` daisy tests |
+| Level 1 had 12 bullets | Wording | Level 1 | Now 10; tutorial player |
 
 No finding blocked a kid from solving: the tutorial player and the kid both solved every cube.
 
@@ -65,6 +65,7 @@ No finding blocked a kid from solving: the tutorial player and the kid both solv
 | `tests/tutorialPlayer.ts`, `tests/tutorialPlayer.test.ts` | New: the no-AI tutorial player and its test |
 | `src/lessons/walkthrough.ts` | `helpSteps`: Hint plans earlier stages first |
 | `src/app/stageLesson.ts` | Hint uses `helpSteps`; Walk asks to turn the cube back |
+| `src/solver/beginner.ts` (cross) | White cross follows level 1's words: front, top and right only |
 
 ## v0.8.13 — Kid test round 2 (2026-11-09)
 

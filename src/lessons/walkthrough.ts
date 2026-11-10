@@ -58,12 +58,12 @@ export function stageSteps(level: Level, pos: CubeState): GuideStep[] {
  * tests/walkthrough.test.ts.
  */
 export const DEMO_SEED: Record<string, number> = {
-  corners: 181, // a corner lifted out, and Corner repeated
-  middle: 31, // a stuck edge popped out, Edge right and Edge left
-  yellowCross: 12, // dot, L, line, cross
-  yellowEdges: 28,
-  yellowCornersPlace: 3,
-  yellowCornersTwist: 0,
+  corners: 78, // a corner lifted out, and Corner repeated
+  middle: 118, // a stuck edge popped out, Edge right and Edge left
+  yellowCross: 2, // dot, L, line, cross
+  yellowEdges: 25,
+  yellowCornersPlace: 14,
+  yellowCornersTwist: 1,
 };
 
 /** The same demo cube every time, so "Show it" and "Walk through it" match. */

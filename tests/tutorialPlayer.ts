@@ -142,7 +142,7 @@ const L1 = {
   bottom: bullet(1, "White edge on the bottom: turn that side twice. It comes up to the top."),
   middle: bullet(
     1,
-    "White edge in the middle row: its white faces one side. Turn the other side it touches, so the edge goes up, white facing up. Wrong way? Turn it back, then the other way.",
+    "White edge in the middle row: turn the whole cube so it's at front-right. Its white faces one side; turn the other side it touches, so the edge goes up, white facing up. Wrong way? Turn it back, then the other way.",
   ),
   out: bullet(
     1,
@@ -159,9 +159,8 @@ const L1 = {
   look: bullet(1, "Can't see a white edge? Turn the whole cube to look at the other sides."),
   part2: bullet(
     1,
-    "<strong>Part 2:</strong> turn the top until an edge's other color matches the center below it.",
+    "<strong>Part 2:</strong> turn the top until an edge's other color matches the center below it. Turn the whole cube so that side faces you, then turn the front twice. The edge drops to the bottom in the right spot.",
   ),
-  drop: bullet(1, "Then turn that side twice. The edge drops to the bottom in the right spot."),
 };
 
 function level1(c: Cube) {
@@ -224,9 +223,12 @@ function level1(c: Cube) {
     } else if (e.includes("U") || e.includes("D")) {
       // "White facing out to the side, in the top or bottom row: turn that side once. It moves to the middle row."
       turnSide(whiteFace, 1); // plainest: "once" = one clockwise quarter turn
+    } else if (e === "LF") {
+      // "White edge in the middle row: turn the whole cube so it's at front-right."
+      c.turn("y'");
     } else {
-      // "White edge in the middle row: its white faces one side. Turn the other side it touches,
-      //  so the edge goes up, white facing up. Wrong way? Turn it back, then the other way."
+      // "Its white faces one side; turn the other side it touches, so the edge goes up,
+      //  white facing up. Wrong way? Turn it back, then the other way."
       const side = otherFace;
       clearAbove(side);
       c.turn(side); // first try: clockwise
@@ -254,10 +256,11 @@ function level1(c: Cube) {
       if (n++ >= 4) c.stop(L1.part2, "no top turn makes a daisy edge match the center below it");
       c.turn("U");
     }
-    // "Then turn that side twice. The edge drops to the bottom in the right spot."
+    // "Turn the whole cube so that side faces you, then turn the front twice."
     const side = match()![1] as Face;
-    c.turn(side);
-    c.turn(side);
+    for (let k = 0; k < { F: 0, R: 1, B: 2, L: 3 }[side as "F"]; k++) c.turn("y");
+    c.turn("F");
+    c.turn("F");
   }
 }
 
