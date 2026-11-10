@@ -44,6 +44,7 @@ export const BEGINNER_LEVELS: Level[] = [
       "White edge on the bottom: turn that side twice. It comes up to the top.",
       "White edge in the middle row: its white faces one side. Turn the other side it touches, so the edge goes up, white facing up. Wrong way? Turn it back, then the other way.",
       "White facing out to the side, in the top or bottom row: turn that side once. It moves to the middle row.",
+      "Keep going with that same edge until it's on top, white facing up. Then find the next one.",
       "Before you turn any side, turn the top so the spot above that side has no white edge facing up yet.",
       "Can't see a white edge? Turn the whole cube to look at the other sides.",
       "<strong>Part 2:</strong> turn the top until an edge's other color matches the center below it.",

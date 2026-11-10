@@ -20,12 +20,13 @@ Hint, Show me and the demo for levels 2, 3, 5 and 6 now follow the level's words
 
 - Tests: Corner starts with a white corner at front-right, a stuck edge pops out with Edge right, Swap edges starts with two edges matching.
 - Tests: demos show the harder cases; a half turn's reason says which swipe.
+- Tutorial player test, every build: a plain program using only the tutorial's words (no solver, no Hint, no AI) solves 2,000 scrambles. It checks each line it follows word for word.
 
 ### Changed
 
 - Level 2, 3, 5 and 6 planning: rules from the words instead of a search.
 - Demo cubes: shortest of 200 that shows the harder cases (lift-out, pop-out, dot).
-- Words: levels 1, 2, 6, 7 and the level 8 recap.
+- Words: levels 1, 2, 6, 7 and the level 8 recap. Level 1 adds "Keep going with that same edge until it's on top": without it, one reading looped forever on 1 cube in a few thousand.
 - Cross reasons say "this side" instead of naming a side.
 
 ### Fixed
@@ -43,6 +44,7 @@ Hint, Show me and the demo for levels 2, 3, 5 and 6 now follow the level's words
 | `src/lessons/walkthrough.ts` | Demo seeds; swipe 1 of 2 |
 | `src/app/stageLesson.ts` | Reason plus the arrow's own words |
 | `tests/kidWords.test.ts`, `tests/walkthrough.test.ts` | New checks |
+| `tests/tutorialPlayer.ts`, `tests/tutorialPlayer.test.ts` | New: the no-AI tutorial player and its test |
 
 ## v0.8.13 — Kid test round 2 (2026-11-09)
 

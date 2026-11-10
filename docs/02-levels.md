@@ -73,6 +73,8 @@ How the three parts are built (v0.8.4):
 - A move's reason and its words are shown separately. The words come from the arrow's move, so they stay right after the player turns the whole cube.
 - A half turn's reason says which of its two swipes it is.
 - "In its right spot" says the colors don't have to face the right way yet; level 7 says to check only after a whole sequence.
+- **On every build,** a plain program that knows only the tutorial's words (no solver, no Hint, no AI) solves 2,000 scrambles.[3] Each rule it follows quotes a "How it works" line, and the test fails if that line's wording changes. It stops instead of guessing when the words run out.
+- Level 1 says to keep going with the same white edge until it's on top. Re-picking a different edge after each turn looped forever on a cube with all four white edges on one side.[3]
 
 ## CFOP (M6)
 
