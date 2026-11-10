@@ -33,6 +33,24 @@ Hint, Show me and the demo for levels 2, 3, 5 and 6 now follow the level's words
 
 - Walk-through words stay right after a whole-cube turn.
 
+### Kid test round 4: what each finding affects
+
+| Finding | Impact | Affects | Test now |
+|---|---|---|---|
+| Hint gives up after one wrong turn or a tip ("Already done!" on unfinished cubes) | Wrong help | Try it, levels 1–16 (Hint, Show me) | `walkthrough.test.ts`: Hint finishes every level after a wrong turn or tip |
+| Walk through it after a whole-cube turn: words name the wrong side; after a tip, asks for a turn no swipe makes | Wrong help | Walk through it, levels 1–16 | Checked in Chrome: tip, arrow to turn back, lesson goes on |
+| Level 7 Hint turns the top where the words say turn the whole cube | Wrong help | Level 7 Hint, Show me, demo | `walkthrough.test.ts`: level 7 never starts with a top turn |
+| Level 1 Hint keeps finished bottom edges; words said bring all 4 up | Wording | Level 1 | Tutorial player still solves 2,000 |
+| Level 2 never said top corners before stuck ones (26/150 looped) | Wording | Level 2 | Tutorial player |
+| Level 7 "yellow on top" read as the whole top (stuck every time) | Wording | Level 7, level 8 recap | Tutorial player |
+| Level 1 make-room line came after the moves it covers | Wording | Level 1 | Tutorial player |
+| Level 3 "right center", "stuck" unclear | Wording | Level 3 | Tutorial player |
+| Daisy reason "it goes back next" wrong (6/300); level 4 top-turn reason vague | Wording | Show it / Walk, levels 1 and 4 | — |
+| Not changed: "Turn this side out of the way" isn't taught (2/300 cubes, Hint only; the arrow shows it) | Wording | Level 1 Hint | — |
+| Not changed: level 1 has 12 bullets | Wording | Level 1 | — |
+
+No finding blocked a kid from solving: the tutorial player and the kid both solved every cube.
+
 ### Files Changed
 
 | File | Change |
@@ -45,6 +63,8 @@ Hint, Show me and the demo for levels 2, 3, 5 and 6 now follow the level's words
 | `src/app/stageLesson.ts` | Reason plus the arrow's own words |
 | `tests/kidWords.test.ts`, `tests/walkthrough.test.ts` | New checks |
 | `tests/tutorialPlayer.ts`, `tests/tutorialPlayer.test.ts` | New: the no-AI tutorial player and its test |
+| `src/lessons/walkthrough.ts` | `helpSteps`: Hint plans earlier stages first |
+| `src/app/stageLesson.ts` | Hint uses `helpSteps`; Walk asks to turn the cube back |
 
 ## v0.8.13 — Kid test round 2 (2026-11-09)
 

@@ -243,7 +243,7 @@ function daisyStep(s: CubeState): SolveStep | null {
     } else if (U_EDGE_STICKERS.has(nextAt)) {
       why.push(
         `Lift the white–${c} edge up to the top, white side up.` +
-          (broke ? " A finished bottom edge moves too; it goes back next." : ""),
+          (broke ? " A finished bottom edge moves too; it gets put back later." : ""),
       );
     } else if (nextAt === at) {
       why.push("Turn this side out of the way.");
@@ -342,7 +342,9 @@ function stepwise(
       st.alg
         ? algWhy(st.alg, st.moves)
         : st.moves.map((m) =>
-            m[0] === "y" ? "Turn the whole cube." : "Turn the top to line it up.",
+            m[0] === "y"
+              ? "Turn the whole cube."
+              : "Turn the top so the yellow L is at the back and the left, or the line goes left-to-right.",
           ),
     );
     const names = [...new Set(found.flatMap((st) => (st.alg ? [ALG_NAMES[st.alg]] : [])))];
@@ -627,6 +629,18 @@ function yellowCornersTwist(s: CubeState): SolveStep[] {
   let cur = s;
   const urf = slot("URF");
   const yellow = center(cur, "U");
+  // "To start, turn the whole cube so a twisted corner is at front-right."
+  let yk = 0;
+  while (yk < 4 && applyMoves(cur, turns("y", yk))[urf.stickers[0]] === yellow) yk++;
+  if (yk > 0 && yk < 4) {
+    out.push({
+      stage: "yellowCornersTwist",
+      moves: turns("y", yk),
+      say: "To start, turn the whole cube so a twisted corner is at front-right.",
+      why: turns("y", yk).map(() => "Turn the whole cube so a twisted corner is at front-right."),
+    });
+    cur = applyMoves(cur, turns("y", yk));
+  }
   let offset = 0; // top turns made so far
   for (let k = 0; k < 4; k++) {
     const delta = (k - offset + 4) % 4;

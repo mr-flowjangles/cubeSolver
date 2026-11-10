@@ -137,7 +137,7 @@ const L1 = {
   hold: bullet(1, "<strong>Hold it:</strong> white center on the bottom, yellow center on top."),
   daisy: bullet(
     1,
-    "<strong>Part 1, the daisy:</strong> bring the 4 white edges to the top, around yellow, white facing up.",
+    "<strong>Part 1, the daisy:</strong> bring the white edges to the top, around yellow, white facing up. One already on the bottom, under its matching center, can stay.",
   ),
   bottom: bullet(1, "White edge on the bottom: turn that side twice. It comes up to the top."),
   middle: bullet(
@@ -171,7 +171,7 @@ function level1(c: Cube) {
     c.stop(L1.hold, "cube not held white down");
 
   const whiteUpOnTop = (e: string) => c.sticker(e, "U") === WHITE;
-  // "<strong>Part 1, the daisy:</strong> bring the 4 white edges to the top, around yellow, white facing up."
+  // "<strong>Part 1, the daisy:</strong> bring the white edges to the top, around yellow, white facing up. One already on the bottom, under its matching center, can stay."
   const daisyDone = () => TOP_EDGES.every(whiteUpOnTop);
 
   // "Before you turn any side, turn the top so the spot above that side has no white edge facing up yet."
@@ -276,7 +276,7 @@ const L2 = {
   repeat: bullet(2, "Repeat the sequence until the corner drops in, white side down."),
   lift: bullet(
     2,
-    "A white corner on the bottom in the wrong spot, or turned the wrong way? Turn the whole cube so it's at front-right, then do the sequence once to lift it out.",
+    "No white corner left in the top layer, but one on the bottom is in the wrong spot or turned the wrong way? Turn the whole cube so it's at front-right, then do the sequence once to lift it out.",
   ),
 };
 
@@ -354,11 +354,11 @@ const L3 = {
   whole: bullet(3, "Turn the whole cube so that side is in front."),
   which: bullet(
     3,
-    "Its top color matches the right center? Do Edge right. The left center? Do Edge left.",
+    "Its top color matches the center on the right side? Do Edge right. The center on the left side? Do Edge left.",
   ),
   stuck: bullet(
     3,
-    "No edge on top fits? One is stuck in the middle. Turn the whole cube so it's at front-right, then do Edge right once. It pops up to the top.",
+    "No edge on top fits? One is stuck in the middle: in the wrong middle spot, or in its spot but flipped. Turn the whole cube so it's at front-right, then do Edge right once. It pops up to the top.",
   ),
 };
 
@@ -387,7 +387,7 @@ function level3(c: Cube) {
         if (n++ >= 4) c.fail(L3.whole, "could not bring edge to front");
         c.turn("y");
       }
-      // "Its top color matches the right center? Do Edge right. The left center? Do Edge left."
+      // "Its top color matches the center on the right side? Do Edge right. The center on the left side? Do Edge left."
       if (topColor === c.center("R")) c.seq(RIGHT);
       else if (topColor === c.center("L")) c.seq(LEFT);
       else c.stop(L3.which, "top color matches neither the right nor the left center");
@@ -552,11 +552,11 @@ const L7 = {
   start: bullet(7, "To start, turn the whole cube so a twisted corner is at front-right."),
   again: bullet(
     7,
-    "Do the whole sequence, all 4 moves, again and again. Check only after all 4 moves: stop when yellow is on top. The bottom gets messy — that's normal.",
+    "Do the whole sequence, all 4 moves, again and again. Check only after all 4 moves: stop when that corner's yellow is on top. The bottom gets messy — that's normal.",
   ),
   next: bullet(7, "Turn only the top to bring the next twisted corner to front-right."),
   never: bullet(7, "Once you've started, never turn the whole cube again."),
-  lineUp: bullet(7, "All yellow on top? Turn the top to line it up. Solved!"),
+  lineUp: bullet(7, "All four corners have yellow on top? Turn the top to line it up. Solved!"),
 };
 
 function level7(c: Cube) {
@@ -588,7 +588,7 @@ function level7(c: Cube) {
       } while (twisted("URF"));
     }
   }
-  // "All yellow on top? Turn the top to line it up. Solved!"
+  // "All four corners have yellow on top? Turn the top to line it up. Solved!"
   let n = 0;
   while (!isSolved(c.s)) {
     if (n++ >= 4) c.fail(L7.lineUp, "no turn of the top lines the cube up");

@@ -18,6 +18,7 @@ import {
   afterGuide,
   demoPosition,
   guideMoves,
+  helpSteps,
   seeded,
   stageSteps,
 } from "../src/lessons/walkthrough";
@@ -206,5 +207,46 @@ describe("beginner demos teach (kid test, round 2)", () => {
     for (const l of BEGINNER_LEVELS)
       for (const t of [l.goal, ...l.teach].filter((t) => /\bhold\b/i.test(t)))
         expect(t).toMatch(/white center on the bottom/);
+  });
+});
+
+describe("Hint recovers after a mistake (kid test, round 4)", () => {
+  const WRONG = ["R", "U'", "F", "L'", "D", "B2", "x", "x'", "y"];
+  it.each(STAGE_LEVELS)(
+    "$title: one wrong turn or a tip, then Hint finishes the level",
+    (level) => {
+      const done = METHODS[level.method].done[level.stage!];
+      const rnd = seeded(level.number * 7 + 1);
+      for (let i = 0; i < 12; i++) {
+        const wrong = WRONG[i % WRONG.length];
+        const start = applyMoves(practicePosition(level, rnd), wrong);
+        const steps = helpSteps(level, start);
+        if (!done(start)) expect(steps.length).toBeGreaterThan(0); // never "Already done!" on an unfinished cube
+        const end = applyMoves(
+          start,
+          steps.flatMap((s) => s.moves),
+        );
+        expect(done(end)).toBe(true);
+      }
+    },
+  );
+
+  it("an earlier stage comes first, and says so", () => {
+    const level = STAGE_LEVELS.find((l) => l.id === "middle")!;
+    const start = applyMoves(practicePosition(level, seeded(5)), "R"); // breaks the white layer
+    const first = helpSteps(level, start)[0];
+    expect(first.stage).not.toBe("middle");
+    expect(first.say).toMatch(/^First fix|^Hold/);
+  });
+});
+
+describe("level 7 starts the way the words say", () => {
+  it("turns the whole cube, never the top, to reach the first twisted corner", () => {
+    const level = STAGE_LEVELS.find((l) => l.id === "yellowCornersTwist")!;
+    const rnd = seeded(77);
+    for (let i = 0; i < 40; i++) {
+      const first = stageSteps(level, practicePosition(level, rnd))[0];
+      if (first) expect(first.moves[0][0]).not.toBe("U");
+    }
   });
 });

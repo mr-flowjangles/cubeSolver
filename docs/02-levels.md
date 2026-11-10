@@ -74,6 +74,7 @@ How the three parts are built (v0.8.4):
 - A half turn's reason says which of its two swipes it is.
 - "In its right spot" says the colors don't have to face the right way yet; level 7 says to check only after a whole sequence.
 - **On every build,** a plain program that knows only the tutorial's words (no solver, no Hint, no AI) solves 2,000 scrambles.[3] Each rule it follows quotes a "How it works" line, and the test fails if that line's wording changes. It stops instead of guessing when the words run out.
+- **Each kid-test finding is sorted by what it affects:** blocks a kid from solving, gives wrong help, or wording only. Each one fixed gets a test, so later runs can only find new things.[3]
 - Level 1 says to keep going with the same white edge until it's on top. Re-picking a different edge after each turn looped forever on a cube with all four white edges on one side.[3]
 
 ## CFOP (M6)
@@ -115,7 +116,8 @@ How the three parts are built (v0.8.4):
 - **No dimming.** The cube keeps its real colors while an arrow shows; lessons still light the piece being moved and where it goes.[1]
 - The FRONT / TOP / RIGHT tags hide while an arrow shows, so nothing covers it.
 - Arrows go on the front first, then the right side, then the top or bottom. Back turns show on the right side's back column.
-- **Turning the whole cube in a lesson is fine.**[1] Walk through it renames the moves left for the new front. Hint and Show me plan from the cube as it is.
+- **Turning the whole cube in a lesson is fine.**[1] Hint and Show me plan from the cube as it is.
+- **Walk through it asks you to turn the cube back.**[3] After a whole-cube turn, an arrow beside the cube shows how to turn it back, then the lesson goes on. Renaming the moves instead left the words naming the wrong side, and after a tip asked for a turn no swipe makes.
 - **Half turns** (U2) are two swipes.
 - **Two-layer turns** are two swipes: r is R then M', f is F then S.
 - **Beginner levels have no middle rows**, since turning one moves the centers. Swiping one says so. CFOP levels and free play allow middle rows.
@@ -129,6 +131,7 @@ How the three parts are built (v0.8.4):
 - Practice cube: a random scramble with every earlier stage already done.
 - Level 7 (twist yellow corners): easier practice cubes have fewer twisted corners, never a cube stopped part-way, because part-way the bottom is scrambled.
 - **Hint** shows the next step in words and moves.
+- **Hint fixes earlier steps first.**[3] After a wrong turn or a tip, it plans from the cube as it is: "First fix the white cross", then this level's step. It never says "Already done!" on an unfinished cube.
 - **Show me** plays the next step on the cube.
 - **New cube** gives a fresh practice cube.
 - Levels 1–2 show the cube from below, so the white side is visible.

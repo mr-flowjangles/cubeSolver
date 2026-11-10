@@ -25,6 +25,26 @@ export function seeded(seed: number) {
   return () => (seed = (seed * 1103515245 + 12345) % 2 ** 31) / 2 ** 31;
 }
 
+/** "White cross" → "white cross"; "F2L" stays. */
+const lowerWord = (t: string) => (/^[A-Z][a-z]/.test(t) ? t[0].toLowerCase() + t.slice(1) : t);
+
+/**
+ * Hint and Show me: every step from the cube as it is to this level's stage done. A wrong turn
+ * or a tip can undo an earlier stage; those steps come first, labelled "First fix …".
+ */
+export function helpSteps(level: Level, pos: CubeState): GuideStep[] {
+  const m = METHODS[level.method];
+  return m
+    .solve(pos, level.stage)
+    .filter((s) => s.moves.length > 0)
+    .map((s) =>
+      // The hold step already says "Hold the cube with white on the bottom…".
+      s.stage === level.stage || s.stage === "hold"
+        ? s
+        : { ...s, say: `First fix the ${lowerWord(m.stageTitle[s.stage])}: ${s.say}` },
+    );
+}
+
 /** The steps that finish this level's stage from `pos`. */
 export function stageSteps(level: Level, pos: CubeState): GuideStep[] {
   return METHODS[level.method]
