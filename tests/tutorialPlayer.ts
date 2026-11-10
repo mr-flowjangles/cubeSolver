@@ -162,7 +162,7 @@ const L1 = {
   ),
   part2: bullet(
     1,
-    "<strong>Part 2:</strong> turn the top until an edge's other color matches the center below it. Turn the whole cube so that side faces you, then turn the front twice. The edge drops to the bottom in the right spot.",
+    "<strong>Part 2:</strong> turn the top until an edge's other color matches the center below it. No match on the sides you can see? Turn the whole cube to look round. Turn the whole cube so that side faces you, then turn the front twice. The edge drops to the bottom in the right spot.",
   ),
 };
 

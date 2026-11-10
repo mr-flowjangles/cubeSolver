@@ -9,14 +9,21 @@ import { swipesFor } from "../render/swipe";
 export class HelpPlan {
   /** Every point of the plan, swipe by swipe, with the rest of its step from there. */
   private marks: { at: string; step: GuideStep }[] = [];
+  /** Where in the plan Hint last pointed. Only points from here on count: a top turn can
+   *  bring back the cube of an earlier point, and going back there would loop. */
+  private at = 0;
 
   constructor(private make: (s: CubeState, history: readonly Move[]) => GuideStep[]) {}
 
   next(state: CubeState, history: readonly Move[]): GuideStep | undefined {
     const now = toString(state);
-    const hit = this.marks.find((m) => m.at === now);
-    if (hit) return hit.step;
+    const i = this.marks.findIndex((m, k) => k >= this.at && m.at === now);
+    if (i >= 0) {
+      this.at = i;
+      return this.marks[i].step;
+    }
     this.marks = [];
+    this.at = 0;
     let s = state;
     for (const step of this.make(state, history)) {
       const sw = step.moves.flatMap((m) => swipesFor(m));
@@ -34,5 +41,6 @@ export class HelpPlan {
 
   clear() {
     this.marks = [];
+    this.at = 0;
   }
 }

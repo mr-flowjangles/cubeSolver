@@ -46,7 +46,7 @@ export const BEGINNER_LEVELS: Level[] = [
       "White facing out to the side, in the top or bottom row: turn that side once, either way. It moves to the middle row.",
       "Keep going with that same edge until it's on top, white facing up. Then find the next one.",
       "No white edge on the front? Turn the whole cube to look at the other sides. White can face down, out of sight: tip the cube up (swipe up beside it) to look underneath, then tip it back.",
-      "<strong>Part 2:</strong> turn the top until an edge's other color matches the center below it. Turn the whole cube so that side faces you, then turn the front twice. The edge drops to the bottom in the right spot.",
+      "<strong>Part 2:</strong> turn the top until an edge's other color matches the center below it. No match on the sides you can see? Turn the whole cube to look round. Turn the whole cube so that side faces you, then turn the front twice. The edge drops to the bottom in the right spot.",
     ],
     algs: [],
   },

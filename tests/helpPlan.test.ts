@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { applyMoves } from "../src/cube";
+import { applyMoves, isSolved } from "../src/cube";
+import { swipesFor } from "../src/render/swipe";
+import { solveBeginner } from "../src/solver/beginner";
 import { HelpPlan } from "../src/app/helpPlan";
 import { BEGINNER_LEVELS } from "../src/lessons/beginner";
 import { practicePosition } from "../src/lessons/position";
 import { METHODS } from "../src/lessons/index";
-import { helpSteps, seeded } from "../src/lessons/walkthrough";
+import { chooseHelp, helpSteps, seeded } from "../src/lessons/walkthrough";
 
 describe("HelpPlan (kid test, round 8)", () => {
   it("one swipe into a half turn, the next Hint is the other swipe, not a new plan", () => {
@@ -61,4 +63,41 @@ describe("Hint through the app's plan cache never loops (kid test, round 8)", ()
       }
     },
   );
+});
+
+describe("press Hint, make one swipe, press Hint again (kid test, round 9)", () => {
+  const LEVELS = BEGINNER_LEVELS.filter((l) => l.kind === "stage");
+  it.each(LEVELS)("$title: one swipe at a time always finishes", (level) => {
+    const rnd = seeded(level.number * 31 + 4);
+    const done = METHODS.beginner.done[level.stage!];
+    for (let i = 0; i < 25; i++) {
+      let s = practicePosition(level, rnd);
+      const hist: string[] = [];
+      const help = new HelpPlan((c, h) => helpSteps(level, c, h));
+      let presses = 0;
+      for (; presses < 400 && !done(s); presses++) {
+        const m = swipesFor(help.next(s, hist)!.moves[0])[0];
+        s = applyMoves(s, [m]);
+        hist.push(m);
+      }
+      expect(done(s)).toBe(true);
+    }
+  });
+
+  it("level 8: one swipe at a time always solves", () => {
+    const full = BEGINNER_LEVELS.find((l) => l.id === "full")!;
+    const rnd = seeded(909);
+    for (let i = 0; i < 6; i++) {
+      let s = practicePosition(full, rnd);
+      const hist: string[] = [];
+      const help = new HelpPlan((c, h) => chooseHelp(full, c, h, (x) => solveBeginner(x)));
+      let presses = 0;
+      for (; presses < 1500 && !isSolved(s); presses++) {
+        const m = swipesFor(help.next(s, hist)!.moves[0])[0];
+        s = applyMoves(s, [m]);
+        hist.push(m);
+      }
+      expect(isSolved(s)).toBe(true);
+    }
+  });
 });

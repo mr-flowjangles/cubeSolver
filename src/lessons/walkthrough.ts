@@ -83,7 +83,11 @@ export function chooseHelp(
   };
   const here = carryOn(pos, hist);
   const backs: Option[] = [];
-  for (const k of [1, 2]) {
+  // Turn back the last move, the last two, or a whole sequence just done at the wrong moment.
+  const whole = level.algs
+    .map((a) => swipes(parseMoves(a.moves)).length)
+    .filter((n) => n > 2 && endsWith(hist, level, n));
+  for (const k of [1, 2, ...whole]) {
     if (hist.length < k) break;
     const moves = invertMoves(hist.slice(-k));
     const after = applyMoves(pos, moves);
@@ -95,7 +99,9 @@ export function chooseHelp(
         ? "You turned the whole cube. Turn it back first."
         : k === 1
           ? "Turn your last move back first."
-          : "Turn your last two moves back first.",
+          : k === 2
+            ? "Turn your last two moves back first."
+            : "That sequence didn't help here. Follow the arrows to undo it first.",
       why: moves.map(() => "Turn back what you just did."),
     };
     backs.push(carryOn(after, hist.slice(0, -k), [back]));
@@ -112,6 +118,14 @@ export function chooseHelp(
     );
   const pick = redoes(here) ? (backs.find((b) => !redoes(b)) ?? here) : here;
   return [...pick.first, ...pick.then];
+}
+
+/** The player's last n swipes are one of this level's sequences, whole. */
+function endsWith(hist: readonly Move[], level: Level, n: number): boolean {
+  return level.algs.some((a) => {
+    const all = swipes(parseMoves(a.moves));
+    return all.length === n && hist.slice(-n).join(" ") === all.join(" ");
+  });
 }
 
 /**
