@@ -370,7 +370,11 @@ const L3 = {
   ),
   stuck: bullet(
     3,
-    "No edge on top fits? One is stuck in the middle: in the wrong middle spot, or in its spot but flipped. Can't see it? Turn the whole cube to look round. Turn the whole cube so it's at front-right, then do Edge right once. It pops up to the top.",
+    "No edge on top fits? Then one is stuck in the middle: in the wrong middle spot, or in its spot but flipped.",
+  ),
+  popOut: bullet(
+    3,
+    "Turn the whole cube until the stuck edge is at front-right. Do Edge right once. It pops up to the top.",
   ),
 };
 
@@ -405,14 +409,14 @@ function level3(c: Cube) {
       else c.stop(L3.which, "top color matches neither the right nor the left center");
       continue;
     }
-    // "No edge on top fits? One is stuck in the middle. Turn the whole cube so it's at front-right,
-    //  then do Edge right once. It pops up to the top."
+    // "No edge on top fits? Then one is stuck in the middle…" (L3.stuck)
+    // "Turn the whole cube until the stuck edge is at front-right. Do Edge right once." (L3.popOut)
     const stuck = MID_EDGES.find((n) => !slotSolved(c.s, slot(n)));
     if (!stuck) return; // goal: "Finish the first two layers."
     const colors = c.colors(stuck);
     let n = 0;
     while (c.find(colors, MID_EDGES) !== "FR") {
-      if (n++ >= 4) c.fail(L3.stuck, "could not bring stuck edge to front-right");
+      if (n++ >= 4) c.fail(L3.popOut, "could not bring stuck edge to front-right");
       c.turn("y");
     }
     c.seq(RIGHT);

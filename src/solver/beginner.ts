@@ -103,7 +103,7 @@ const D_EDGES = ["DF", "DR", "DB", "DL"].map(slot);
 const D_CORNERS = ["DFR", "DRB", "DBL", "DLF"].map(slot);
 const MID_EDGES = ["FR", "FL", "BR", "BL"].map(slot);
 const U_EDGES = ["UF", "UR", "UB", "UL"].map(slot);
-const U_CORNERS = ["URF", "UFL", "ULB", "UBR"].map(slot);
+const U_CORNERS = ["URF", "UFL", "ULB", "UBR"].map(slot); // front-right first
 
 const count = (s: CubeState, slots: typeof D_EDGES) => slots.filter((x) => slotSolved(s, x)).length;
 const all = (s: CubeState, slots: typeof D_EDGES) => count(s, slots) === slots.length;
@@ -125,6 +125,38 @@ export const STAGE_DONE: Record<StageId, (s: CubeState) => boolean> = {
   yellowEdges: yellowEdgesDone,
   yellowCornersPlace: yellowCornersPlaced,
   yellowCornersTwist: isSolved,
+};
+
+/** Best count over the four top turns: these stages line the top up before they count. */
+const anyTop = (s: CubeState, n: (t: CubeState) => number) =>
+  Math.max(...[0, 1, 2, 3].map((k) => n(applyMoves(s, Array<Move>(k).fill("U")))));
+
+/**
+ * How many of a stage's own pieces are in place, so Hint can tell a sequence that would undo one
+ * (one sequence too many) from one that is still on its way (kid test, round 10).
+ */
+export const STAGE_PIECES: Partial<Record<StageId, (s: CubeState) => number>> = {
+  cross: (s) => count(s, D_EDGES),
+  corners: (s) => count(s, D_CORNERS),
+  middle: (s) => count(s, MID_EDGES),
+  yellowCross: (s) => U_EDGES.filter((e) => s[e.stickers[0]] === center(s, "U")).length,
+  // Two matching side by side is one Swap from done; two opposite is two Swaps away.
+  yellowEdges: (s) =>
+    anyTop(s, (t) => {
+      const m = U_EDGES.map((e) => slotSolved(t, e));
+      const n = m.filter(Boolean).length;
+      return 2 * n + (n === 2 && m[0] !== m[2] ? 1 : 0);
+    }),
+  // The edges are done here, so the top is already lined up.
+  yellowCornersPlace: (s) => U_CORNERS.filter((c) => slotHasRightPiece(s, c)).length,
+  // A Twist round changes only the front-right top corner on top. That corner counts half until
+  // its yellow is up, so a round on it is never a loss, unless its yellow was already up (one
+  // Twist too many). Doubled, to keep whole numbers.
+  yellowCornersTwist: (s) =>
+    U_CORNERS.reduce((n, c) => {
+      const up = s[c.stickers[0]] === center(s, "U");
+      return n + (up ? 2 : c === U_CORNERS[0] ? 1 : 0);
+    }, 0),
 };
 
 export const STAGES: StageId[] = [

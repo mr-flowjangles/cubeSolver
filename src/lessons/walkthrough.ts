@@ -11,10 +11,10 @@ import {
   parseMoves,
 } from "../cube";
 import { swipesFor } from "../render/swipe";
-import type { Level } from "./beginner";
+import { BEGINNER_LEVELS, type Level } from "./beginner";
 import { type GuideStep, METHODS } from "./index";
 import { practicePosition } from "./position";
-import { finishTwist } from "../solver/beginner";
+import { STAGE_PIECES, finishTwist } from "../solver/beginner";
 
 export interface GuideMove {
   move: Move;
@@ -59,12 +59,16 @@ const swipes = (moves: readonly Move[]) => {
 };
 
 /**
- * Which help to give: carry on from here, or turn back the last swipe, the last two, or a sequence
- * done at the wrong moment. Each one first finishes a sequence the player started, if any, then
- * follows `plan`.
- * Carrying on wins unless it would redo a stage the player had finished (a stray turn broke it);
- * then a turn-back that doesn't, if there is one. Following the plan never redoes a stage, so a
- * player on the plan is never told to turn back.
+ * Which help to give: carry on from here, or turn back some of the player's last swipes (up to a
+ * sequence's length plus a stray turn either side). Each option first finishes a sequence the
+ * player started, if any, then follows `plan`.
+ * 1. Options that would redo a stage the player had finished (a stray turn broke it) are out.
+ * 2. A turn-back never stops inside a whole sequence the player just did: it undoes all of it.
+ * 3. Carrying on wins unless it redoes a stage: then the shortest turn-back that doesn't, so
+ *    only the stray moves are undone. Following the plan never redoes a stage, so a player on
+ *    the plan is never told to turn back.
+ * 4. A sequence started at the wrong moment, which finishing would lose ground from (one Corner
+ *    too many undoes the corner just placed), is undone instead of finished.
  */
 export function chooseHelp(
   level: Level,
@@ -73,46 +77,48 @@ export function chooseHelp(
   plan: (s: CubeState) => GuideStep[],
 ): GuideStep[] {
   const hist = swipes(recent);
+  const raw = recent.flatMap((m) => swipesFor(m)); // without look-backs taken out
   let reached = 0; // the most stages the player had got past, here or just before a stray move
   /** An option: what to do first (turn back, finish a sequence), then the plan from there. */
-  type Option = { first: GuideStep[]; then: GuideStep[] };
-  const carryOn = (s: CubeState, h: readonly Move[], first: GuideStep[] = []): Option => {
+  type Option = { first: GuideStep[]; then: GuideStep[]; k: number };
+  const carryOn = (s: CubeState, h: readonly Move[], k = 0, first: GuideStep[] = []): Option => {
     const f = finishSequence(level, s, h);
     const from = f ? applyMoves(s, f.moves) : s;
     reached = Math.max(reached, reachedStage(level, from));
-    return { first: f ? [...first, f] : first, then: plan(from) };
+    return { first: f ? [...first, f] : first, then: plan(from), k };
   };
-  const here = carryOn(pos, hist);
-  const backs: Option[] = [];
-  // Turn back the last move, the last two, or a sequence (whole or part-done) started at the
-  // wrong moment, with one stray turn after it or not. Shorter turn-backs are tried first.
-  const started = [
-    ...new Set(
-      level.algs.flatMap((a) => [
-        ...startsDone(hist, a.moves),
-        ...startsDone(hist.slice(0, -1), a.moves, 2).map((k) => k + 1),
-      ]),
-    ),
-  ].sort((a, b) => a - b);
-  for (const k of [1, 2, ...started]) {
-    if (hist.length < k) break;
-    const moves = invertMoves(hist.slice(-k));
-    const after = applyMoves(pos, moves);
-    const wholeCube = moves.every((m) => "xyz".includes(m[0]));
+  const here = carryOn(pos, raw);
+  // 1. Whole sequences the player's swipes end with: a turn-back can't stop inside one.
+  const wholeAtEnd = level.algs
+    .map((a) => swipes(parseMoves(a.moves)))
+    .filter(
+      (all) => hist.length >= all.length && hist.slice(-all.length).join(" ") === all.join(" "),
+    )
+    .map((all) => all.length);
+  const longest = Math.max(0, ...level.algs.map((a) => swipes(parseMoves(a.moves)).length));
+  /** Turn back the last k swipes of `h`, then carry on. */
+  const turnBack = (k: number, h: readonly Move[]): Option => {
+    const moves = invertMoves(h.slice(-k));
     const back: GuideStep = {
       stage: level.stage ?? "full",
       moves,
-      say: wholeCube
+      say: moves.every((m) => "xyz".includes(m[0]))
         ? "You turned the whole cube. Turn it back first."
         : k === 1
           ? "Turn your last move back first."
           : k === 2
             ? "Turn your last two moves back first."
-            : "That sequence doesn't help here. Follow the arrows to undo it first.",
+            : isSequence(level, h.slice(-k))
+              ? "That sequence doesn't help here. Follow the arrows to undo it first."
+              : `Turn your last ${k} moves back first.`,
       why: moves.map(() => "Turn back what you just did."),
     };
-    backs.push(carryOn(after, hist.slice(0, -k), [back]));
-  }
+    return carryOn(applyMoves(pos, moves), h.slice(0, -k), k, [back]);
+  };
+  const backs: Option[] = [];
+  // 2. Turn back the last k swipes, for every k up to a sequence plus a stray turn either side.
+  for (let k = 1; k <= Math.min(hist.length, longest + 2); k++)
+    if (!wholeAtEnd.some((n) => k < n)) backs.push(turnBack(k, hist));
   const stages = METHODS[level.method].stages.filter((x) => x !== "hold");
   /** The plan redoes a stage the player had got past (or turns white back down). Top turns only line up. */
   const redoes = (o: Option) =>
@@ -123,20 +129,15 @@ export function chooseHelp(
           stages.indexOf(st.stage) < reached &&
           !st.moves.every((m) => m[0] === "U")),
     );
-  const pick = redoes(here) ? (backs.find((b) => !redoes(b)) ?? here) : here;
+  // 3. Carrying on wins, unless it redoes a stage or starts by finishing a sequence (which may
+  //    undo a piece just placed: one sequence too many). Then the cheapest option that redoes
+  //    nothing; carrying on wins a tie.
+  // A sequence started at the wrong moment (finishing it loses ground): undo that start.
+  const w = here.first.length ? null : wrongStart(level, pos, raw);
+  const undo = w ? turnBack(w.p, w.h) : undefined;
+  const undoStart = undo && !redoes(undo) ? undo : undefined;
+  const pick = redoes(here) ? (backs.find((b) => !redoes(b)) ?? here) : (undoStart ?? here);
   return [...pick.first, ...pick.then];
-}
-
-/**
- * How many of a sequence's swipes the player's last swipes are, for each length from `min` that
- * fits: the whole sequence, or its start. (Turning back one or two swipes is already an option.)
- */
-function startsDone(hist: readonly Move[], moves: string, min = 3): number[] {
-  const all = swipes(parseMoves(moves));
-  const out: number[] = [];
-  for (let p = min; p <= all.length && p <= hist.length; p++)
-    if (hist.slice(-p).join(" ") === all.slice(0, p).join(" ")) out.push(p);
-  return out;
 }
 
 /**
@@ -172,11 +173,97 @@ export function finishSequence(
   pos: CubeState,
   recent: readonly Move[],
 ): GuideStep | null {
-  const hist = swipes(recent);
+  for (const h of readings(recent)) {
+    const step = startedIn(level, pos, h).step;
+    if (step) return step;
+  }
+  return null;
+}
+
+/**
+ * The player's swipes as made, then with a swipe-and-undo at the end taken out, one pair at a
+ * time. As made comes first: "F' F" is a sequence ended and the next one begun. Then a look and
+ * look-back (or a hand undo) after it doesn't hide that "F".
+ */
+function readings(recent: readonly Move[]): Move[][] {
+  const out = [recent.flatMap((m) => swipesFor(m))];
+  for (;;) {
+    const h = [...out[out.length - 1]];
+    if (h.length < 2 || h[h.length - 1] !== invertMove(h[h.length - 2])) return out;
+    out.push(h.slice(0, -2));
+  }
+}
+
+/**
+ * How many swipes of a sequence the player started at the wrong moment, and the reading of their
+ * swipes it was found in: finishing it would lose a piece or a stage they had before starting it
+ * (e.g. one Corner too many). Null if none.
+ */
+export function wrongStart(
+  level: Level,
+  pos: CubeState,
+  recent: readonly Move[],
+): { p: number; h: Move[] } | null {
+  for (const h of readings(recent)) {
+    const r = startedIn(level, pos, h);
+    if (r.step) return null;
+    if (r.wrong) return { p: r.wrong, h };
+  }
+  return null;
+}
+
+/** These swipes are (most of) one of the level's sequences: three or more of its swipes in a
+ *  row, with at most one stray swipe before or after. */
+function isSequence(level: Level, part: readonly Move[]): boolean {
+  return level.algs.some((a) => {
+    const all = swipes(parseMoves(a.moves)).join(" ");
+    return [part, part.slice(1), part.slice(0, -1), part.slice(1, -1)].some(
+      (x) => x.length >= 3 && ` ${all} `.includes(` ${x.join(" ")} `),
+    );
+  });
+}
+
+/** Pieces of the stage after the first `n` done stages that are in place (beginner only). */
+function stagePieces(level: Level, n: number, s: CubeState): number {
+  if (level.method !== "beginner") return 0;
+  const st = METHODS.beginner.stages.filter((x) => x !== "hold")[n] as keyof typeof STAGE_PIECES;
+  return st ? (STAGE_PIECES[st]?.(s) ?? 0) : 0;
+}
+
+/**
+ * finishSequence on one reading of the player's swipes. Also the longest start that finishing
+ * would lose ground from (`wrong`), when no sequence can be finished.
+ */
+function startedIn(
+  level: Level,
+  pos: CubeState,
+  hist: readonly Move[],
+): { step: GuideStep | null; wrong: number } {
   const base = reachedStage(level, pos);
   let best: { p: number; step: GuideStep } | null = null;
+  let wrong = 0;
+  /** Finishing (or having done) the sequence leaves less than the player had before it. */
+  const losesGround = (end: CubeState, start: CubeState) => {
+    const done = reachedStage(level, end);
+    const before = reachedStage(level, start);
+    return (
+      done < before ||
+      (done === before && stagePieces(level, done, end) < stagePieces(level, done, start))
+    );
+  };
+  /** It is the sequence of the stage the player was on: on level 8, an R' in the white cross is
+   *  a cross move, not the start of a Twist to undo. */
+  const ofStage = (name: string, start: CubeState) => {
+    const on = METHODS[level.method].stages.filter((x) => x !== "hold")[reachedStage(level, start)];
+    return BEGINNER_LEVELS.some((l) => l.stage === on && l.algs.some((x) => x.name === name));
+  };
   for (const a of level.algs) {
     const all = swipes(parseMoves(a.moves));
+    // The whole sequence just done, one time too many: nothing to finish, but it can be undone.
+    if (hist.length >= all.length && hist.slice(-all.length).join(" ") === all.join(" ")) {
+      const start = applyMoves(pos, invertMoves(all));
+      if (losesGround(pos, start) && ofStage(a.name, start)) wrong = Math.max(wrong, all.length);
+    }
     for (let p = all.length - 1; p >= 1; p--) {
       if (best && p <= best.p) break;
       // "You started" must be true: the last p swipes made are this sequence's first p swipes.
@@ -186,9 +273,16 @@ export function finishSequence(
       const rest = all.slice(p);
       // Finishing it must put back what the player had before starting it, and more than now.
       // (Corner and Swap edges both start R U R': only the one really under way passes.)
-      const done = reachedStage(level, applyMoves(pos, rest));
-      const before = reachedStage(level, applyMoves(pos, invertMoves(all.slice(0, p))));
-      if (done <= base || done < before) continue;
+      // Within the same stage, it must not lose a piece of it either.
+      const end = applyMoves(pos, rest);
+      const start = applyMoves(pos, invertMoves(all.slice(0, p)));
+      if (losesGround(end, start)) {
+        if (ofStage(a.name, start)) wrong = Math.max(wrong, p);
+        continue;
+      }
+      if (reachedStage(level, end) <= base) continue;
+      // On level 8, which teaches every sequence, only the one for the stage the player is on.
+      if (!level.stage && !ofStage(a.name, start)) continue;
       best = {
         p,
         step: {
@@ -200,7 +294,7 @@ export function finishSequence(
       };
     }
   }
-  return best?.step ?? null;
+  return { step: best?.step ?? null, wrong: best ? 0 : wrong };
 }
 
 function planFrom(level: Level, pos: CubeState): GuideStep[] {

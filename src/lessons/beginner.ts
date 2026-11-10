@@ -82,7 +82,8 @@ export const BEGINNER_LEVELS: Level[] = [
       "Turn the top until its side color matches the center below it.",
       "Turn the whole cube so that side is in front.",
       "Its top color matches the center on the right side? Do Edge right. If not, it goes left: do Edge left.",
-      "No edge on top fits? One is stuck in the middle: in the wrong middle spot, or in its spot but flipped. Can't see it? Turn the whole cube to look round. Turn the whole cube so it's at front-right, then do Edge right once. It pops up to the top.",
+      "No edge on top fits? Then one is stuck in the middle: in the wrong middle spot, or in its spot but flipped.",
+      "Turn the whole cube until the stuck edge is at front-right. Do Edge right once. It pops up to the top.",
     ],
     algs: [
       { name: N.middleRight, moves: ALGS.middleRight },

@@ -127,6 +127,20 @@ Nothing in round 8 stopped a kid who follows the words; the loop needed Hint.
 
 Round 9 verdict: words alone solve 150 of 150 cubes on every level.
 
+### Kid test round 10: what each finding affects
+
+| Finding | Impact | Affects | Test now |
+|---|---|---|---|
+| One sequence too many: "Finish the Corner/Twist sequence you started" undid the piece just placed (+13–22 swipes) | Wrong help | Try it, levels 2, 3, 7, 8 | `walkthrough.test.ts`: turned back, not finished |
+| Whole-cube turn, then a Twist: "First fix the white cross" (+137–195 swipes) | Wrong help | Try it, levels 7, 8 | `walkthrough.test.ts`: undone, solved in under 40 swipes |
+| Corner at the wrong moment: turned back one move, then "Finish the Swap edges sequence you started" | Wrong help | Level 8 | `walkthrough.test.ts`: never names Swap edges |
+| "Undo it" undid 5 of 6 moves, then said "Finish the Yellow cross sequence" | Wrong help | Level 8 | A turn-back never stops inside a whole sequence |
+| Second Yellow cross begun (F after F'): Hint undid the F | Wrong help | Levels 4, 8 | `walkthrough.test.ts`, with and without a look-back |
+| Level 3 stuck-edge bullet: five sentences in one | Wording | Level 3 | Split in two; tutorial player quotes both |
+| A test twisted the wrong corner (skipped "turn the top") | Test fix | — | Test now does the earlier steps first |
+
+Round 10 verdict: every cube finished in every test. After these fixes, every round 10 repro and sweep passes.
+
 ### Files Changed
 
 | File | Change |
@@ -145,6 +159,8 @@ Round 9 verdict: words alone solve 150 of 150 cubes on every level.
 | `src/lessons/walkthrough.ts` (`chooseHelp`) | Turn back a sequence done at the wrong moment |
 | `src/solver/beginner.ts` (yellow cross) | Line and L steps say different words |
 | `CLAUDE.md` | Glossary: removed "See back" |
+| `src/lessons/walkthrough.ts` (`chooseHelp`, `finishSequence`, `wrongStart`) | Undo one sequence too many; turn-backs up to a sequence plus a stray turn |
+| `src/solver/beginner.ts` (`STAGE_PIECES`) | New: pieces in place, per stage |
 | `src/solver/beginner.ts` (cross) | White cross follows level 1's words: front, top and right only |
 
 ## v0.8.13 — Kid test round 2 (2026-11-09)

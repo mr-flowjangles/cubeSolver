@@ -14,8 +14,9 @@ import {
   invertMoves,
   parseMoves,
   solved,
+  fromString,
 } from "../src/cube";
-import { BEGINNER_LEVELS } from "../src/lessons/beginner";
+import { BEGINNER_LEVELS, type Level } from "../src/lessons/beginner";
 import { ALL_LEVELS, METHODS } from "../src/lessons/index";
 import { PRACTICE_RAMP, practicePosition } from "../src/lessons/position";
 import {
@@ -30,7 +31,7 @@ import {
 } from "../src/lessons/walkthrough";
 import { allowedSwipes } from "../src/app/cubePanel";
 import { reorient, swipesFor } from "../src/render/swipe";
-import { STAGE_DONE, solveBeginner } from "../src/solver/beginner";
+import { STAGE_DONE, STAGE_PIECES, solveBeginner } from "../src/solver/beginner";
 
 const STAGE_LEVELS = ALL_LEVELS.filter((l) => l.kind === "stage");
 
@@ -349,8 +350,15 @@ describe("Hint after one wrong turn (kid test, round 6)", () => {
     const rnd = seeded(31);
     for (let i = 0; i < 20; i++) {
       let s = practicePosition(level, rnd);
-      const step = stageSteps(level, s).find((x) => x.moves.length >= 4 && x.moves[0][0] !== "y");
-      if (!step) continue;
+      const steps = stageSteps(level, s);
+      const at = steps.findIndex((x) => x.moves.length >= 4 && x.moves[0][0] !== "y");
+      if (at < 0) continue;
+      const step = steps[at];
+      // The steps before it first (e.g. turn the top), so the round twists the right corner.
+      s = applyMoves(
+        s,
+        steps.slice(0, at).flatMap((x) => x.moves),
+      );
       s = applyMoves(s, step.moves.slice(0, 4)); // one Twist round: the bottom is messy
       const recent = [...step.moves.slice(0, 4), "y"];
       const help = helpSteps(level, applyMoves(s, "y"), recent);
@@ -507,7 +515,10 @@ describe("Hint after a sequence at the wrong moment (kid test, round 9)", () => 
               if (METHODS.beginner.done[level.stage!](t)) continue;
               const help = helpSteps(level, t, [...hist, ...did, ...stray]);
               expect(help.some((h) => /^First fix/.test(h.say))).toBe(false);
-              const end = applyMoves(t, help.flatMap((h) => h.moves));
+              const end = applyMoves(
+                t,
+                help.flatMap((h) => h.moves),
+              );
               expect(METHODS.beginner.done[level.stage!](end)).toBe(true);
             }
           }
@@ -515,4 +526,92 @@ describe("Hint after a sequence at the wrong moment (kid test, round 9)", () => 
       }
     },
   );
+});
+
+describe("Hint after one sequence too many, or a turn before one (kid test, round 10)", () => {
+  const lv = (id: string) => BEGINNER_LEVELS.find((l) => l.id === id)!;
+  /** Follow Hint's first step n times from `start`, do `extra`, then ask Hint. */
+  const after = (level: Level, start: string, n: number, extra: string) => {
+    let s = fromString(start);
+    const h: Move[] = [];
+    for (let i = 0; i < n; i++) {
+      const st = helpSteps(level, s, h)[0];
+      s = applyMoves(s, st.moves);
+      h.push(...st.moves);
+    }
+    const moves = parseMoves(extra);
+    const at = applyMoves(s, moves);
+    const help = helpSteps(level, at, [...h, ...moves]);
+    const end = applyMoves(
+      at,
+      help.flatMap((x) => x.moves),
+    );
+    const swipes = help.flatMap((x) => x.moves.flatMap((m) => swipesFor(m))).length;
+    return { help, end, swipes };
+  };
+
+  // After a step that put a piece in place, one move of the sequence again: the start of one
+  // sequence too many, which would undo that piece.
+  it.each([
+    ["corners", "R"],
+    ["yellowCornersTwist", "R'"],
+  ] as const)("%s: one sequence move too many is turned back, not finished", (id, extra) => {
+    const level = lv(id);
+    const rnd = seeded(1010);
+    let checked = 0;
+    for (let i = 0; i < 10; i++) {
+      let s = practicePosition(level, rnd);
+      const h: Move[] = [];
+      const placed = STAGE_PIECES[level.stage as keyof typeof STAGE_PIECES]!;
+      for (const st of stageSteps(level, s)) {
+        const had = placed(s);
+        s = applyMoves(s, st.moves);
+        h.push(...st.moves);
+        if (METHODS.beginner.done[level.stage!](s)) break;
+        if (placed(s) <= had) continue; // only steps that put a piece in place
+        const next = helpSteps(level, s, h)[0];
+        if (next.moves[0] === extra) continue; // the next step really starts with it
+        const help = helpSteps(level, applyMoves(s, [extra]), [...h, extra]);
+        expect(help[0].moves).toEqual(invertMoves([extra]));
+        checked++;
+      }
+    }
+    expect(checked).toBeGreaterThan(5);
+  });
+
+  it("level 7: a whole-cube turn, then a Twist, is undone, not a trip back to the cross", () => {
+    const level = lv("yellowCornersTwist");
+    const r = after(
+      level,
+      "DDDDDDFDBLBBBBBBBBDLDLLLLLLUUUUUUUUUFFLFFFFFFRRRRRRRRR",
+      2,
+      "y R' D' R D",
+    );
+    expect(r.help.some((x) => /^First fix/.test(x.say))).toBe(false);
+    expect(r.help[0].moves).toEqual(parseMoves("D' R' D R y'"));
+    expect(isSolved(r.end)).toBe(true);
+    expect(r.swipes).toBeLessThan(40);
+  });
+
+  it("level 8: a Corner at the wrong moment is never called Swap edges", () => {
+    const level = lv("full");
+    const r = after(
+      level,
+      "DFLLDRDBFRDBBBBBBBRDDLLLLLLUUUUUUUUULDBFFFFFFDDFRRRRRR",
+      0,
+      "R U R' U'",
+    );
+    expect(r.help.some((x) => /Swap edges sequence you started/.test(x.say))).toBe(false);
+    expect(isSolved(r.end)).toBe(true);
+  });
+
+  it("level 4: starting the second Yellow cross (F after F') is finished, not undone", () => {
+    const level = lv("yellowCross");
+    const start = "DDBRDDRFDRBDRRRRRRDDBBBBBBBUUUUUUUUULDFLLLLLLLLFFFFFFF";
+    const moves = parseMoves("U' F R U R' U' F' F");
+    const s = applyMoves(fromString(start), moves);
+    expect(helpSteps(level, s, moves)[0].moves).toEqual(parseMoves("R U R' U' F'"));
+    // And with a look and look-back after the F.
+    expect(helpSteps(level, s, [...moves, "x", "x'"])[0].moves).toEqual(parseMoves("R U R' U' F'"));
+  });
 });
