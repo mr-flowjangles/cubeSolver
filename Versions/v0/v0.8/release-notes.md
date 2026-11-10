@@ -1,5 +1,55 @@
 # v0.8
 
+## v0.8.13 — Kid test round 2 (2026-11-09)
+
+### Problem
+
+A second kid test (a program following each level's words literally, start to finish) solved every cube, but found:
+
+- Levels 4–6 said "hold", levels 2, 3 and 7 said "turn the whole cube". Reading "hold" as turning the top left level 6 stuck on 243 of 300 cubes.
+- White cross: "turn that side once" could knock a white edge off the daisy; the middle-row rule didn't say which side to turn.
+- White corners: a white corner on the bottom in the wrong spot wasn't covered.
+- Levels 2–7 promised lit pieces and a reason for each move, and gave neither.
+- The yellow edges demo never played its sequence; the yellow cross words didn't say an L turns into a line.
+- Front-right and back-left were never explained; level 0 only turned the whole cube left; level 8's tips started closed.
+
+### Solution
+
+The words always say "turn the whole cube" or "turn the top". Every demo move gives a reason, levels 2–3 light the piece and its home, and each demo cube plays the level's sequences. Design: docs/02-levels.md → "Level words checked by a kid test".
+
+### New
+
+- Per-move reasons in levels 2–7, e.g. "Corner sequence, round 2 of 3, move 3 of 4: the right side goes down."
+- Levels 2–3 light the piece being placed and its home.
+- Level 0 has an 11th swipe: the whole cube turns back to the right.
+- Level 8 opens with a one-line recap of each level.
+- Tests: every demo move has a reason, every demo plays its sequences, levels 2–3 light a piece, no "hold" in the words.
+
+### Changed
+
+- Level words for 1, 2, 4, 5 and 6; level 6's goal says what "in its right spot" allows.
+- "Cycle corners" is now "Move corners". Sequence names live in one place.
+- Demo cubes for levels 2–7: the shortest of 40 that plays every taught sequence.
+- Hint text says "turn the whole cube" and names Edge right or Edge left.
+
+### Fixed
+
+- Show it no longer promises lit squares on levels that light none.
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `docs/02-levels.md` | Second-round rules |
+| `site/catalog.json` | Regenerated from the docs |
+| `src/lessons/beginner.ts` | Level words, 11th swipe, level 8 recap |
+| `src/solver/beginner.ts` | Per-move reasons, lit pieces, sequence names, Hint text |
+| `src/cube/pieces.ts` | New `homeSlot`: where a piece belongs |
+| `src/lessons/walkthrough.ts` | Demo seeds |
+| `src/app/stageLesson.ts` | Lights a piece's home; Show it help text |
+| `src/app/lesson.ts`, `src/app/controlsLesson.ts` | Level 8 tips open; comment |
+| `tests/walkthrough.test.ts` | New checks |
+
 ## v0.8.12 — Kid test fixes (2026-11-09)
 
 ### Problem

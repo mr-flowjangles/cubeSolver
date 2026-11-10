@@ -1,7 +1,7 @@
 // Beginner levels. Content is data; the lesson screen reads it.
 // Level list decided by Claude under Rob's standing go-ahead (2026-11-04); see docs/02-levels.md.
 
-import { ALGS } from "../solver/beginner";
+import { ALG_NAMES as N, ALGS } from "../solver/beginner";
 
 export interface Level {
   id: string;
@@ -42,9 +42,10 @@ export const BEGINNER_LEVELS: Level[] = [
       "<strong>Center:</strong> the middle square of a side. It never moves.",
       "<strong>Part 1, the daisy:</strong> bring the 4 white edges to the top, around yellow, white facing up.",
       "White edge on the bottom: turn that side twice. It comes up to the top.",
-      "White edge in the middle row: turn the side next to it so it goes up, white facing up.",
+      "White edge in the middle row: its white faces one side. Turn the other side it touches, so the edge goes up, white facing up. Wrong way? Turn it back, then the other way.",
       "White facing out to the side, in the top or bottom row: turn that side once. It moves to the middle row.",
-      "Before a side goes up, turn the top so the spot above it has no white edge yet.",
+      "Before you turn any side, turn the top so the spot above that side has no white edge yet.",
+      "Can't see a white edge? Turn the whole cube to look at the other sides.",
       "<strong>Part 2:</strong> turn the top until an edge's other color matches the center below it.",
       "Then turn that side twice. The edge drops to the bottom in the right spot.",
     ],
@@ -59,14 +60,15 @@ export const BEGINNER_LEVELS: Level[] = [
     method: "beginner",
     stage: "corners",
     teach: [
-      "Find a white corner in the top layer.",
+      "<strong>Front-right:</strong> the corner of the cube nearest you, on the right.",
+      "Find a white corner in the top layer, the layer next to yellow.",
       "Its spot is the bottom corner between the centers of its other two colors.",
       "Turn the top until the corner sits right above its spot.",
       "Turn the whole cube so that corner is at front-right.",
       "Repeat the sequence until the corner drops in, white side down.",
-      "Corner stuck in the bottom the wrong way? Turn the whole cube so it's at front-right, then do the sequence once to lift it out.",
+      "A white corner on the bottom in the wrong spot, or turned the wrong way? Turn the whole cube so it's at front-right, then do the sequence once to lift it out.",
     ],
-    algs: [{ name: "Corner", moves: ALGS.cornerUp }],
+    algs: [{ name: N.cornerUp, moves: ALGS.cornerUp }],
   },
   {
     id: "middle",
@@ -84,8 +86,8 @@ export const BEGINNER_LEVELS: Level[] = [
       "No edge on top fits? One is stuck in the middle. Turn the whole cube so it's at front-right, then do Edge right once. It pops up to the top.",
     ],
     algs: [
-      { name: "Edge right", moves: ALGS.middleRight },
-      { name: "Edge left", moves: ALGS.middleLeft },
+      { name: N.middleRight, moves: ALGS.middleRight },
+      { name: N.middleLeft, moves: ALGS.middleLeft },
     ],
   },
   {
@@ -99,10 +101,10 @@ export const BEGINNER_LEVELS: Level[] = [
     teach: [
       "Look at the yellow edges on top, not the corners: a dot, an L, or a line.",
       "Dot: do the sequence once to get an L.",
-      "L: hold it at back-left, then do the sequence.",
-      "Line: hold it left-to-right, then do the sequence.",
+      "L: turn the top so the L's two edges are at the back and the left. Do the sequence. It turns into a line.",
+      "Line: turn the top so it goes left-to-right. Do the sequence. Now it's a cross.",
     ],
-    algs: [{ name: "Yellow cross", moves: ALGS.yellowCross }],
+    algs: [{ name: N.yellowCross, moves: ALGS.yellowCross }],
   },
   {
     id: "yellowEdges",
@@ -114,26 +116,26 @@ export const BEGINNER_LEVELS: Level[] = [
     stage: "yellowEdges",
     teach: [
       "Turn the top until two edges match their centers.",
-      "Matching edges side by side: hold them at back and right.",
+      "Matching edges side by side: turn the whole cube so they're at the back and the right. Then do the sequence.",
       "Matching edges opposite: do the sequence once, then try again.",
     ],
-    algs: [{ name: "Swap edges", moves: ALGS.yellowEdges }],
+    algs: [{ name: N.yellowEdges, moves: ALGS.yellowEdges }],
   },
   {
     id: "yellowCornersPlace",
     number: 6,
     title: "Yellow corners into place",
-    goal: "Put every top corner in its right spot. Twisted is fine.",
+    goal: "Put every top corner in its right spot. It can still be turned the wrong way; the next level fixes that.",
     kind: "stage",
     method: "beginner",
     stage: "yellowCornersPlace",
     teach: [
       "A corner is in place when its three colors match the three centers around it.",
-      "Hold a corner that is in place at front-right.",
+      "Turn the whole cube so a corner that is in place is at front-right.",
       "Do the sequence. Repeat until all four are in place.",
       "None in place? Do the sequence once from anywhere.",
     ],
-    algs: [{ name: "Cycle corners", moves: ALGS.yellowCornersPlace }],
+    algs: [{ name: N.yellowCornersPlace, moves: ALGS.yellowCornersPlace }],
   },
   {
     id: "yellowCornersTwist",
@@ -150,7 +152,7 @@ export const BEGINNER_LEVELS: Level[] = [
       "Once you've started, never turn the whole cube again.",
       "All yellow on top? Turn the top to line it up. Solved!",
     ],
-    algs: [{ name: "Twist", moves: ALGS.twist }],
+    algs: [{ name: N.twist, moves: ALGS.twist }],
   },
   {
     id: "full",
@@ -161,22 +163,29 @@ export const BEGINNER_LEVELS: Level[] = [
     method: "beginner",
     teach: [
       "Everything you've learned, start to finish. Each level's sequence is below.",
+      "1 · White cross: make the daisy around yellow, then turn each white edge down.",
+      "2 · White corners: corner above its spot, whole cube so it's front-right, Corner until it drops in.",
+      "3 · Middle edges: match a top edge to its center, turn it to the front, then Edge right or Edge left.",
+      "4 · Yellow cross: dot, L or line on top, then Yellow cross until it's a plus.",
+      "5 · Yellow edges: two edges matching, at the back and the right, then Swap edges.",
+      "6 · Yellow corners: a corner in place at front-right, then Move corners.",
+      "7 · Twist: Twist until yellow is up, turn only the top to the next corner, then line up the top.",
       "Use Hint if you're stuck — it tells you the next step.",
     ],
     algs: [
-      { name: "Corner", moves: ALGS.cornerUp },
-      { name: "Edge right", moves: ALGS.middleRight },
-      { name: "Edge left", moves: ALGS.middleLeft },
-      { name: "Yellow cross", moves: ALGS.yellowCross },
-      { name: "Swap edges", moves: ALGS.yellowEdges },
-      { name: "Cycle corners", moves: ALGS.yellowCornersPlace },
-      { name: "Twist", moves: ALGS.twist },
+      { name: N.cornerUp, moves: ALGS.cornerUp },
+      { name: N.middleRight, moves: ALGS.middleRight },
+      { name: N.middleLeft, moves: ALGS.middleLeft },
+      { name: N.yellowCross, moves: ALGS.yellowCross },
+      { name: N.yellowEdges, moves: ALGS.yellowEdges },
+      { name: N.yellowCornersPlace, moves: ALGS.yellowCornersPlace },
+      { name: N.twist, moves: ALGS.twist },
     ],
   },
 ];
 
 /**
- * Level 0, part 1: ten swipes, in order. Written for a 10-year-old; no letters, the arrow shows
+ * Level 0, part 1: eleven swipes, in order. Written for a 10-year-old; no letters, the arrow shows
  * each move. `say` is what to do next; `did` is the line printed after the move is made.
  * `move` is the standard letter, used only by the app.
  */
@@ -202,6 +211,11 @@ export const NOTATION_STEPS: { move: string; say: string; did: string }[] = [
     move: "B",
     say: "Turn the back. You can't see it, so swipe where the arrow shows.",
     did: "The back turned.",
+  },
+  {
+    move: "y'",
+    say: "Turn the whole cube back: swipe next to the cube, to the right.",
+    did: "The whole cube turned back.",
   },
 ];
 export const NOTATION_DRILL = NOTATION_STEPS.map((s) => s.move);

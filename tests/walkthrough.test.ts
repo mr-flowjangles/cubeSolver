@@ -4,12 +4,14 @@ import {
   applyMoves,
   center,
   findPiece,
+  homeSlot,
   scramble,
   slot,
   slotSolved,
   invertMoves,
   solved,
 } from "../src/cube";
+import { BEGINNER_LEVELS } from "../src/lessons/beginner";
 import { ALL_LEVELS, METHODS } from "../src/lessons/index";
 import { PRACTICE_RAMP, practicePosition } from "../src/lessons/position";
 import {
@@ -152,5 +154,41 @@ describe("practice cubes get harder", () => {
 
   it("cross: done check matches", () => {
     expect(STAGE_DONE.cross(solved())).toBe(true);
+  });
+});
+
+describe("beginner demos teach (kid test, round 2)", () => {
+  const BEGINNER_STAGES = STAGE_LEVELS.filter((l) => l.method === "beginner");
+
+  it.each(BEGINNER_STAGES)("$title: every demo move gives a reason", (level) => {
+    for (const g of guideMoves(stageSteps(level, demoPosition(level)))) expect(g.why).toBeTruthy();
+  });
+
+  it.each(BEGINNER_STAGES.filter((l) => l.algs.length))(
+    "$title: the demo plays every sequence the level teaches",
+    (level) => {
+      const played = stageSteps(level, demoPosition(level))
+        .flatMap((s) => s.moves)
+        .join(" ");
+      for (const a of level.algs) expect(played).toContain(a.moves);
+    },
+  );
+
+  it.each(BEGINNER_STAGES.filter((l) => ["corners", "middle"].includes(l.stage!)))(
+    "$title: each step lights the piece it places",
+    (level) => {
+      let s = demoPosition(level);
+      for (const st of stageSteps(level, s)) {
+        expect(st.piece).toBeTruthy();
+        s = applyMoves(s, st.moves);
+        expect(slotSolved(s, homeSlot(s, st.piece!))).toBe(true);
+      }
+    },
+  );
+
+  it("no level's words say 'hold' except holding the cube white-down", () => {
+    for (const l of BEGINNER_LEVELS)
+      for (const t of [l.goal, ...l.teach].filter((t) => /\bhold\b/i.test(t)))
+        expect(t).toMatch(/white center on the bottom/);
   });
 });

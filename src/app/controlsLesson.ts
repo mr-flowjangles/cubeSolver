@@ -1,6 +1,6 @@
 // Level 0, learn to turn the cube, for a 10-year-old (docs/02-levels.md → Level 0).
 // No letters: the arrow shows every move.
-//   Part 1  10 swipes; the arrow shows where, one sentence says what to do
+//   Part 1  11 swipes; the arrow shows where, one sentence says what to do
 //   Part 2  the trick: the same 4 moves (R U R' U') six times take a solved cube apart and back
 // Every move prints a line in a list under the cube.
 

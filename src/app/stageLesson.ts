@@ -4,7 +4,15 @@
 //   3 Try it           practice cubes on their own, easy first, with Hint and Show me
 // See docs/02-levels.md → "Every level is a tutorial".
 
-import { type CubeState, type Move, applyMoves, findPiece, slot, toString } from "../cube";
+import {
+  type CubeState,
+  type Move,
+  applyMoves,
+  findPiece,
+  homeSlot,
+  slot,
+  toString,
+} from "../cube";
 import type { Level } from "../lessons/beginner";
 import { type GuideStep, METHODS, stageDoneAnyHold } from "../lessons/index";
 import { moveWords } from "../lessons/moveWords";
@@ -93,7 +101,9 @@ export function mountStageLesson(root: HTMLElement, level: Level, next?: Level):
   const light = (g: GuideMove | undefined, s: CubeState) => {
     if (!g?.piece) return panel.view.spotlight(null);
     const map = stickerMap(turned);
-    const lit = [...findPiece(s, g.piece).stickers, ...(g.to ? slot(g.to).stickers.map(map) : [])];
+    // The cross names its target slot; later stages light the piece's home by its colors.
+    const home = g.to ? slot(g.to).stickers.map(map) : homeSlot(s, g.piece).stickers;
+    const lit = [...findPiece(s, g.piece).stickers, ...home];
     panel.view.spotlight(lit);
   };
 
@@ -273,7 +283,9 @@ export function mountStageLesson(root: HTMLElement, level: Level, next?: Level):
       b.classList.toggle("current", b.dataset.phase === p);
       b.setAttribute("aria-current", String(b.dataset.phase === p));
     });
-    $(".phase-help").textContent = PHASE_HELP[p];
+    // Only promise lit squares when this level lights a piece (the top-layer stages move many at once).
+    $(".phase-help").textContent =
+      p === "show" && !guide.some((g) => g.piece) ? "Watch the app do it." : PHASE_HELP[p];
     if (p === "try") {
       guideEl.hidden = true;
       practice = 0;

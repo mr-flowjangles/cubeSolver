@@ -52,6 +52,20 @@ export function slotSolved(state: CubeState, s: Slot): boolean {
   return s.stickers.every((i) => state[i] === center(state, FACE_OF_STICKER(i)));
 }
 
+/** Where a piece with these colors belongs: the slot whose side centers are its colors. */
+export function homeSlot(state: CubeState, colors: readonly Face[]): Slot {
+  const want = [...colors].sort().join("");
+  const found = [...EDGE_SLOTS, ...CORNER_SLOTS].find(
+    (s) =>
+      [...s.name]
+        .map((f) => center(state, f as Face))
+        .sort()
+        .join("") === want,
+  );
+  if (!found) throw new Error(`No home for ${colors.join("")}`);
+  return found;
+}
+
 /** The right piece is in this slot, turned any way. */
 export function slotHasRightPiece(state: CubeState, s: Slot): boolean {
   const want = s.stickers

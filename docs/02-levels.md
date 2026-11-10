@@ -38,7 +38,7 @@ How the three parts are built (v0.8.4):
 
 | # | Level | Passed when | Sequence taught |
 |---|---|---|---|
-| 0 | Learn the controls | 10 swipes, then the trick: the same 4 moves six times | `R U R' U'` (6 times brings the cube back) |
+| 0 | Learn the controls | 11 swipes, then the trick: the same 4 moves six times | `R U R' U'` (6 times brings the cube back) |
 | 1 | White cross | 4 white edges on the bottom, matching centers | none — the daisy, then F2 for each edge |
 | 2 | White corners | white layer done | `R U R' U'` (repeat) |
 | 3 | Middle edges | first two layers done | `U R U' R' U' F' U F` / `U' L' U L U F U' F'` |
@@ -52,7 +52,7 @@ How the three parts are built (v0.8.4):
 
 - Written for a 10-year-old. No letters: the arrow shows every move.
 - One line at the top: "Learn to turn the cube. Swipe where the arrow shows." No goal paragraph, no list.
-- **Part 1:** 10 swipes, one plain sentence each, e.g. "Swipe the right side up."
+- **Part 1:** 11 swipes, one plain sentence each, e.g. "Swipe the right side up." The whole cube turns both ways: left, then back to the right.[1]
 - **Every move prints a line** in a list under the cube, e.g. "The right side went up."
 - **Part 2, the trick:** a fresh solved cube. Follow the arrows for the same 4 moves, 6 times (24 swipes). The cube gets mixed up, then comes back solved.
 - The trick is `R U R' U'` six times, which always returns the cube to where it started (checked by the app's own cube model in the tests). The letters show only as a small caption.
@@ -63,6 +63,12 @@ How the three parts are built (v0.8.4):
 - Each level's words were written as code and run on 200 practice cubes, as a 10-year-old who knows only what the screen says. A test repeats it on 20 cubes per level.
 - Every step the words left out is now said: how to lift an edge into the daisy, turning the whole cube so the spot is at front-right, which center means Edge right, how to pop out a stuck edge, and the last top turn.
 - Full solve lists every sequence, so it can be done without Hint.
+- **Second round.**[1] The words never say "hold". They say "turn the whole cube" or "turn the top", because the two give different results.
+- Front-right and the L's back-left are said in plain words where they're first used.
+- Full solve opens with a one-line recap of every level.
+- Every move in Show it and Walk through it gives a reason, e.g. "Corner sequence, round 2 of 3, move 3 of 4: the right side goes down."
+- Levels 2 and 3 light the piece being placed and its home. Levels 4–7 move many pieces at once, so nothing lights, and Show it doesn't promise it.
+- Each beginner demo cube is the shortest of 40 that plays every sequence the level teaches.
 
 ## CFOP (M6)
 

@@ -10,6 +10,7 @@
 
 import {
   type CubeState,
+  type Slot,
   type Face,
   type Move,
   COLOR_NAME,
@@ -23,6 +24,7 @@ import {
   slotHasRightPiece,
   slotSolved,
 } from "../cube";
+import { moveWords } from "../lessons/moveWords";
 import { type Step, stepSearch } from "./search";
 
 export type StageId =
@@ -58,6 +60,29 @@ export const ALGS = {
   yellowCornersPlace: "U R U' L' U R' U' L",
   twist: "R' D' R D",
 } as const;
+
+/** What the lessons call each sequence. */
+export const ALG_NAMES: Record<keyof typeof ALGS, string> = {
+  cornerUp: "Corner",
+  middleRight: "Edge right",
+  middleLeft: "Edge left",
+  yellowCross: "Yellow cross",
+  yellowEdges: "Swap edges",
+  yellowCornersPlace: "Move corners",
+  twist: "Twist",
+};
+
+const lower = (t: string) => t[0].toLowerCase() + t.slice(1);
+
+/** A reason for each move of a taught sequence done `moves.length / alg length` times. */
+function algWhy(alg: keyof typeof ALGS, moves: Move[]): string[] {
+  const len = seq(ALGS[alg]).length;
+  const rounds = moves.length / len;
+  return moves.map((m, i) => {
+    const round = rounds > 1 ? `, round ${Math.floor(i / len) + 1} of ${rounds}` : "";
+    return `${ALG_NAMES[alg]} sequence${round}, move ${(i % len) + 1} of ${len}: ${lower(moveWords(m))}`;
+  });
+}
 
 const seq = (s: string): Move[] => s.split(" ");
 const name = (f: Face) => COLOR_NAME[f];
@@ -310,33 +335,57 @@ function cross(s: CubeState): SolveStep[] {
 function stepwise(
   stage: StageId,
   s: CubeState,
-  steps: Step[],
+  steps: AlgStep[],
   progress: (s: CubeState) => number,
   keep: (s: CubeState) => boolean,
   maxDepth: number,
-  say: (count: number) => string,
+  say: (count: number, algs: string[]) => string,
+  /** Slots that fill one at a time (corners, middle edges): the new one is lit up on screen. */
+  pieces?: Slot[],
 ): SolveStep[] {
   const out: SolveStep[] = [];
   let cur = s;
   while (!STAGE_DONE[stage](cur)) {
     const before = progress(cur);
-    const found = stepSearch(cur, steps, (x) => keep(x) && progress(x) > before, maxDepth);
+    const found = stepSearch(cur, steps, (x) => keep(x) && progress(x) > before, maxDepth) as
+      AlgStep[] | null;
     if (!found) throw new Error(`${stage} search failed`);
     const moves = found.flatMap((st) => st.moves);
-    out.push({ stage, moves, say: say(before) });
-    cur = applyMoves(cur, moves);
+    const why = found.flatMap((st) =>
+      st.alg
+        ? algWhy(st.alg, st.moves)
+        : st.moves.map(
+            (m) =>
+              `${m[0] === "y" ? "Turn the whole cube to bring it round" : "Turn the top to line it up"}: ${lower(moveWords(m))}`,
+          ),
+    );
+    const names = [...new Set(found.flatMap((st) => (st.alg ? [ALG_NAMES[st.alg]] : [])))];
+    const next = applyMoves(cur, moves);
+    const filled = pieces?.find((p) => !slotSolved(cur, p) && slotSolved(next, p));
+    out.push({
+      stage,
+      moves,
+      say: say(before, names),
+      why,
+      ...(filled && { piece: filled.stickers.map((i) => next[i]) }),
+    });
+    cur = next;
   }
   return out;
 }
 
+/** A search step; `alg` names the taught sequence it is, if any. */
+type AlgStep = Step & { alg?: keyof typeof ALGS };
+
 function corners(s: CubeState) {
-  const steps: Step[] = [
+  const steps: AlgStep[] = [
     ...TOP,
     ...SPIN,
     ...[1, 3, 5].map((n) => ({
       moves: seq(repeat(ALGS.cornerUp, n)),
       group: "alg",
       say: `Do ${ALGS.cornerUp} ×${n}`,
+      alg: "cornerUp" as const,
     })),
   ];
   return stepwise(
@@ -347,16 +396,25 @@ function corners(s: CubeState) {
     (x) => all(x, D_EDGES),
     6,
     () =>
-      "Put a white corner above its spot (front-right), then repeat the corner sequence until it drops in.",
+      "Put a white corner above its spot, turn the whole cube so it's at front-right, then repeat the Corner sequence until it drops in.",
+    D_CORNERS,
   );
 }
 
 function middle(s: CubeState) {
-  const steps: Step[] = [
+  const steps: AlgStep[] = [
     ...TOP,
     ...SPIN,
-    { moves: seq(ALGS.middleRight), say: `Move edge right: ${ALGS.middleRight}` },
-    { moves: seq(ALGS.middleLeft), say: `Move edge left: ${ALGS.middleLeft}` },
+    {
+      moves: seq(ALGS.middleRight),
+      say: `Move edge right: ${ALGS.middleRight}`,
+      alg: "middleRight" as const,
+    },
+    {
+      moves: seq(ALGS.middleLeft),
+      say: `Move edge left: ${ALGS.middleLeft}`,
+      alg: "middleLeft" as const,
+    },
   ];
   return stepwise(
     "middle",
@@ -365,12 +423,17 @@ function middle(s: CubeState) {
     (x) => count(x, MID_EDGES),
     bottomDone,
     5,
-    () => "Line up a top edge with its center, then move it down right or left.",
+    (_, names) =>
+      `Line up a top edge with its center and turn the whole cube so it's in front, then do ${names.join(" and ") || "Edge right or Edge left"}.`,
+    MID_EDGES,
   );
 }
 
 function yellowCross(s: CubeState) {
-  const steps: Step[] = [...TOP, { moves: seq(ALGS.yellowCross), say: ALGS.yellowCross }];
+  const steps: AlgStep[] = [
+    ...TOP,
+    { moves: seq(ALGS.yellowCross), say: ALGS.yellowCross, alg: "yellowCross" },
+  ];
   const yellowEdgesUp = (x: CubeState) =>
     U_EDGES.filter((e) => x[e.stickers[0]] === center(x, "U")).length;
   return stepwise(
@@ -383,12 +446,16 @@ function yellowCross(s: CubeState) {
     (n) =>
       n === 0
         ? "Yellow dot: do the sequence."
-        : "Hold the yellow L at back-left (or line left-to-right), then do the sequence.",
+        : "Turn the top so the yellow L is at back-left (or the line goes left-to-right), then do the sequence. An L turns into a line: do it again.",
   );
 }
 
 function yellowEdges(s: CubeState) {
-  const steps: Step[] = [...TOP, ...SPIN, { moves: seq(ALGS.yellowEdges), say: ALGS.yellowEdges }];
+  const steps: AlgStep[] = [
+    ...TOP,
+    ...SPIN,
+    { moves: seq(ALGS.yellowEdges), say: ALGS.yellowEdges, alg: "yellowEdges" },
+  ];
   return stepwise(
     "yellowEdges",
     s,
@@ -401,9 +468,13 @@ function yellowEdges(s: CubeState) {
 }
 
 function yellowCornersPlace(s: CubeState) {
-  const steps: Step[] = [
+  const steps: AlgStep[] = [
     ...SPIN,
-    { moves: seq(ALGS.yellowCornersPlace), say: ALGS.yellowCornersPlace },
+    {
+      moves: seq(ALGS.yellowCornersPlace),
+      say: ALGS.yellowCornersPlace,
+      alg: "yellowCornersPlace",
+    },
   ];
   return stepwise(
     "yellowCornersPlace",
@@ -412,7 +483,8 @@ function yellowCornersPlace(s: CubeState) {
     (x) => (yellowCornersPlaced(x) ? 1 : 0),
     yellowEdgesDone,
     5,
-    () => "Hold a corner that is in its right spot at front-right, then do the sequence.",
+    () =>
+      "Turn the whole cube so a corner that is in its right spot is at front-right, then do the sequence.",
   );
 }
 
@@ -434,6 +506,7 @@ function yellowCornersTwist(s: CubeState): SolveStep[] {
         stage: "yellowCornersTwist",
         moves: u,
         say: "Turn the top to bring the next twisted corner to front-right.",
+        why: u.map((m) => `Turn only the top: ${lower(moveWords(m))}`),
       });
     }
     cur = here;
@@ -446,13 +519,19 @@ function yellowCornersTwist(s: CubeState): SolveStep[] {
     out.push({
       stage: "yellowCornersTwist",
       moves: seq(repeat(ALGS.twist, n)),
+      why: algWhy("twist", seq(repeat(ALGS.twist, n))),
       say: `Do the twist sequence ${n} times, until yellow is on top. The bottom will look messed up — keep going.`,
     });
   }
   for (const u of ["U", "U'", "U2"]) {
     if (isSolved(cur)) break;
     if (isSolved(applyMoves(cur, [u]))) {
-      out.push({ stage: "yellowCornersTwist", moves: [u], say: "Turn the top to line it up." });
+      out.push({
+        stage: "yellowCornersTwist",
+        moves: [u],
+        say: "Turn the top to line it up.",
+        why: [`Turn the top to line it up: ${lower(moveWords(u))}`],
+      });
       cur = applyMoves(cur, [u]);
     }
   }
