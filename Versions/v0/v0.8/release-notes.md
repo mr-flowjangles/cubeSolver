@@ -98,6 +98,21 @@ Nothing stopped a kid in round 6 either.
 
 Two cases in about 10,000 Hint checks still say "First fix the white cross" after a stray on top of an abandoned sequence. That's true (the cross is broken) and the plan finishes.
 
+### Kid test round 8: what each finding affects
+
+| Finding | Impact | Affects | Test now |
+|---|---|---|---|
+| Mid-sequence, a look and look-back (which levels 1–2 tell kids to do) made Hint loop on "Turn it back first" | Stops a kid | Try it, levels 2–7; level 8 | `helpPlan.test.ts`: through the app's plan cache, every look-back and undo-by-hand finishes |
+| One swipe into "turn the front twice", Hint replanned and turned it back | Wrong help | Level 1 | `helpPlan.test.ts`: the next Hint is the other swipe |
+| Hold step asked for green in front, which no level says | Wording | All levels | — |
+| Level 3: left center off-camera for "Edge left" | Wording | Level 3 | Words: "If not, it goes left" |
+| Level 5: the back is hidden | Wording | Level 5 | Words: the two that don't match go front and left |
+| Level 2: "tip the cube" with no direction; corners facing back or left | Wording | Level 2 | Words: tip toward you, or turn the cube to look round |
+| Level 1: "One already on the bottom… can stay" read as only one; "turn that side once" with no direction | Wording | Level 1 | Words |
+| Level 8 recap didn't say how to look at hidden pieces | Wording | Level 8 | Words |
+
+Nothing in round 8 stopped a kid who follows the words; the loop needed Hint.
+
 ### Files Changed
 
 | File | Change |
@@ -112,6 +127,7 @@ Two cases in about 10,000 Hint checks still say "First fix the white cross" afte
 | `tests/tutorialPlayer.ts`, `tests/tutorialPlayer.test.ts` | New: the no-AI tutorial player and its test |
 | `src/lessons/walkthrough.ts` | `helpSteps`: Hint plans earlier stages first |
 | `src/app/stageLesson.ts` | Hint uses `helpSteps`; Walk asks to turn the cube back |
+| `src/app/helpPlan.ts` | New: Hint follows one plan, swipe by swipe |
 | `src/solver/beginner.ts` (cross) | White cross follows level 1's words: front, top and right only |
 
 ## v0.8.13 — Kid test round 2 (2026-11-09)

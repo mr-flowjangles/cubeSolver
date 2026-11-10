@@ -11,6 +11,7 @@ import { solveBeginner } from "../solver/beginner";
 import { solvePll } from "../solver/cfop";
 import { algButtonsHtml, onAlgTap } from "./algButtons";
 import { type CubePanel, mountCubePanel } from "./cubePanel";
+import { HelpPlan } from "./helpPlan";
 import { HintArrows } from "./hintArrows";
 import { showPass } from "./reward";
 import type { Screen } from "./shell";
@@ -119,25 +120,13 @@ export function mountLesson(root: HTMLElement, id: string): Screen {
 
   // Follow one plan while the player stays on it. Re-planning mid-way would go wrong
   // in the twist stage, where the bottom is meant to look broken until it's done.
-  let plan: { at: string; step: GuideStep }[] = [];
-  const nextStep = (): GuideStep | undefined => {
-    const now = toString(panel.state);
-    const k = plan.findIndex((p) => p.at === now);
-    if (k >= 0) return plan[k].step;
-    let s: CubeState = panel.state;
-    const planOf = (x: CubeState) =>
-      level.kind === "pll"
-        ? pllSteps(x)
-        : method.solve(x, level.kind === "full" ? undefined : level.stage);
-    // Finish a sequence the player started, or turn back a stray move, when that's shorter.
-    const steps = chooseHelp(level, s, panel.history, planOf);
-    plan = steps.map((step) => {
-      const at = toString(s);
-      s = applyMoves(s, step.moves);
-      return { at, step };
-    });
-    return plan[0]?.step;
-  };
+  const planOf = (x: CubeState) =>
+    level.kind === "pll"
+      ? pllSteps(x)
+      : method.solve(x, level.kind === "full" ? undefined : level.stage);
+  // Finish a sequence the player started, or turn back a stray move (see chooseHelp).
+  const help = new HelpPlan((s, h) => chooseHelp(level, s, h, planOf));
+  const nextStep = (): GuideStep | undefined => help.next(panel.state, panel.history);
 
   onAlgTap(root.querySelector(".intro")!, (name, moves) => {
     hints.start(moves);

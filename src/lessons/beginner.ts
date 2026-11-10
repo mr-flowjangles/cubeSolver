@@ -39,13 +39,13 @@ export const BEGINNER_LEVELS: Level[] = [
     teach: [
       "<strong>Hold it:</strong> white center on the bottom, yellow center on top.",
       "<strong>Edge piece:</strong> a piece with 2 colors; four have white. <strong>Center:</strong> the middle square of a side; it never moves.",
-      "<strong>Part 1, the daisy:</strong> bring the white edges to the top, around yellow, white facing up. One already on the bottom, under its matching center, can stay.",
+      "<strong>Part 1, the daisy:</strong> bring the white edges to the top, around yellow, white facing up. Any already on the bottom, under their matching centers, can stay.",
       "In Part 1, before you turn any side, turn the top so the spot above that side has no white edge facing up yet.",
       "White edge on the bottom: turn that side twice. It comes up to the top.",
       "White edge in the middle row: turn the whole cube so it's at front-right, the front's right edge. Its white faces one side; turn the other side it touches, so the edge goes up, white facing up. Wrong way? Turn it back, then the other way.",
-      "White facing out to the side, in the top or bottom row: turn that side once. It moves to the middle row.",
+      "White facing out to the side, in the top or bottom row: turn that side once, either way. It moves to the middle row.",
       "Keep going with that same edge until it's on top, white facing up. Then find the next one.",
-      "No white edge on the front? Turn the whole cube to look at the other sides. White can face down, out of sight: tip the cube up to look underneath, then tip it back.",
+      "No white edge on the front? Turn the whole cube to look at the other sides. White can face down, out of sight: tip the cube up (swipe up beside it) to look underneath, then tip it back.",
       "<strong>Part 2:</strong> turn the top until an edge's other color matches the center below it. Turn the whole cube so that side faces you, then turn the front twice. The edge drops to the bottom in the right spot.",
     ],
     algs: [],
@@ -60,7 +60,7 @@ export const BEGINNER_LEVELS: Level[] = [
     stage: "corners",
     teach: [
       "<strong>Front-right:</strong> the column nearest you on the right. Its top corner sits right above its bottom corner.",
-      "Find a white corner in the top layer, the layer next to yellow. Its white can face up, out of sight: tip the cube to look at the top, then tip it back.",
+      "Find a white corner in the top layer, the layer next to yellow. Its white can face up or to a side you can't see: tip the cube toward you (swipe down beside it) to look at the top, or turn the whole cube to look round, then turn it back.",
       "Its spot is the bottom corner between the centers of its other two colors.",
       "Turn the top until the corner sits right above its spot.",
       "Turn the whole cube so that corner is at front-right.",
@@ -81,7 +81,7 @@ export const BEGINNER_LEVELS: Level[] = [
       "Find a top edge with no yellow.",
       "Turn the top until its side color matches the center below it.",
       "Turn the whole cube so that side is in front.",
-      "Its top color matches the center on the right side? Do Edge right. The center on the left side? Do Edge left.",
+      "Its top color matches the center on the right side? Do Edge right. If not, it goes left: do Edge left.",
       "No edge on top fits? One is stuck in the middle: in the wrong middle spot, or in its spot but flipped. Turn the whole cube so it's at front-right, then do Edge right once. It pops up to the top.",
     ],
     algs: [
@@ -115,7 +115,7 @@ export const BEGINNER_LEVELS: Level[] = [
     stage: "yellowEdges",
     teach: [
       "Turn the top until two edges match their centers.",
-      "Matching edges side by side: turn the whole cube so they're at the back and the right. Then do the sequence.",
+      "Matching edges side by side: turn the whole cube until the two that don't match are at the front and the left. The matching two are then at the back and the right. Do the sequence.",
       "Matching edges opposite: do the sequence once, then try again.",
     ],
     algs: [{ name: N.yellowEdges, moves: ALGS.yellowEdges }],
@@ -170,6 +170,7 @@ export const BEGINNER_LEVELS: Level[] = [
       "5 · Yellow edges: two edges matching, at the back and the right, then Swap edges. Opposite each other? Swap edges once, then look again.",
       "6 · Yellow corners: a corner in its right spot at front-right, then Move corners. None? Move corners once from anywhere.",
       "7 · Twist: Twist, all 4 moves at a time, until that corner's yellow is up; turn only the top to the next corner; then line up the top.",
+      "Can't see a piece? Turn or tip the whole cube to look, then turn it back.",
       "Use Hint if you're stuck — it tells you the next step.",
     ],
     algs: [

@@ -142,6 +142,9 @@ How the three parts are built (v0.8.4):
 - **How Hint chooses.**[3] It looks at three options: carry on from here, turn back the last move, or turn back the last two. Each first finishes a sequence the player started, if any. It carries on unless that would redo a stage the player had finished; then it turns back. So a player following the plan is never told to turn back.
 - "A sequence you started" means the player's last swipes are its start (a half turn counts as two swipes), it isn't only top turns, and finishing it gets back at least what the player had before starting it. Corner and Swap edges both start the same way; only the one really under way counts.
 - After a stray turn Hint says "Turn your last move back first". After a tip or turn of the whole cube it says "You turned the whole cube. Turn it back first."
+- A look and look-back (or a turn put right by hand) at the very end of the moves counts as nothing: the cube is as it was.[3]
+- Pressed again partway through its own step (one swipe into "turn the front twice"), Hint gives the rest of that step instead of a new plan.[3]
+- The "hold" step asks only for white on the bottom; no level says which side faces you.[3]
 - A daisy step that turns the whole cube partway is split there, so the lit squares are right before and after the turn.[3]
 - **Show me** plays the next step on the cube.
 - **New cube** gives a fresh practice cube.

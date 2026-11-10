@@ -28,6 +28,7 @@ import {
 import { WHOLE_CUBE, stickerMap } from "../render/swipe";
 import { algButtonsHtml, onAlgTap } from "./algButtons";
 import { type CubePanel, mountCubePanel } from "./cubePanel";
+import { HelpPlan } from "./helpPlan";
 import { HintArrows } from "./hintArrows";
 import { showPass } from "./reward";
 import type { Screen } from "./shell";
@@ -224,7 +225,7 @@ export function mountStageLesson(root: HTMLElement, level: Level, next?: Level):
     panel.view.lookFrom(lookWork);
     panel.view.spotlight(null);
     hints.clear();
-    plan = [];
+    help.clear();
     cubeDone = false;
     started = Date.now();
     panel.say(
@@ -259,19 +260,8 @@ export function mountStageLesson(root: HTMLElement, level: Level, next?: Level):
   };
 
   // Follow one plan while the player stays on it (see lesson.ts).
-  let plan: { at: string; step: GuideStep }[] = [];
-  const nextStep = (): GuideStep | undefined => {
-    const now = toString(panel.state);
-    const k = plan.findIndex((p) => p.at === now);
-    if (k >= 0) return plan[k].step;
-    let s: CubeState = panel.state;
-    plan = helpSteps(level, s, panel.history).map((step) => {
-      const at = toString(s);
-      s = applyMoves(s, step.moves);
-      return { at, step };
-    });
-    return plan[0]?.step;
-  };
+  const help = new HelpPlan((s, h) => helpSteps(level, s, h));
+  const nextStep = (): GuideStep | undefined => help.next(panel.state, panel.history);
 
   // ---- Phase switching and buttons ----
   const setActions = () => {

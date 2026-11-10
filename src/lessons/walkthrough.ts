@@ -1,7 +1,15 @@
 // The "Show it" and "Walk through it" parts of a level: one fixed demo cube, and the
 // moves that finish the level's stage on it, each with a plain-words reason.
 
-import { type CubeState, type Face, type Move, applyMoves, invertMoves, parseMoves } from "../cube";
+import {
+  type CubeState,
+  type Face,
+  type Move,
+  applyMoves,
+  invertMove,
+  invertMoves,
+  parseMoves,
+} from "../cube";
 import { swipesFor } from "../render/swipe";
 import type { Level } from "./beginner";
 import { type GuideStep, METHODS } from "./index";
@@ -38,8 +46,17 @@ export function helpSteps(level: Level, pos: CubeState, recent: readonly Move[] 
   return chooseHelp(level, pos, recent, (s) => planFrom(level, s));
 }
 
-/** One entry per swipe: a half turn is two. */
-const swipes = (moves: readonly Move[]) => moves.flatMap((m) => swipesFor(m));
+/**
+ * One entry per swipe (a half turn is two). A swipe and its undo at the very end are dropped:
+ * a look and look-back, or a wrong turn put right by hand, leaves the cube as it was.
+ * (Only at the end: earlier, a line-up turn and a sequence's first move can look the same.)
+ */
+const swipes = (moves: readonly Move[]) => {
+  const out = moves.flatMap((m) => swipesFor(m));
+  while (out.length >= 2 && out[out.length - 1] === invertMove(out[out.length - 2]))
+    out.length -= 2;
+  return out;
+};
 
 /**
  * Which help to give, from three: carry on from here, turn back the last swipe, or turn back the
@@ -185,17 +202,17 @@ export function stageSteps(level: Level, pos: CubeState): GuideStep[] {
 }
 
 /**
- * Seed offsets for beginner demos: the shortest of 200 cubes whose demo plays every sequence the
+ * Seed offsets for beginner demos: the shortest of 400 cubes whose demo plays every sequence the
  * level teaches and shows its harder cases (docs/02-levels.md → kid test). Checked in
  * tests/walkthrough.test.ts.
  */
 export const DEMO_SEED: Record<string, number> = {
-  corners: 78, // a corner lifted out, and Corner repeated
-  middle: 118, // a stuck edge popped out, Edge right and Edge left
-  yellowCross: 2, // dot, L, line, cross
-  yellowEdges: 23, // top turn, whole-cube turn, and the "opposite" case
+  corners: 377, // a corner lifted out, and Corner repeated
+  middle: 180, // a stuck edge popped out, Edge right and Edge left
+  yellowCross: 10, // dot, L, line, cross
+  yellowEdges: 20, // top turn, whole-cube turn, and the "opposite" case
   yellowCornersPlace: 0, // the "none in place" case, and a whole-cube turn
-  yellowCornersTwist: 1,
+  yellowCornersTwist: 5,
 };
 
 /** The same demo cube every time, so "Show it" and "Walk through it" match. */

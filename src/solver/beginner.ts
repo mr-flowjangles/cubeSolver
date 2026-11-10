@@ -116,7 +116,8 @@ const yellowCornersPlaced = (s: CubeState) =>
   yellowEdgesDone(s) && U_CORNERS.every((c) => slotHasRightPiece(s, c));
 
 export const STAGE_DONE: Record<StageId, (s: CubeState) => boolean> = {
-  hold: (s) => center(s, "D") === "U" && center(s, "F") === "F",
+  // Only white down: no level says which side faces you, and every stage works from any front.
+  hold: (s) => center(s, "D") === "U",
   cross: (s) => all(s, D_EDGES),
   corners: bottomDone,
   middle: f2lDone,
@@ -152,10 +153,8 @@ function hold(s: CubeState): SolveStep[] {
   const swipes = (m: string[]) => m.reduce((n, t) => n + (t.endsWith("2") ? 2 : 1), 0);
   options.sort((x, y) => swipes(x) - swipes(y));
   const moves = options.find((m) => STAGE_DONE.hold(applyMoves(s, m)));
-  if (!moves) throw new Error("No white or green center");
-  return [
-    { stage: "hold", moves, say: "Hold the cube with white on the bottom and green in front." },
-  ];
+  if (!moves) throw new Error("No white center");
+  return [{ stage: "hold", moves, say: "Hold the cube with white on the bottom." }];
 }
 
 // ---- White cross, the daisy way ----
@@ -192,7 +191,7 @@ function cross(s: CubeState): SolveStep[] {
     if (guard > 24) throw new Error("Daisy failed");
     const e = FRONT_EDGES.find(needsWork);
     if (!e) {
-      // "No white edge on the front? Turn the whole cube to look at the other sides. White can face down, out of sight: tip the cube up to look underneath, then tip it back."
+      // "No white edge on the front? Turn the whole cube to look at the other sides. White can face down, out of sight: tip the cube up (swipe up beside it) to look underneath, then tip it back."
       if (looks++ > 3) throw new Error("Daisy: no white edge to work on");
       out.push({
         stage: "cross",

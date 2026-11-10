@@ -434,6 +434,13 @@ describe("pressing Hint again and again always finishes (kid test, round 7)", ()
         for (const st of stageSteps(level, s))
           for (const m of st.moves) {
             expect(pressUntilDone(level, s, hist)).toBeGreaterThanOrEqual(0);
+            // A look and look-back, or a wrong turn put right by hand, mid-sequence (round 8).
+            for (const pair of [
+              ["x", "x'"],
+              ["y", "y'"],
+              ["F", "F'"],
+            ])
+              expect(pressUntilDone(level, s, [...hist, ...pair])).toBeGreaterThanOrEqual(0);
             // Following the plan exactly is never a stray move.
             expect(helpSteps(level, s, hist)[0]?.say ?? "").not.toMatch(/back first/);
             s = applyMoves(s, [m]);

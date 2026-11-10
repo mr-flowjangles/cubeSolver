@@ -137,7 +137,7 @@ const L1 = {
   hold: bullet(1, "<strong>Hold it:</strong> white center on the bottom, yellow center on top."),
   daisy: bullet(
     1,
-    "<strong>Part 1, the daisy:</strong> bring the white edges to the top, around yellow, white facing up. One already on the bottom, under its matching center, can stay.",
+    "<strong>Part 1, the daisy:</strong> bring the white edges to the top, around yellow, white facing up. Any already on the bottom, under their matching centers, can stay.",
   ),
   bottom: bullet(1, "White edge on the bottom: turn that side twice. It comes up to the top."),
   middle: bullet(
@@ -146,7 +146,7 @@ const L1 = {
   ),
   out: bullet(
     1,
-    "White facing out to the side, in the top or bottom row: turn that side once. It moves to the middle row.",
+    "White facing out to the side, in the top or bottom row: turn that side once, either way. It moves to the middle row.",
   ),
   clear: bullet(
     1,
@@ -158,7 +158,7 @@ const L1 = {
   ),
   look: bullet(
     1,
-    "No white edge on the front? Turn the whole cube to look at the other sides. White can face down, out of sight: tip the cube up to look underneath, then tip it back.",
+    "No white edge on the front? Turn the whole cube to look at the other sides. White can face down, out of sight: tip the cube up (swipe up beside it) to look underneath, then tip it back.",
   ),
   part2: bullet(
     1,
@@ -173,7 +173,7 @@ function level1(c: Cube) {
     c.stop(L1.hold, "cube not held white down");
 
   const whiteUpOnTop = (e: string) => c.sticker(e, "U") === WHITE;
-  // "<strong>Part 1, the daisy:</strong> bring the white edges to the top, around yellow, white facing up. One already on the bottom, under its matching center, can stay."
+  // "<strong>Part 1, the daisy:</strong> bring the white edges to the top, around yellow, white facing up. Any already on the bottom, under their matching centers, can stay."
   const daisyDone = () => TOP_EDGES.every(whiteUpOnTop);
 
   // "In Part 1, before you turn any side, turn the top so the spot above that side has no white edge facing up yet."
@@ -209,7 +209,7 @@ function level1(c: Cube) {
     if (!e) e = FRONT_EDGES.find(needsWork);
     if (e) following = c.colors(e);
     if (!e) {
-      // "No white edge on the front? Turn the whole cube to look at the other sides. White can face down, out of sight: tip the cube up to look underneath, then tip it back."
+      // "No white edge on the front? Turn the whole cube to look at the other sides. White can face down, out of sight: tip the cube up (swipe up beside it) to look underneath, then tip it back."
       if (looks++ >= 4)
         c.stop(L1.look, "turned all the way round, no white edge to work on, daisy not done");
       c.turn("y");
@@ -224,7 +224,7 @@ function level1(c: Cube) {
       // "White edge on the bottom: turn that side twice. It comes up to the top."
       turnSide(otherFace, 2);
     } else if (e.includes("U") || e.includes("D")) {
-      // "White facing out to the side, in the top or bottom row: turn that side once. It moves to the middle row."
+      // "White facing out to the side, in the top or bottom row: turn that side once, either way. It moves to the middle row."
       turnSide(whiteFace, 1); // plainest: "once" = one clockwise quarter turn
     } else if (e === "LF") {
       // "White edge in the middle row: turn the whole cube so it's at front-right."
@@ -277,7 +277,7 @@ const L2 = {
   ),
   find: bullet(
     2,
-    "Find a white corner in the top layer, the layer next to yellow. Its white can face up, out of sight: tip the cube to look at the top, then tip it back.",
+    "Find a white corner in the top layer, the layer next to yellow. Its white can face up or to a side you can't see: tip the cube toward you (swipe down beside it) to look at the top, or turn the whole cube to look round, then turn it back.",
   ),
   spot: bullet(2, "Its spot is the bottom corner between the centers of its other two colors."),
   above: bullet(2, "Turn the top until the corner sits right above its spot."),
@@ -297,7 +297,7 @@ function level2(c: Cube) {
   let guard = 0;
   for (;;) {
     if (guard++ > CAP) c.fail(L2.find, "corner loop did not finish");
-    // "Find a white corner in the top layer, the layer next to yellow. Its white can face up, out of sight: tip the cube to look at the top, then tip it back."
+    // "Find a white corner in the top layer, the layer next to yellow. Its white can face up or to a side you can't see: tip the cube toward you (swipe down beside it) to look at the top, or turn the whole cube to look round, then turn it back."
     const top = TOP_CORNERS.find((n) => c.colors(n).includes(WHITE));
     if (top) {
       const colors = c.colors(top);
@@ -366,7 +366,7 @@ const L3 = {
   whole: bullet(3, "Turn the whole cube so that side is in front."),
   which: bullet(
     3,
-    "Its top color matches the center on the right side? Do Edge right. The center on the left side? Do Edge left.",
+    "Its top color matches the center on the right side? Do Edge right. If not, it goes left: do Edge left.",
   ),
   stuck: bullet(
     3,
@@ -399,7 +399,7 @@ function level3(c: Cube) {
         if (n++ >= 4) c.fail(L3.whole, "could not bring edge to front");
         c.turn("y");
       }
-      // "Its top color matches the center on the right side? Do Edge right. The center on the left side? Do Edge left."
+      // "Its top color matches the center on the right side? Do Edge right. If not, it goes left: do Edge left."
       if (topColor === c.center("R")) c.seq(RIGHT);
       else if (topColor === c.center("L")) c.seq(LEFT);
       else c.stop(L3.which, "top color matches neither the right nor the left center");
@@ -479,7 +479,7 @@ const L5 = {
   turn: bullet(5, "Turn the top until two edges match their centers."),
   side: bullet(
     5,
-    "Matching edges side by side: turn the whole cube so they're at the back and the right. Then do the sequence.",
+    "Matching edges side by side: turn the whole cube until the two that don't match are at the front and the left. The matching two are then at the back and the right. Do the sequence.",
   ),
   opp: bullet(5, "Matching edges opposite: do the sequence once, then try again."),
 };
@@ -505,7 +505,7 @@ function level5(c: Cube) {
       c.seq(SEQ);
       continue;
     }
-    // "Matching edges side by side: turn the whole cube so they're at the back and the right. Then do the sequence."
+    // "Matching edges side by side: turn the whole cube until the two that don't match are at the front and the left. The matching two are then at the back and the right. Do the sequence."
     n = 0;
     while (!(matches("UB") && matches("UR"))) {
       if (n++ >= 4) c.fail(L5.side, "could not put matching edges at back and right");
