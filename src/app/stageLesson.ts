@@ -223,10 +223,10 @@ export function mountStageLesson(root: HTMLElement, level: Level, next?: Level):
     started = Date.now();
     panel.say(
       practice === 0
-        ? `Cube 1 of 3: almost done — one step left.`
+        ? `Cube 1 of 3: the easiest one.`
         : practice === 1
-          ? `Cube 2 of 3: a few steps left.`
-          : `Cube 3 of 3: the whole step, from a mixed cube.`,
+          ? `Cube 2 of 3: a bit harder.`
+          : `Cube 3 of 3: fully mixed.`,
     );
     setActions();
   };
@@ -259,7 +259,7 @@ export function mountStageLesson(root: HTMLElement, level: Level, next?: Level):
     const k = plan.findIndex((p) => p.at === now);
     if (k >= 0) return plan[k].step;
     let s: CubeState = panel.state;
-    plan = helpSteps(level, s).map((step) => {
+    plan = helpSteps(level, s, panel.history).map((step) => {
       const at = toString(s);
       s = applyMoves(s, step.moves);
       return { at, step };

@@ -16,6 +16,7 @@ import { showPass } from "./reward";
 import type { Screen } from "./shell";
 import { mountControlsLesson } from "./controlsLesson";
 import { mountStageLesson } from "./stageLesson";
+import { finishSequence } from "../lessons/walkthrough";
 
 const algList = (level: Level) => algButtonsHtml(level.algs);
 
@@ -71,7 +72,7 @@ export function mountLesson(root: HTMLElement, id: string): Screen {
         </details>
         ${
           level.algs.length > 4
-            ? `<details class="algs"><summary>Sequences (${level.algs.length})</summary>${algList(level)}</details>`
+            ? `<details class="algs" ${level.kind === "full" ? "open" : ""}><summary>Sequences (${level.algs.length})</summary>${algList(level)}</details>`
             : algList(level)
         }
       </section>
@@ -124,10 +125,13 @@ export function mountLesson(root: HTMLElement, id: string): Screen {
     const k = plan.findIndex((p) => p.at === now);
     if (k >= 0) return plan[k].step;
     let s: CubeState = panel.state;
-    const steps =
+    const planOf = (x: CubeState) =>
       level.kind === "pll"
-        ? pllSteps(s)
-        : method.solve(s, level.kind === "full" ? undefined : level.stage);
+        ? pllSteps(x)
+        : method.solve(x, level.kind === "full" ? undefined : level.stage);
+    // Stopped partway through a sequence? Finish it first, instead of re-solving from the cross.
+    const finish = finishSequence(level, s, panel.history);
+    const steps = finish ? [finish, ...planOf(applyMoves(s, finish.moves))] : planOf(s);
     plan = steps.map((step) => {
       const at = toString(s);
       s = applyMoves(s, step.moves);

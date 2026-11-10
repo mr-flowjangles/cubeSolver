@@ -17,6 +17,7 @@ import { PRACTICE_RAMP, practicePosition } from "../src/lessons/position";
 import {
   afterGuide,
   demoPosition,
+  finishSequence,
   guideMoves,
   helpSteps,
   seeded,
@@ -192,6 +193,8 @@ describe("beginner demos teach (kid test, round 2)", () => {
     ["corners", [/stuck in the bottom/, /Corner \d+ times/]],
     ["middle", [/stuck in the middle/, /Edge right\.$/, /Edge left\.$/]],
     ["yellowCross", [/^Yellow dot/]],
+    ["yellowEdges", [/opposite/, /back and the right/]],
+    ["yellowCornersPlace", [/^No corner/, /^Turn the whole cube/]],
   ] as const)("%s: the demo shows the harder cases", (id, cases) => {
     const level = BEGINNER_STAGES.find((l) => l.id === id)!;
     const says = stageSteps(level, demoPosition(level)).map((s) => s.say);
@@ -247,6 +250,72 @@ describe("level 7 starts the way the words say", () => {
     for (let i = 0; i < 40; i++) {
       const first = stageSteps(level, practicePosition(level, rnd))[0];
       if (first) expect(first.moves[0][0]).not.toBe("U");
+    }
+  });
+});
+
+describe("Hint mid-sequence and after a tip (kid test, round 5)", () => {
+  const BEGINNER_STAGES = STAGE_LEVELS.filter((l) => l.method === "beginner" && l.algs.length);
+
+  it.each(BEGINNER_STAGES)(
+    "$title: Hint partway through a step never sends you back a level",
+    (level) => {
+      const rnd = seeded(level.number * 13 + 5);
+      let checked = 0;
+      for (let i = 0; i < 15; i++) {
+        let s = practicePosition(level, rnd);
+        for (const st of stageSteps(level, s)) {
+          // Stop at the start of each step and every point inside it, and ask for Hint there.
+          for (let k = 0; k < st.moves.length; k++) {
+            const mid = applyMoves(s, st.moves.slice(0, k));
+            const help = helpSteps(level, mid, st.moves.slice(0, k));
+            expect(help[0]?.say ?? "").not.toMatch(/^First fix/);
+            const end = applyMoves(
+              mid,
+              help.flatMap((h) => h.moves),
+            );
+            expect(METHODS.beginner.done[level.stage!](end)).toBe(true);
+            checked++;
+          }
+          s = applyMoves(s, st.moves);
+        }
+      }
+      expect(checked).toBeGreaterThan(0);
+    },
+  );
+
+  it("Hint's hold step never asks for a sideways whole-cube turn (no swipe makes z)", () => {
+    const level = STAGE_LEVELS.find((l) => l.id === "corners")!;
+    const base = practicePosition(level, seeded(9));
+    for (const a of ["", "x", "x'", "x2"])
+      for (const b of ["", "y", "y'", "y2", "z", "z'"]) {
+        const held = applyMoves(base, [a, b].filter(Boolean));
+        for (const st of helpSteps(level, held))
+          for (const m of st.moves) expect(m[0]).not.toBe("z");
+      }
+  });
+});
+
+describe("full solve: Hint mid-twist stays on the twist (kid test, round 5)", () => {
+  it("every point of the twist stage plans only twist steps", () => {
+    const rnd = seeded(808);
+    for (let i = 0; i < 20; i++) {
+      let s = applyMoves(solved(), scramble(25, rnd));
+      const plan = solveBeginner(s);
+      for (const st of plan) {
+        if (st.stage === "yellowCornersTwist")
+          for (let k = 0; k < st.moves.length; k++) {
+            const mid = applyMoves(s, st.moves.slice(0, k));
+            const fin = finishSequence(
+              BEGINNER_LEVELS.find((l) => l.id === "full")!,
+              mid,
+              st.moves.slice(0, k),
+            );
+            const next = fin ? fin : solveBeginner(mid)[0];
+            if (next) expect(["full", "yellowCornersTwist"]).toContain(next.stage);
+          }
+        s = applyMoves(s, st.moves);
+      }
     }
   });
 });

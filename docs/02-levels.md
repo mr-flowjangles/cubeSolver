@@ -133,6 +133,9 @@ How the three parts are built (v0.8.4):
 - Level 7 (twist yellow corners): easier practice cubes have fewer twisted corners, never a cube stopped part-way, because part-way the bottom is scrambled.
 - **Hint** shows the next step in words and moves.
 - **Hint fixes earlier steps first.**[3] After a wrong turn or a tip, it plans from the cube as it is: "First fix the white cross", then this level's step. It never says "Already done!" on an unfinished cube.
+- **Hint partway through a sequence says to finish it.**[3] If the player's last moves are the start of one of the level's sequences, Hint shows the rest of it, not "First fix the white cross". Partway through the twist stage it stays on the twist: the bottom is meant to look messy.
+- Hint's "hold the cube" step uses only turns a swipe can make: up, down, left, right.[3]
+- Try it's three cubes are labelled easiest, a bit harder, fully mixed. They no longer promise a number of steps.[3]
 - **Show me** plays the next step on the cube.
 - **New cube** gives a fresh practice cube.
 - Levels 1–2 show the cube from below, so the white side is visible.

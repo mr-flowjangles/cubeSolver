@@ -51,6 +51,24 @@ Hint, Show me and the demo for levels 2, 3, 5 and 6 now follow the level's words
 
 No finding blocked a kid from solving: the tutorial player and the kid both solved every cube.
 
+### Kid test round 5: what each finding affects
+
+| Finding | Impact | Affects | Test now |
+|---|---|---|---|
+| Hint mid-sequence (levels 2–8) said "First fix the white cross" and replanned 25–170 moves (round 4's Hint change) | Wrong help | Try it, levels 2–7; level 8 | `walkthrough.test.ts`: Hint at every point of every step never says "First fix" and finishes the level |
+| Hint mid-twist sent the player back to level 1 | Wrong help | Level 7, level 8 | `walkthrough.test.ts`: every point of the twist plans only twist steps |
+| Hint's hold step could ask for a sideways turn (z) no swipe makes | Wrong help | Try it, all levels | `walkthrough.test.ts`: no z after any tip or turn |
+| Level 7, last top turn labelled "First fix the yellow edges" | Wording | Level 7 | Covered by the mid-step test |
+| Try it labels promised step counts the cubes didn't have | Wording | Try it, all stage levels | — |
+| "Repeat until the corner drops in" misread when a wrong corner sits white-down in the spot | Wording | Level 2 | Tutorial player |
+| "Front-right" used in level 1 before it's explained | Wording | Level 1 | Tutorial player |
+| "Before you turn any side" read into Part 2 | Wording | Level 1 | Tutorial player |
+| Level 1 demo: "Turn the other side it touches" without "middle row" | Wording | Level 1 demo | — |
+| Level 5 and 6 demos showed only the sequence | Wording | Levels 5, 6 demos | `walkthrough.test.ts`: demos show the opposite and none-in-place cases |
+| Level 8 sequences in a closed box | Wording | Level 8 | — |
+
+Nothing stopped a kid in round 5 either.
+
 ### Files Changed
 
 | File | Change |

@@ -138,15 +138,18 @@ export const STAGES: StageId[] = [
 
 // ---- Stages ----
 
-const ROTATIONS = ["", "x", "x'", "x2", "y", "y'", "y2", "z", "z'", "z2"];
+// Only x and y: no swipe turns the cube sideways (z). y, then x, then y reaches every hold.
+const Y_TURNS = ["", "y", "y'", "y2"];
+const X_TURNS = ["", "x", "x'", "x2"];
 
 function hold(s: CubeState): SolveStep[] {
   // Already white-down (the player may have spun the cube since): nothing to do.
   if (center(s, "D") === "U") return [];
-  const options = ROTATIONS.flatMap((a) =>
-    ["", "y", "y'", "y2"].map((b) => [a, b].filter(Boolean)),
+  const options = Y_TURNS.flatMap((a) =>
+    X_TURNS.flatMap((b) => Y_TURNS.map((c) => [a, b, c].filter(Boolean))),
   );
-  options.sort((x, y) => x.length - y.length);
+  const swipes = (m: string[]) => m.reduce((n, t) => n + (t.endsWith("2") ? 2 : 1), 0);
+  options.sort((x, y) => swipes(x) - swipes(y));
   const moves = options.find((m) => STAGE_DONE.hold(applyMoves(s, m)));
   if (!moves) throw new Error("No white or green center");
   return [
@@ -250,7 +253,10 @@ function cross(s: CubeState): SolveStep[] {
             t[sl.stickers[sl.name.indexOf("U")]] === white
           );
         })!;
-        go(up, "Turn the other side it touches, so the edge goes up, white facing up.");
+        go(
+          up,
+          "White edge in the middle row: turn the other side it touches, so the edge goes up, white facing up.",
+        );
       }
     }
     out.push({
@@ -612,10 +618,11 @@ function yellowCornersTwist(s: CubeState): SolveStep[] {
   let cur = s;
   const urf = slot("URF");
   const yellow = center(cur, "U");
-  // "To start, turn the whole cube so a twisted corner is at front-right."
+  // "To start, turn the whole cube so a twisted corner is at front-right." Only before starting:
+  // once the bottom is messy, "never turn the whole cube again".
   let yk = 0;
   while (yk < 4 && applyMoves(cur, turns("y", yk))[urf.stickers[0]] === yellow) yk++;
-  if (yk > 0 && yk < 4) {
+  if (f2lDone(cur) && yk > 0 && yk < 4) {
     out.push({
       stage: "yellowCornersTwist",
       moves: turns("y", yk),
@@ -640,16 +647,18 @@ function yellowCornersTwist(s: CubeState): SolveStep[] {
     }
     cur = here;
     offset = k;
+    // "Do the whole sequence, all 4 moves, again and again. Check only after all 4 moves."
     let n = 0;
     while (cur[urf.stickers[0]] !== yellow) {
-      cur = applyMoves(cur, seq(repeat(ALGS.twist, 2)));
-      n += 2;
+      if (n === 5) throw new Error("Twist: corner never turned yellow up");
+      cur = applyMoves(cur, seq(ALGS.twist));
+      n++;
     }
     out.push({
       stage: "yellowCornersTwist",
       moves: seq(repeat(ALGS.twist, n)),
       why: algWhy("twist", seq(repeat(ALGS.twist, n))),
-      say: `Do the twist sequence ${n} times, until yellow is on top. The bottom will look messed up — keep going.`,
+      say: `Do the Twist sequence ${n === 1 ? "once" : `${n} times`}, until that corner's yellow is on top. The bottom will look messed up — keep going.`,
     });
   }
   for (const u of ["U", "U'", "U2"]) {
@@ -680,7 +689,32 @@ const RUN: Record<StageId, (s: CubeState) => SolveStep[]> = {
 };
 
 /** Solve stage by stage. Stops after `until` if given. */
+/**
+ * The twist steps alone, if they finish the cube from here: true partway through the twist
+ * stage, when the bottom is meant to look messy. Otherwise null.
+ */
+export function finishTwist(state: CubeState): SolveStep[] | null {
+  try {
+    const steps = yellowCornersTwist(state);
+    return isSolved(
+      applyMoves(
+        state,
+        steps.flatMap((x) => x.moves),
+      ),
+    )
+      ? steps
+      : null;
+  } catch {
+    return null;
+  }
+}
+
 export function solveBeginner(state: CubeState, until?: StageId): SolveStep[] {
+  // Partway through the twist stage the bottom looks broken; don't send the player back to level 1.
+  if (until === undefined || until === "yellowCornersTwist") {
+    const twist = finishTwist(state);
+    if (twist) return twist.filter((x) => x.moves.length > 0);
+  }
   const out: SolveStep[] = [];
   let cur = state;
   for (const st of STAGES) {

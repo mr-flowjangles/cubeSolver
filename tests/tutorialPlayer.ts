@@ -142,7 +142,7 @@ const L1 = {
   bottom: bullet(1, "White edge on the bottom: turn that side twice. It comes up to the top."),
   middle: bullet(
     1,
-    "White edge in the middle row: turn the whole cube so it's at front-right. Its white faces one side; turn the other side it touches, so the edge goes up, white facing up. Wrong way? Turn it back, then the other way.",
+    "White edge in the middle row: turn the whole cube so it's at front-right, the front's right edge. Its white faces one side; turn the other side it touches, so the edge goes up, white facing up. Wrong way? Turn it back, then the other way.",
   ),
   out: bullet(
     1,
@@ -150,7 +150,7 @@ const L1 = {
   ),
   clear: bullet(
     1,
-    "Before you turn any side, turn the top so the spot above that side has no white edge facing up yet.",
+    "In Part 1, before you turn any side, turn the top so the spot above that side has no white edge facing up yet.",
   ),
   keep: bullet(
     1,
@@ -173,7 +173,7 @@ function level1(c: Cube) {
   // "<strong>Part 1, the daisy:</strong> bring the white edges to the top, around yellow, white facing up. One already on the bottom, under its matching center, can stay."
   const daisyDone = () => TOP_EDGES.every(whiteUpOnTop);
 
-  // "Before you turn any side, turn the top so the spot above that side has no white edge facing up yet."
+  // "In Part 1, before you turn any side, turn the top so the spot above that side has no white edge facing up yet."
   const clearAbove = (side: Face) => {
     let n = 0;
     while (whiteUpOnTop("U" + side)) {
@@ -276,7 +276,10 @@ const L2 = {
   spot: bullet(2, "Its spot is the bottom corner between the centers of its other two colors."),
   above: bullet(2, "Turn the top until the corner sits right above its spot."),
   whole: bullet(2, "Turn the whole cube so that corner is at front-right."),
-  repeat: bullet(2, "Repeat the sequence until the corner drops in, white side down."),
+  repeat: bullet(
+    2,
+    "Repeat the sequence until the corner you're placing drops into its spot, white side down.",
+  ),
   lift: bullet(
     2,
     "No white corner left in the top layer, but one on the bottom is in the wrong spot or turned the wrong way? Turn the whole cube so it's at front-right, then do the sequence once to lift it out.",
@@ -320,7 +323,7 @@ function level2(c: Cube) {
         if (n++ >= 4) c.fail(L2.whole, "could not bring corner to front-right");
         c.turn("y");
       }
-      // "Repeat the sequence until the corner drops in, white side down."
+      // "Repeat the sequence until the corner you're placing drops into its spot, white side down."
       n = 0;
       const droppedIn = () =>
         c.colors("DFR").sort().join("") === [...colors].sort().join("") &&
