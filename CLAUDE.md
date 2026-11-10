@@ -76,7 +76,6 @@ Commit identity: Rob Rose <robmrose@me.com>
 - **Rank** — a title earned by XP, from Newcomer to Speedcuber.
 - **Scramble** — a random list of moves used to mix up a cube.
 - **Streak** — days in a row with at least one level passed.
-- **See back** — button that swings the view round to show the back of the cube; any turn swings it back.
 - **Show me** — lesson button that plays the next step on the cube.
 - **Show it · Walk through it · Try it** — the three parts of every level: watch the app, do it with the app, then practice alone.
 - **Side tags** — the FRONT · F, TOP · U, RIGHT · R labels beside the 3D cube. They stay put when the cube turns, because letters mean places, not colors.

@@ -370,7 +370,7 @@ const L3 = {
   ),
   stuck: bullet(
     3,
-    "No edge on top fits? One is stuck in the middle: in the wrong middle spot, or in its spot but flipped. Turn the whole cube so it's at front-right, then do Edge right once. It pops up to the top.",
+    "No edge on top fits? One is stuck in the middle: in the wrong middle spot, or in its spot but flipped. Can't see it? Turn the whole cube to look round. Turn the whole cube so it's at front-right, then do Edge right once. It pops up to the top.",
   ),
 };
 

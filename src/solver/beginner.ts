@@ -328,7 +328,7 @@ function stepwise(
   progress: (s: CubeState) => number,
   keep: (s: CubeState) => boolean,
   maxDepth: number,
-  say: (count: number, algs: string[]) => string,
+  say: (count: number, algs: string[], times: number) => string,
 ): SolveStep[] {
   const out: SolveStep[] = [];
   let cur = s;
@@ -348,7 +348,8 @@ function stepwise(
           ),
     );
     const names = [...new Set(found.flatMap((st) => (st.alg ? [ALG_NAMES[st.alg]] : [])))];
-    out.push({ stage, moves, say: say(before, names), why });
+    const times = found.filter((st) => st.alg).length; // how many sequences this step does
+    out.push({ stage, moves, say: say(before, names, times), why });
     cur = applyMoves(cur, moves);
   }
   return out;
@@ -573,10 +574,13 @@ function yellowCross(s: CubeState) {
     (x) => (yellowEdgesUp(x) === 4 ? 4 : yellowEdgesUp(x) === 2 ? 2 : 0),
     f2lDone,
     3,
-    (n) =>
+    (n, _, times) =>
       n === 0
         ? "Yellow dot: do the sequence."
-        : "Turn the top so the yellow L is at the back and the left (or the line goes left-to-right), then do the sequence. An L turns into a line: do it again.",
+        : // An L needs the sequence twice (L, then line); a line needs it once.
+          times > 1
+          ? "Turn the top so the yellow L is at the back and the left, then do the sequence. An L turns into a line: do it again."
+          : "Turn the top so the yellow line goes left-to-right, then do the sequence.",
   );
 }
 

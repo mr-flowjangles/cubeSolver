@@ -12,6 +12,7 @@ import {
   slot,
   slotSolved,
   invertMoves,
+  parseMoves,
   solved,
 } from "../src/cube";
 import { BEGINNER_LEVELS } from "../src/lessons/beginner";
@@ -28,7 +29,7 @@ import {
   chooseHelp,
 } from "../src/lessons/walkthrough";
 import { allowedSwipes } from "../src/app/cubePanel";
-import { reorient } from "../src/render/swipe";
+import { reorient, swipesFor } from "../src/render/swipe";
 import { STAGE_DONE, solveBeginner } from "../src/solver/beginner";
 
 const STAGE_LEVELS = ALL_LEVELS.filter((l) => l.kind === "stage");
@@ -479,4 +480,39 @@ describe("full solve: pressing Hint again and again always finishes (kid test, r
       });
     }
   });
+});
+
+describe("Hint after a sequence at the wrong moment (kid test, round 9)", () => {
+  it.each(STAGE_LEVELS.filter((l) => l.method === "beginner" && l.algs.length > 0))(
+    "$title: a sequence started or done at the wrong moment is undone, not the cross redone",
+    (level) => {
+      const rnd = seeded(level.number * 23 + 9);
+      for (let i = 0; i < 8; i++) {
+        // Partway through: some of the plan's steps done, as a player following Hint would.
+        const pos = practicePosition(level, rnd);
+        const plan = helpSteps(level, pos);
+        const before = plan.slice(0, i % plan.length).flatMap((h) => h.moves);
+        const start = applyMoves(pos, before);
+        const hist = before.flatMap((m) => swipesFor(m));
+        for (const a of level.algs) {
+          const all = parseMoves(a.moves).flatMap((m) => swipesFor(m));
+          // Every start of the sequence from two swipes on, and the whole of it.
+          for (let p = 2; p <= all.length; p++) {
+            const did = all.slice(0, p);
+            const s = applyMoves(start, did);
+            if (METHODS.beginner.done[level.stage!](s)) continue;
+            // The sequence alone, and with one stray turn after it.
+            for (const stray of [[], ["F'"]] as Move[][]) {
+              const t = applyMoves(s, stray);
+              if (METHODS.beginner.done[level.stage!](t)) continue;
+              const help = helpSteps(level, t, [...hist, ...did, ...stray]);
+              expect(help.some((h) => /^First fix/.test(h.say))).toBe(false);
+              const end = applyMoves(t, help.flatMap((h) => h.moves));
+              expect(METHODS.beginner.done[level.stage!](end)).toBe(true);
+            }
+          }
+        }
+      }
+    },
+  );
 });

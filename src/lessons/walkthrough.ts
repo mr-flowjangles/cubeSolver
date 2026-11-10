@@ -59,8 +59,9 @@ const swipes = (moves: readonly Move[]) => {
 };
 
 /**
- * Which help to give, from three: carry on from here, turn back the last swipe, or turn back the
- * last two. Each one first finishes a sequence the player started, if any, then follows `plan`.
+ * Which help to give: carry on from here, or turn back the last swipe, the last two, or a sequence
+ * done at the wrong moment. Each one first finishes a sequence the player started, if any, then
+ * follows `plan`.
  * Carrying on wins unless it would redo a stage the player had finished (a stray turn broke it);
  * then a turn-back that doesn't, if there is one. Following the plan never redoes a stage, so a
  * player on the plan is never told to turn back.
@@ -83,11 +84,17 @@ export function chooseHelp(
   };
   const here = carryOn(pos, hist);
   const backs: Option[] = [];
-  // Turn back the last move, the last two, or a whole sequence just done at the wrong moment.
-  const whole = level.algs
-    .map((a) => swipes(parseMoves(a.moves)).length)
-    .filter((n) => n > 2 && endsWith(hist, level, n));
-  for (const k of [1, 2, ...whole]) {
+  // Turn back the last move, the last two, or a sequence (whole or part-done) started at the
+  // wrong moment, with one stray turn after it or not. Shorter turn-backs are tried first.
+  const started = [
+    ...new Set(
+      level.algs.flatMap((a) => [
+        ...startsDone(hist, a.moves),
+        ...startsDone(hist.slice(0, -1), a.moves, 2).map((k) => k + 1),
+      ]),
+    ),
+  ].sort((a, b) => a - b);
+  for (const k of [1, 2, ...started]) {
     if (hist.length < k) break;
     const moves = invertMoves(hist.slice(-k));
     const after = applyMoves(pos, moves);
@@ -101,7 +108,7 @@ export function chooseHelp(
           ? "Turn your last move back first."
           : k === 2
             ? "Turn your last two moves back first."
-            : "That sequence didn't help here. Follow the arrows to undo it first.",
+            : "That sequence doesn't help here. Follow the arrows to undo it first.",
       why: moves.map(() => "Turn back what you just did."),
     };
     backs.push(carryOn(after, hist.slice(0, -k), [back]));
@@ -120,12 +127,16 @@ export function chooseHelp(
   return [...pick.first, ...pick.then];
 }
 
-/** The player's last n swipes are one of this level's sequences, whole. */
-function endsWith(hist: readonly Move[], level: Level, n: number): boolean {
-  return level.algs.some((a) => {
-    const all = swipes(parseMoves(a.moves));
-    return all.length === n && hist.slice(-n).join(" ") === all.join(" ");
-  });
+/**
+ * How many of a sequence's swipes the player's last swipes are, for each length from `min` that
+ * fits: the whole sequence, or its start. (Turning back one or two swipes is already an option.)
+ */
+function startsDone(hist: readonly Move[], moves: string, min = 3): number[] {
+  const all = swipes(parseMoves(moves));
+  const out: number[] = [];
+  for (let p = min; p <= all.length && p <= hist.length; p++)
+    if (hist.slice(-p).join(" ") === all.slice(0, p).join(" ")) out.push(p);
+  return out;
 }
 
 /**
