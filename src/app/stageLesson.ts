@@ -10,6 +10,7 @@ import {
   applyMoves,
   findPiece,
   homeSlot,
+  invertMove,
   slot,
   toString,
 } from "../cube";
@@ -17,10 +18,17 @@ import type { Level } from "../lessons/beginner";
 import { type GuideStep, METHODS, stageDoneAnyHold } from "../lessons/index";
 import { moveWords } from "../lessons/moveWords";
 import { PRACTICE_RAMP, practicePosition } from "../lessons/position";
-import { type GuideMove, demoPosition, guideMoves, stageSteps } from "../lessons/walkthrough";
-import { WHOLE_CUBE, reorient, stickerMap } from "../render/swipe";
+import {
+  type GuideMove,
+  demoPosition,
+  guideMoves,
+  helpSteps,
+  stageSteps,
+} from "../lessons/walkthrough";
+import { WHOLE_CUBE, stickerMap } from "../render/swipe";
 import { algButtonsHtml, onAlgTap } from "./algButtons";
 import { type CubePanel, mountCubePanel } from "./cubePanel";
+import { HelpPlan } from "./helpPlan";
 import { HintArrows } from "./hintArrows";
 import { showPass } from "./reward";
 import type { Screen } from "./shell";
@@ -93,16 +101,21 @@ export function mountStageLesson(root: HTMLElement, level: Level, next?: Level):
   let started = Date.now();
   let passed = false;
   let cubeDone = false;
-  // Whole-cube turns the player made during Walk through it. The moves left are renamed
-  // for the new front, so the player can turn the cube whenever they like.
+  // Whole-cube turns the player made during Walk through it, not yet turned back. While any are
+  // left, the arrow shows how to turn the cube back; the words always name sides as the demo has them.
   let turned: Move[] = [];
-  const shown = (g: GuideMove) => reorient(g.move, turned);
+  const turnBack = () => invertMove(turned[turned.length - 1]);
 
   const light = (g: GuideMove | undefined, s: CubeState) => {
     if (!g?.piece) return panel.view.spotlight(null);
-    const map = stickerMap(turned);
-    // The cross names its target slot; later stages light the piece's home by its colors.
-    const home = g.to ? slot(g.to).stickers.map(map) : homeSlot(s, g.piece).stickers;
+    // The cross names its target slot ("" = light only the piece); later stages light the
+    // piece's home by its colors.
+    const home =
+      g.to === undefined
+        ? homeSlot(s, g.piece).stickers
+        : g.to
+          ? slot(g.to).stickers.map(stickerMap(turned))
+          : [];
     const lit = [...findPiece(s, g.piece).stickers, ...home];
     panel.view.spotlight(lit);
   };
@@ -127,9 +140,16 @@ export function mountStageLesson(root: HTMLElement, level: Level, next?: Level):
       ? `${g.part} · step ${g.step + 1} of ${g.steps}`
       : `Step ${g.step + 1} of ${g.steps}`;
     $(".guide-say").textContent = g.say;
-    $(".guide-move").textContent = g.why ?? moveWords(shown(g));
-    panel.view.pointTo(shown(g));
     light(g, panel.state);
+    if (turned.length) {
+      $(".guide-move").textContent =
+        `Turn the whole cube back to keep going. ${moveWords(turnBack())}`;
+      panel.view.pointTo(turnBack());
+      return;
+    }
+    // The reason, then the words for the arrow's move.
+    $(".guide-move").textContent = [g.why, moveWords(g.move)].filter(Boolean).join(" ");
+    panel.view.pointTo(g.move);
   };
 
   const panel: CubePanel = mountCubePanel($(".panel"), demo, {
@@ -140,13 +160,17 @@ export function mountStageLesson(root: HTMLElement, level: Level, next?: Level):
         setTimeout(() => p.undo(), 250);
       } else if (phase === "walk") {
         const g = guide[at];
-        if (g && m === shown(g)) {
+        if (turned.length && m === turnBack()) {
+          turned.pop();
+          p.say(turned.length ? "Keep turning it back." : "Good — back where you were.");
+          present();
+        } else if (!turned.length && g && m === g.move) {
           at++;
           p.say(at < guide.length ? "Good!" : "");
           present();
         } else if (WHOLE_CUBE.includes(m)) {
           turned.push(m);
-          p.say("You turned the cube. The moves now match the new front.");
+          p.say("You turned the cube. Turn it back to keep going — follow the arrow.");
           present();
         } else {
           p.say("That wasn't the arrow's move. Undoing it — follow the arrow.");
@@ -201,15 +225,15 @@ export function mountStageLesson(root: HTMLElement, level: Level, next?: Level):
     panel.view.lookFrom(lookWork);
     panel.view.spotlight(null);
     hints.clear();
-    plan = [];
+    help.clear();
     cubeDone = false;
     started = Date.now();
     panel.say(
       practice === 0
-        ? `Cube 1 of 3: almost done — one step left.`
+        ? `Cube 1 of 3: the easiest one.`
         : practice === 1
-          ? `Cube 2 of 3: a few steps left.`
-          : `Cube 3 of 3: the whole step, from a mixed cube.`,
+          ? `Cube 2 of 3: a bit harder.`
+          : `Cube 3 of 3: fully mixed.`,
     );
     setActions();
   };
@@ -236,19 +260,8 @@ export function mountStageLesson(root: HTMLElement, level: Level, next?: Level):
   };
 
   // Follow one plan while the player stays on it (see lesson.ts).
-  let plan: { at: string; step: GuideStep }[] = [];
-  const nextStep = (): GuideStep | undefined => {
-    const now = toString(panel.state);
-    const k = plan.findIndex((p) => p.at === now);
-    if (k >= 0) return plan[k].step;
-    let s: CubeState = panel.state;
-    plan = stageSteps(level, s).map((step) => {
-      const at = toString(s);
-      s = applyMoves(s, step.moves);
-      return { at, step };
-    });
-    return plan[0]?.step;
-  };
+  const help = new HelpPlan((s, h) => helpSteps(level, s, h));
+  const nextStep = (): GuideStep | undefined => help.next(panel.state, panel.history);
 
   // ---- Phase switching and buttons ----
   const setActions = () => {

@@ -38,7 +38,7 @@ How the three parts are built (v0.8.4):
 
 | # | Level | Passed when | Sequence taught |
 |---|---|---|---|
-| 0 | Learn the controls | 11 swipes, then the trick: the same 4 moves six times | `R U R' U'` (6 times brings the cube back) |
+| 0 | Learn the controls | 13 swipes, then the trick: the same 4 moves six times | `R U R' U'` (6 times brings the cube back) |
 | 1 | White cross | 4 white edges on the bottom, matching centers | none — the daisy, then F2 for each edge |
 | 2 | White corners | white layer done | `R U R' U'` (repeat) |
 | 3 | Middle edges | first two layers done | `U R U' R' U' F' U F` / `U' L' U L U F U' F'` |
@@ -52,7 +52,7 @@ How the three parts are built (v0.8.4):
 
 - Written for a 10-year-old. No letters: the arrow shows every move.
 - One line at the top: "Learn to turn the cube. Swipe where the arrow shows." No goal paragraph, no list.
-- **Part 1:** 11 swipes, one plain sentence each, e.g. "Swipe the right side up." The whole cube turns both ways: left, then back to the right.[1]
+- **Part 1:** 13 swipes, one plain sentence each, e.g. "Swipe the right side up." The whole cube turns left and back, then tips up and back, since Hint can ask for either.[1][3]
 - **Every move prints a line** in a list under the cube, e.g. "The right side went up."
 - **Part 2, the trick:** a fresh solved cube. Follow the arrows for the same 4 moves, 6 times (24 swipes). The cube gets mixed up, then comes back solved.
 - The trick is `R U R' U'` six times, which always returns the cube to where it started (checked by the app's own cube model in the tests). The letters show only as a small caption.
@@ -68,7 +68,18 @@ How the three parts are built (v0.8.4):
 - Full solve opens with a one-line recap of every level.
 - Every move in Show it and Walk through it gives a reason, e.g. "Corner sequence, round 2 of 3, move 3 of 4: the right side goes down."
 - Levels 2 and 3 light the piece being placed and its home. Levels 4–7 move many pieces at once, so nothing lights, and Show it doesn't promise it.
-- Each beginner demo cube is the shortest of 40 that plays every sequence the level teaches.
+- Each beginner demo cube is the shortest of 200 that plays every sequence the level teaches and shows the level's harder cases: a corner lifted out and Corner repeated (level 2), a stuck edge popped out (level 3), the dot case (level 4).
+- **Third round.**[3] Hint, Show me and the demo for levels 1, 2, 3, 5 and 6 follow the level's words step for step, so they never do what the words don't say.
+- Pieces the camera can't show: level 1 says to tip the cube to look underneath, level 2 to look at the top, then tip it back.[3]
+- Level 7 starts by turning the top, never the whole cube, so Hint never turns the whole cube in the twist stage.[3]
+- A lift-out lights the piece and the top spot it goes to, not its home.[3]
+- Level 1's words keep the daisy to the front, top and right: a middle-row edge is first turned to front-right, and part 2 turns the cube so the edge's side faces you, then turns the front twice.
+- A move's reason and its words are shown separately. The words come from the arrow's move, so they stay right after the player turns the whole cube.
+- A half turn's reason says which of its two swipes it is.
+- "In its right spot" says the colors don't have to face the right way yet; level 7 says to check only after a whole sequence.
+- **On every build,** a plain program that knows only the tutorial's words (no solver, no Hint, no AI) solves 2,000 scrambles.[3] Each rule it follows quotes a "How it works" line, and the test fails if that line's wording changes. It stops instead of guessing when the words run out.
+- **Each kid-test finding is sorted by what it affects:** blocks a kid from solving, gives wrong help, or wording only. Each one fixed gets a test, so later runs can only find new things.[3]
+- Level 1 says to keep going with the same white edge until it's on top. Re-picking a different edge after each turn looped forever on a cube with all four white edges on one side.[3]
 
 ## CFOP (M6)
 
@@ -109,7 +120,8 @@ How the three parts are built (v0.8.4):
 - **No dimming.** The cube keeps its real colors while an arrow shows; lessons still light the piece being moved and where it goes.[1]
 - The FRONT / TOP / RIGHT tags hide while an arrow shows, so nothing covers it.
 - Arrows go on the front first, then the right side, then the top or bottom. Back turns show on the right side's back column.
-- **Turning the whole cube in a lesson is fine.**[1] Walk through it renames the moves left for the new front. Hint and Show me plan from the cube as it is.
+- **Turning the whole cube in a lesson is fine.**[1] Hint and Show me plan from the cube as it is.
+- **Walk through it asks you to turn the cube back.**[3] After a whole-cube turn, an arrow beside the cube shows how to turn it back, then the lesson goes on. Renaming the moves instead left the words naming the wrong side, and after a tip asked for a turn no swipe makes.
 - **Half turns** (U2) are two swipes.
 - **Two-layer turns** are two swipes: r is R then M', f is F then S.
 - **Beginner levels have no middle rows**, since turning one moves the centers. Swiping one says so. CFOP levels and free play allow middle rows.
@@ -123,6 +135,31 @@ How the three parts are built (v0.8.4):
 - Practice cube: a random scramble with every earlier stage already done.
 - Level 7 (twist yellow corners): easier practice cubes have fewer twisted corners, never a cube stopped part-way, because part-way the bottom is scrambled.
 - **Hint** shows the next step in words and moves.
+- **Hint fixes earlier steps first.**[3] After a wrong turn or a tip, it plans from the cube as it is: "First fix the white cross", then this level's step. It never says "Already done!" on an unfinished cube.
+- **Hint partway through a sequence says to finish it.**[3] If the player's last moves are the start of one of the level's sequences, Hint shows the rest of it, not "First fix the white cross". Partway through the twist stage it stays on the twist: the bottom is meant to look messy.
+- Hint's "hold the cube" step uses only turns a swipe can make: up, down, left, right.[3]
+- Try it's three cubes are labelled easiest, a bit harder, fully mixed. They no longer promise a number of steps.[3]
+- **How Hint chooses.**[3] It looks at these options: carry on from here, or turn back the last few swipes (up to a sequence's length plus a stray turn on either side). Each first finishes a sequence the player started, if any. It carries on unless that would redo a stage the player had finished; then it takes the shortest turn-back that doesn't. So a player following the plan is never told to turn back.
+- A turn-back never stops partway through a whole sequence the player just did: it undoes all of it.[3]
+- **One sequence too many.**[3] If finishing a sequence would lose a piece of the stage the player is on (one Corner after the corner dropped in, one Twist after the yellow is up), Hint undoes it instead of finishing it. A whole extra sequence is undone the same way.
+- Pieces in place, per stage: white edges on the bottom; white corners; middle edges; yellow edges facing up; yellow edges matching their sides (two side by side counts more than two opposite); top corners in their right spots; yellow corners facing up (the front-right one counts half while it is being twisted).[3]
+- On level 8, which teaches every sequence, a move only counts as starting a sequence if that sequence is for the stage the player is on. An R' in the white cross is a cross move, not the start of a Twist.[3]
+- The player's swipes are read as made first: "F' F" is one Yellow cross ended and the next begun. Only if nothing fits is a swipe and its undo at the end taken out, one pair at a time.[3]
+- After a sequence at the wrong moment, Hint says "That sequence doesn't help here. Follow the arrows to undo it first." Without this, Hint said "First fix the white cross" and cost up to 110 more swipes on average.[3]
+- "A sequence you started" means the player's last swipes are its start (a half turn counts as two swipes), it isn't only top turns, and finishing it gets back at least what the player had before starting it. Corner and Swap edges both start the same way; only the one really under way counts.
+- After a stray turn Hint says "Turn your last move back first". After a tip or turn of the whole cube it says "You turned the whole cube. Turn it back first."
+- A look and look-back (or a turn put right by hand) at the very end of the moves counts as nothing: the cube is as it was.[3]
+- Pressed again partway through its own step (one swipe into "turn the front twice"), Hint gives the rest of that step instead of a new plan.[3]
+- **Where in the plan the player is** comes from the swipes made since the last press, not from matching the cube alone. A plan that turns and turns back ("F' F" between two Yellow crosses) comes back to an earlier cube; matching the cube alone sent Hint back there forever.[3]
+- Turn-back arrows never show a turn and its undo ("R' R"): they cancel out.[3]
+- **A stray turn, then more of the step from memory.** Hint also looks back up to 24 swipes for the point with the most stages done.[3]
+- **When carrying on would redo a stage,** Hint takes the shortest turn-back, unless a longer one, or fixing from here, saves more than 10 swipes. A small saving isn't worth a kid going back a stage instead of turning one move back.[3]
+- When the mistake is known exactly (one sequence too many), Hint undoes just those moves.[3]
+- Only this level's stages count: a later stage done by chance isn't the player's.[3]
+- "Turn back your last N moves" counts the arrows shown.[3]
+- **Partway into a step,** Hint says "Keep going with this step: N more moves." The step's own words would give the whole count ("do Corner 5 times" with 4 left), and a kid who obeys does one too many.[3]
+- The "hold" step asks only for white on the bottom; no level says which side faces you.[3]
+- A daisy step that turns the whole cube partway is split there, so the lit squares are right before and after the turn.[3]
 - **Show me** plays the next step on the cube.
 - **New cube** gives a fresh practice cube.
 - Levels 1–2 show the cube from below, so the white side is visible.
@@ -140,3 +177,4 @@ How the three parts are built (v0.8.4):
 
 - [1] Design decision, 2026-11-09.
 - [2] Design decision, 2026-11-06.
+- [3] Design decision, 2026-11-10.

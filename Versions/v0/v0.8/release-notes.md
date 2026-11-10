@@ -1,5 +1,196 @@
 # v0.8
 
+## v0.8.14 — Kid test round 3 (2026-11-10)
+
+### Problem
+
+A third kid test found a 10-year-old could solve the cube from the words, but:
+
+- Walk through it: after the player turned the whole cube, the words described the old move (v0.8.13 put the move's words inside the reason, and only the arrow got renamed).
+- Hint, Show me and the demo broke the level's rules: Swap edges with 0–1 edges matching (162 of 380), Corner with no white corner at front-right (102 of 1,180), and Edge left to pop out a stuck edge.
+- Level 6's "in place" read strictly got stuck on 228 of 240 cubes. Level 7's "until yellow is on top" allowed stopping mid-sequence.
+- Level 1's make-room rule contradicted itself for an edge already on top. A half turn's reason showed on both swipes.
+- Demos skipped the harder cases; "twisted corner" and front-right were unclear; level 8's recap left out special cases.
+
+### Solution
+
+Hint, Show me and the demo for levels 2, 3, 5 and 6 now follow the level's words step for step. The screen shows the reason and the arrow's own words separately. Design: docs/02-levels.md → "Level words checked by a kid test".
+
+### New
+
+- Tests: Corner starts with a white corner at front-right, a stuck edge pops out with Edge right, Swap edges starts with two edges matching.
+- Tests: demos show the harder cases; a half turn's reason says which swipe.
+- Tutorial player test, every build: a plain program using only the tutorial's words (no solver, no Hint, no AI) solves 2,000 scrambles. It checks each line it follows word for word.
+
+### Changed
+
+- Level 2, 3, 5 and 6 planning: rules from the words instead of a search.
+- Demo cubes: shortest of 200 that shows the harder cases (lift-out, pop-out, dot).
+- Words: levels 1, 2, 6, 7 and the level 8 recap. Level 1 adds "Keep going with that same edge until it's on top": without it, one reading looped forever on 1 cube in a few thousand.
+- Cross reasons say "this side" instead of naming a side.
+
+### Fixed
+
+- Walk-through words stay right after a whole-cube turn.
+
+### Kid test round 4: what each finding affects
+
+| Finding | Impact | Affects | Test now |
+|---|---|---|---|
+| Hint gives up after one wrong turn or a tip ("Already done!" on unfinished cubes) | Wrong help | Try it, levels 1–16 (Hint, Show me) | `walkthrough.test.ts`: Hint finishes every level after a wrong turn or tip |
+| Walk through it after a whole-cube turn: words name the wrong side; after a tip, asks for a turn no swipe makes | Wrong help | Walk through it, levels 1–16 | Checked in Chrome: tip, arrow to turn back, lesson goes on |
+| Level 7 Hint turns the top where the words say turn the whole cube | Wrong help | Level 7 Hint, Show me, demo | `walkthrough.test.ts`: level 7 never starts with a top turn |
+| Level 1 Hint keeps finished bottom edges; words said bring all 4 up | Wording | Level 1 | Tutorial player still solves 2,000 |
+| Level 2 never said top corners before stuck ones (26/150 looped) | Wording | Level 2 | Tutorial player |
+| Level 7 "yellow on top" read as the whole top (stuck every time) | Wording | Level 7, level 8 recap | Tutorial player |
+| Level 1 make-room line came after the moves it covers | Wording | Level 1 | Tutorial player |
+| Level 3 "right center", "stuck" unclear | Wording | Level 3 | Tutorial player |
+| Daisy reason "it goes back next" wrong (6/300); level 4 top-turn reason vague | Wording | Show it / Walk, levels 1 and 4 | — |
+| "Turn this side out of the way" isn't taught (2/300 cubes) | Wrong help | Level 1 Hint, Show me, demo | Level 1 Hint now follows the words step for step; `walkthrough.test.ts` daisy tests |
+| Level 1 had 12 bullets | Wording | Level 1 | Now 10; tutorial player |
+
+No finding blocked a kid from solving: the tutorial player and the kid both solved every cube.
+
+### Kid test round 5: what each finding affects
+
+| Finding | Impact | Affects | Test now |
+|---|---|---|---|
+| Hint mid-sequence (levels 2–8) said "First fix the white cross" and replanned 25–170 moves (round 4's Hint change) | Wrong help | Try it, levels 2–7; level 8 | `walkthrough.test.ts`: Hint at every point of every step never says "First fix" and finishes the level |
+| Hint mid-twist sent the player back to level 1 | Wrong help | Level 7, level 8 | `walkthrough.test.ts`: every point of the twist plans only twist steps |
+| Hint's hold step could ask for a sideways turn (z) no swipe makes | Wrong help | Try it, all levels | `walkthrough.test.ts`: no z after any tip or turn |
+| Level 7, last top turn labelled "First fix the yellow edges" | Wording | Level 7 | Covered by the mid-step test |
+| Try it labels promised step counts the cubes didn't have | Wording | Try it, all stage levels | — |
+| "Repeat until the corner drops in" misread when a wrong corner sits white-down in the spot | Wording | Level 2 | Tutorial player |
+| "Front-right" used in level 1 before it's explained | Wording | Level 1 | Tutorial player |
+| "Before you turn any side" read into Part 2 | Wording | Level 1 | Tutorial player |
+| Level 1 demo: "Turn the other side it touches" without "middle row" | Wording | Level 1 demo | — |
+| Level 5 and 6 demos showed only the sequence | Wording | Levels 5, 6 demos | `walkthrough.test.ts`: demos show the opposite and none-in-place cases |
+| Level 8 sequences in a closed box | Wording | Level 8 | — |
+
+Nothing stopped a kid in round 5 either.
+
+### Kid test round 6: what each finding affects
+
+| Finding | Impact | Affects | Test now |
+|---|---|---|---|
+| One stray turn: Hint re-solved 40–60 moves instead of turning it back | Wrong help | Try it, all levels; level 8 | `walkthrough.test.ts`: a wrong turn is turned back |
+| Mid-twist whole-cube turn: Hint went back to the cross (~181 moves) | Wrong help | Level 7, level 8 | `walkthrough.test.ts`: turned back, then the same twist steps |
+| Partway into a sequence, then a stray turn: "First fix the white cross" | Wrong help | Levels 2–8 | `walkthrough.test.ts`: turn it back, then finish the sequence |
+| Daisy lit the wrong target square before a whole-cube turn inside a step | Wrong help | Level 1 Show it / Walk | `walkthrough.test.ts`: a daisy step never turns the cube partway |
+| After a tip, Hint said a step was undone | Wording | Try it, levels 2–7 | `walkthrough.test.ts`: "You turned the whole cube" |
+| "No white edge to bring up on the front" while one showed on the right | Wording | Level 1 | Tutorial player (new wording quoted) |
+| Level 0 never taught tipping, which Hint can ask for | Wording | Level 0 | — |
+
+Nothing stopped a kid in round 6 either.
+
+### Kid test round 7: what each finding affects
+
+| Finding | Impact | Affects | Test now |
+|---|---|---|---|
+| Hint right after a finished sequence looped: "turn your last move back", "finish the sequence", forever (round 6's change) | Stops a kid | Try it, levels 2–7; level 8 | `walkthrough.test.ts`: pressing Hint again and again finishes from every point, with the full move history; following the plan is never told to turn back |
+| Level 2 viewed from below hides white-up top corners (28/400 stuck) | Stops a kid | Level 2 | Words: tip to look at the top, then tip back |
+| Level 1 hides white-down bottom edges (6/400 stuck) | Stops a kid | Level 1 | Words: tip to look underneath, then tip back |
+| Lift-out steps lit the piece's home, not where it goes | Wrong help | Levels 2, 3 Show it / Walk | `walkthrough.test.ts` (piece tests skip lift-outs; lights the top spot) |
+| Hint said "To start, turn the whole cube" after twisting had started | Wrong help | Level 7 | `walkthrough.test.ts`: level 7 never turns the whole cube |
+| Corner and Swap edges start alike; Hint mistook one for the other in the full solve | Wrong help | Level 8 | Full-solve press-Hint test |
+| Level 8 recap dropped the yellow cross's top turn | Wording | Level 8 | — |
+| Hint "back-left" vs lesson "the back and the left" | Wording | Level 4 | — |
+
+Two cases in about 10,000 Hint checks still say "First fix the white cross" after a stray on top of an abandoned sequence. That's true (the cross is broken) and the plan finishes.
+
+### Kid test round 8: what each finding affects
+
+| Finding | Impact | Affects | Test now |
+|---|---|---|---|
+| Mid-sequence, a look and look-back (which levels 1–2 tell kids to do) made Hint loop on "Turn it back first" | Stops a kid | Try it, levels 2–7; level 8 | `helpPlan.test.ts`: through the app's plan cache, every look-back and undo-by-hand finishes |
+| One swipe into "turn the front twice", Hint replanned and turned it back | Wrong help | Level 1 | `helpPlan.test.ts`: the next Hint is the other swipe |
+| Hold step asked for green in front, which no level says | Wording | All levels | — |
+| Level 3: left center off-camera for "Edge left" | Wording | Level 3 | Words: "If not, it goes left" |
+| Level 5: the back is hidden | Wording | Level 5 | Words: the two that don't match go front and left |
+| Level 2: "tip the cube" with no direction; corners facing back or left | Wording | Level 2 | Words: tip toward you, or turn the cube to look round |
+| Level 1: "One already on the bottom… can stay" read as only one; "turn that side once" with no direction | Wording | Level 1 | Words |
+| Level 8 recap didn't say how to look at hidden pieces | Wording | Level 8 | Words |
+
+Nothing in round 8 stopped a kid who follows the words; the loop needed Hint.
+
+### Kid test round 9: what each finding affects
+
+| Finding | Impact | Affects | Test now |
+|---|---|---|---|
+| Hint, one swipe, Hint again looped: the plan cache matched an earlier point with the same cube | Stops a kid | Try it, levels 1–8 | `helpPlan.test.ts`: one swipe at a time, every level finishes |
+| Level 1 Part 2 never said to look round; in 13% of cubes the match is on a hidden side | Stops a kid | Level 1 | Tutorial player; words |
+| A sequence done or part-done at the wrong moment (with or without a stray turn) got "First fix the white cross", up to 110 more swipes on average | Wording (long help) | Try it, levels 2–8 | `walkthrough.test.ts`: undone, never "First fix" |
+| Level 4 said "An L turns into a line: do it again" on a line | Wording | Level 4 | Words |
+| Level 3 never said how to find a stuck edge out of sight | Wording | Level 3 | Words: "Can't see it? Turn the whole cube to look round." |
+| "See back" was in the glossary after the button was removed (v0.8.8) | Wording | Mission Control glossary | — |
+| Level 3: "turn the top" then Edge's first move turns it back | No change | Level 3 | The step does what the words say |
+
+Round 9 verdict: words alone solve 150 of 150 cubes on every level.
+
+### Kid test round 10: what each finding affects
+
+| Finding | Impact | Affects | Test now |
+|---|---|---|---|
+| One sequence too many: "Finish the Corner/Twist sequence you started" undid the piece just placed (+13–22 swipes) | Wrong help | Try it, levels 2, 3, 7, 8 | `walkthrough.test.ts`: turned back, not finished |
+| Whole-cube turn, then a Twist: "First fix the white cross" (+137–195 swipes) | Wrong help | Try it, levels 7, 8 | `walkthrough.test.ts`: undone, solved in under 40 swipes |
+| Corner at the wrong moment: turned back one move, then "Finish the Swap edges sequence you started" | Wrong help | Level 8 | `walkthrough.test.ts`: never names Swap edges |
+| "Undo it" undid 5 of 6 moves, then said "Finish the Yellow cross sequence" | Wrong help | Level 8 | A turn-back never stops inside a whole sequence |
+| Second Yellow cross begun (F after F'): Hint undid the F | Wrong help | Levels 4, 8 | `walkthrough.test.ts`, with and without a look-back |
+| Level 3 stuck-edge bullet: five sentences in one | Wording | Level 3 | Split in two; tutorial player quotes both |
+| A test twisted the wrong corner (skipped "turn the top") | Test fix | — | Test now does the earlier steps first |
+
+Round 10 verdict: every cube finished in every test. After these fixes, every round 10 repro and sweep passes.
+
+### Kid test round 11: what each finding affects
+
+| Finding | Impact | Affects | Test now |
+|---|---|---|---|
+| Hint pressed every 2 swipes looped when the plan turns and turns back ("F' F", "U U'") | Stops a kid | Try it, levels 3, 4, 8 | `helpPlan.test.ts`: 2 or 3 swipes per press always finishes |
+| After a turn and its undo, the turn-back arrows kept "F' F" and Hint gave them forever | Stops a kid | Try it, levels 2, 4, 5, 7 | `helpPlan.test.ts`: no such pair, never loops |
+| A stray turn inside a Twist step, then the rest from memory: "First fix the white cross" (+96–223 swipes) | Wrong help | Try it, levels 2, 4, 7, 8 | `helpPlan.test.ts`: turned back, within 4 swipes of the best |
+| "That sequence doesn't help here" for a stray inside the right sequence | Wording | Try it | No change: the arrows undo the right moves |
+| Level 2 words don't say to check only after all four moves | Wording | Level 2 | No change: a mid-Corner check costs one top turn, nothing breaks |
+
+Round 11 verdict: words alone finish every level; Hint never undid correct work. After these fixes, every round 11 loop script finishes with 0 loops.
+
+### Kid test round 12: what each finding affects
+
+| Finding | Impact | Affects | Test now |
+|---|---|---|---|
+| A stray inside a step: the shortest turn-back landed far back, then a full re-solve (150 swipes vs 43) | Wrong help | Try it, levels 4, 7 | `helpPlan.test.ts`: no more than the best way back |
+| Partway into a step, Hint kept the step's full count ("do Corner 5 times" with 4 left) | Wrong help | Try it, levels 1, 2, 7, 8 | `helpPlan.test.ts`: says how many are left |
+| "Turn your last N moves back" counted moves the arrows left out | Wrong help | Try it, levels 2–8 | `helpPlan.test.ts`: count matches arrows |
+| A turn-back cost far more than fixing from here (78 vs 36) | Wrong help (cost) | Try it, mostly level 2 | `helpPlan.test.ts`: no more than the best way back |
+| A later stage solved by chance counted as the player's | Wrong help | Try it, level 2 | Existing round 10 test |
+| New cube on level 8 doesn't clear Hint's plan | No change | Level 8 | A new cube never matches the old plan, so Hint re-plans |
+
+Round 12 verdict: every cube finished, no loops. After these fixes, every round 12 repro is at or under its best count.
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `docs/02-levels.md` | Third-round rules, footnote [3] |
+| `site/catalog.json` | Regenerated from the docs |
+| `src/solver/beginner.ts` | Rule-based levels 2, 3, 5, 6; reasons without move words |
+| `src/lessons/beginner.ts` | Level words, level 8 recap |
+| `src/lessons/walkthrough.ts` | Demo seeds; swipe 1 of 2 |
+| `src/app/stageLesson.ts` | Reason plus the arrow's own words |
+| `tests/kidWords.test.ts`, `tests/walkthrough.test.ts` | New checks |
+| `tests/tutorialPlayer.ts`, `tests/tutorialPlayer.test.ts` | New: the no-AI tutorial player and its test |
+| `src/lessons/walkthrough.ts` | `helpSteps`: Hint plans earlier stages first |
+| `src/app/stageLesson.ts` | Hint uses `helpSteps`; Walk asks to turn the cube back |
+| `src/app/helpPlan.ts` | New: Hint follows one plan, swipe by swipe |
+| `src/lessons/walkthrough.ts` (`chooseHelp`) | Turn back a sequence done at the wrong moment |
+| `src/solver/beginner.ts` (yellow cross) | Line and L steps say different words |
+| `CLAUDE.md` | Glossary: removed "See back" |
+| `src/lessons/walkthrough.ts` (`chooseHelp`, `finishSequence`, `wrongStart`) | Undo one sequence too many; turn-backs up to a sequence plus a stray turn |
+| `src/solver/beginner.ts` (`STAGE_PIECES`) | New: pieces in place, per stage |
+| `src/app/helpPlan.ts` | Expects the last point plus swipes made since |
+| `src/lessons/walkthrough.ts` (`dropPairs`) | Turn-backs without cancelling pairs; look back up to 24 swipes; weigh options when a stage would be redone |
+| `src/app/helpPlan.ts` (`keepGoing`) | Partway words say how many moves are left |
+| `src/solver/beginner.ts` (cross) | White cross follows level 1's words: front, top and right only |
+
 ## v0.8.13 — Kid test round 2 (2026-11-09)
 
 ### Problem
