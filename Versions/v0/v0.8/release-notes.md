@@ -69,6 +69,20 @@ No finding blocked a kid from solving: the tutorial player and the kid both solv
 
 Nothing stopped a kid in round 5 either.
 
+### Kid test round 6: what each finding affects
+
+| Finding | Impact | Affects | Test now |
+|---|---|---|---|
+| One stray turn: Hint re-solved 40–60 moves instead of turning it back | Wrong help | Try it, all levels; level 8 | `walkthrough.test.ts`: a wrong turn is turned back |
+| Mid-twist whole-cube turn: Hint went back to the cross (~181 moves) | Wrong help | Level 7, level 8 | `walkthrough.test.ts`: turned back, then the same twist steps |
+| Partway into a sequence, then a stray turn: "First fix the white cross" | Wrong help | Levels 2–8 | `walkthrough.test.ts`: turn it back, then finish the sequence |
+| Daisy lit the wrong target square before a whole-cube turn inside a step | Wrong help | Level 1 Show it / Walk | `walkthrough.test.ts`: a daisy step never turns the cube partway |
+| After a tip, Hint said a step was undone | Wording | Try it, levels 2–7 | `walkthrough.test.ts`: "You turned the whole cube" |
+| "No white edge to bring up on the front" while one showed on the right | Wording | Level 1 | Tutorial player (new wording quoted) |
+| Level 0 never taught tipping, which Hint can ask for | Wording | Level 0 | — |
+
+Nothing stopped a kid in round 6 either.
+
 ### Files Changed
 
 | File | Change |

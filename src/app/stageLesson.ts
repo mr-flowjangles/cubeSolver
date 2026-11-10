@@ -107,8 +107,14 @@ export function mountStageLesson(root: HTMLElement, level: Level, next?: Level):
 
   const light = (g: GuideMove | undefined, s: CubeState) => {
     if (!g?.piece) return panel.view.spotlight(null);
-    // The cross names its target slot; later stages light the piece's home by its colors.
-    const home = g.to ? slot(g.to).stickers.map(stickerMap(turned)) : homeSlot(s, g.piece).stickers;
+    // The cross names its target slot ("" = light only the piece); later stages light the
+    // piece's home by its colors.
+    const home =
+      g.to === undefined
+        ? homeSlot(s, g.piece).stickers
+        : g.to
+          ? slot(g.to).stickers.map(stickerMap(turned))
+          : [];
     const lit = [...findPiece(s, g.piece).stickers, ...home];
     panel.view.spotlight(lit);
   };

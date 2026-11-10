@@ -356,3 +356,50 @@ describe("Hint after one wrong turn (kid test, round 6)", () => {
     }
   });
 });
+
+describe("kid test, round 6", () => {
+  it("a daisy step never turns the whole cube partway (so the lit squares stay right)", () => {
+    const rnd = seeded(66);
+    for (let i = 0; i < 60; i++) {
+      const c = applyMoves(solved(), scramble(25, rnd));
+      for (const st of solveBeginner(c, "cross").filter((x) => x.part?.startsWith("Part 1")))
+        if (st.moves.some((m) => m[0] === "y")) expect(st.moves.length).toBe(1);
+    }
+  });
+
+  it.each(STAGE_LEVELS.filter((l) => l.method === "beginner" && l.algs.length))(
+    "$title: partway into a sequence, then a stray turn: turn it back, then finish",
+    (level) => {
+      const rnd = seeded(level.number * 19 + 2);
+      for (let i = 0; i < 10; i++) {
+        let s = practicePosition(level, rnd);
+        for (const st of stageSteps(level, s)) {
+          const k = st.why!.findIndex((w) => / sequence, move 3 /.test(w)); // two moves into a sequence
+          if (k >= 0) {
+            const stray = i % 2 ? "F" : "y";
+            const recent = [...st.moves.slice(0, k), stray];
+            const pos = applyMoves(s, recent);
+            const help = helpSteps(level, pos, recent);
+            expect(help[0].say).toMatch(/back first/);
+            expect(help[1].say).toMatch(/^Finish/);
+            const end = applyMoves(
+              pos,
+              help.flatMap((h) => h.moves),
+            );
+            expect(METHODS.beginner.done[level.stage!](end)).toBe(true);
+            break;
+          }
+          s = applyMoves(s, st.moves);
+        }
+      }
+    },
+  );
+
+  it("after a tip, Hint says the whole cube was turned, not that a step was undone", () => {
+    const level = STAGE_LEVELS.find((l) => l.id === "middle")!;
+    const s = applyMoves(practicePosition(level, seeded(4)), "x");
+    expect(helpSteps(level, s, ["x"])[0].say).toBe(
+      "You turned the whole cube. Turn it back first.",
+    );
+  });
+});

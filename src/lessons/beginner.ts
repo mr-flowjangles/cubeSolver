@@ -45,7 +45,7 @@ export const BEGINNER_LEVELS: Level[] = [
       "White edge in the middle row: turn the whole cube so it's at front-right, the front's right edge. Its white faces one side; turn the other side it touches, so the edge goes up, white facing up. Wrong way? Turn it back, then the other way.",
       "White facing out to the side, in the top or bottom row: turn that side once. It moves to the middle row.",
       "Keep going with that same edge until it's on top, white facing up. Then find the next one.",
-      "Can't see a white edge? Turn the whole cube to look at the other sides.",
+      "No white edge on the front? Turn the whole cube to look at the other sides.",
       "<strong>Part 2:</strong> turn the top until an edge's other color matches the center below it. Turn the whole cube so that side faces you, then turn the front twice. The edge drops to the bottom in the right spot.",
     ],
     algs: [],
@@ -185,7 +185,7 @@ export const BEGINNER_LEVELS: Level[] = [
 ];
 
 /**
- * Level 0, part 1: eleven swipes, in order. Written for a 10-year-old; no letters, the arrow shows
+ * Level 0, part 1: thirteen swipes, in order. Written for a 10-year-old; no letters, the arrow shows
  * each move. `say` is what to do next; `did` is the line printed after the move is made.
  * `move` is the standard letter, used only by the app.
  */
@@ -216,6 +216,16 @@ export const NOTATION_STEPS: { move: string; say: string; did: string }[] = [
     move: "y'",
     say: "Turn the whole cube back: swipe next to the cube, to the right.",
     did: "The whole cube turned back.",
+  },
+  {
+    move: "x",
+    say: "Tip the whole cube: swipe next to the cube, upwards.",
+    did: "The whole cube tipped up.",
+  },
+  {
+    move: "x'",
+    say: "Tip it back: swipe next to the cube, downwards.",
+    did: "The whole cube tipped back.",
   },
 ];
 export const NOTATION_DRILL = NOTATION_STEPS.map((s) => s.move);

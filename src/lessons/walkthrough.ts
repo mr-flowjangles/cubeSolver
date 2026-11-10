@@ -71,16 +71,23 @@ export function undoLast(level: Level, pos: CubeState, recent: readonly Move[]):
     if (recent.length < k) break;
     const moves = invertMoves(recent.slice(-k));
     const after = applyMoves(pos, moves);
-    if (progress(level, after) > base || (twisting && finishTwist(after)))
-      return {
-        stage: level.stage ?? "full",
-        moves,
-        say:
-          k === 1
-            ? "Your last turn undid an earlier step. Turn it back."
-            : "Your last two turns undid an earlier step. Turn them back.",
-        why: moves.map(() => "Turn back what you just did."),
-      };
+    const helps =
+      progress(level, after) > base ||
+      (twisting && finishTwist(after)) ||
+      // Partway into a sequence, then a stray turn: turn it back, then finish the sequence.
+      finishSequence(level, after, recent.slice(0, -k));
+    if (!helps) continue;
+    const wholeCube = moves.every((m) => "xyz".includes(m[0]));
+    return {
+      stage: level.stage ?? "full",
+      moves,
+      say: wholeCube
+        ? "You turned the whole cube. Turn it back first."
+        : k === 1
+          ? "Turn your last move back first."
+          : "Turn your last two moves back first.",
+      why: moves.map(() => "Turn back what you just did."),
+    };
   }
   return null;
 }

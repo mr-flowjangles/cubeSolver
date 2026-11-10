@@ -38,7 +38,7 @@ How the three parts are built (v0.8.4):
 
 | # | Level | Passed when | Sequence taught |
 |---|---|---|---|
-| 0 | Learn the controls | 11 swipes, then the trick: the same 4 moves six times | `R U R' U'` (6 times brings the cube back) |
+| 0 | Learn the controls | 13 swipes, then the trick: the same 4 moves six times | `R U R' U'` (6 times brings the cube back) |
 | 1 | White cross | 4 white edges on the bottom, matching centers | none — the daisy, then F2 for each edge |
 | 2 | White corners | white layer done | `R U R' U'` (repeat) |
 | 3 | Middle edges | first two layers done | `U R U' R' U' F' U F` / `U' L' U L U F U' F'` |
@@ -52,7 +52,7 @@ How the three parts are built (v0.8.4):
 
 - Written for a 10-year-old. No letters: the arrow shows every move.
 - One line at the top: "Learn to turn the cube. Swipe where the arrow shows." No goal paragraph, no list.
-- **Part 1:** 11 swipes, one plain sentence each, e.g. "Swipe the right side up." The whole cube turns both ways: left, then back to the right.[1]
+- **Part 1:** 13 swipes, one plain sentence each, e.g. "Swipe the right side up." The whole cube turns left and back, then tips up and back, since Hint can ask for either.[1][3]
 - **Every move prints a line** in a list under the cube, e.g. "The right side went up."
 - **Part 2, the trick:** a fresh solved cube. Follow the arrows for the same 4 moves, 6 times (24 swipes). The cube gets mixed up, then comes back solved.
 - The trick is `R U R' U'` six times, which always returns the cube to where it started (checked by the app's own cube model in the tests). The letters show only as a small caption.
@@ -136,6 +136,8 @@ How the three parts are built (v0.8.4):
 - **Hint partway through a sequence says to finish it.**[3] If the player's last moves are the start of one of the level's sequences, Hint shows the rest of it, not "First fix the white cross". Partway through the twist stage it stays on the twist: the bottom is meant to look messy.
 - Hint's "hold the cube" step uses only turns a swipe can make: up, down, left, right.[3]
 - Try it's three cubes are labelled easiest, a bit harder, fully mixed. They no longer promise a number of steps.[3]
+- After a stray turn, Hint says "Turn your last move back first", then finishes the sequence the player started. After a tip or turn of the whole cube it says "You turned the whole cube. Turn it back first."[3]
+- A daisy step that turns the whole cube partway is split there, so the lit squares are right before and after the turn.[3]
 - **Show me** plays the next step on the cube.
 - **New cube** gives a fresh practice cube.
 - Levels 1–2 show the cube from below, so the white side is visible.

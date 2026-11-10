@@ -156,7 +156,7 @@ const L1 = {
     1,
     "Keep going with that same edge until it's on top, white facing up. Then find the next one.",
   ),
-  look: bullet(1, "Can't see a white edge? Turn the whole cube to look at the other sides."),
+  look: bullet(1, "No white edge on the front? Turn the whole cube to look at the other sides."),
   part2: bullet(
     1,
     "<strong>Part 2:</strong> turn the top until an edge's other color matches the center below it. Turn the whole cube so that side faces you, then turn the front twice. The edge drops to the bottom in the right spot.",
@@ -206,7 +206,7 @@ function level1(c: Cube) {
     if (!e) e = FRONT_EDGES.find(needsWork);
     if (e) following = c.colors(e);
     if (!e) {
-      // "Can't see a white edge? Turn the whole cube to look at the other sides."
+      // "No white edge on the front? Turn the whole cube to look at the other sides."
       if (looks++ >= 4)
         c.stop(L1.look, "turned all the way round, no white edge to work on, daisy not done");
       c.turn("y");

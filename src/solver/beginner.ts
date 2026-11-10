@@ -191,13 +191,13 @@ function cross(s: CubeState): SolveStep[] {
     if (guard > 24) throw new Error("Daisy failed");
     const e = FRONT_EDGES.find(needsWork);
     if (!e) {
-      // "Can't see a white edge? Turn the whole cube to look at the other sides."
+      // "No white edge on the front? Turn the whole cube to look at the other sides."
       if (looks++ > 3) throw new Error("Daisy: no white edge to work on");
       out.push({
         stage: "cross",
         part: "Part 1: the daisy",
         moves: ["y"],
-        say: "No white edge to bring up on the front. Turn the whole cube to look at the other sides.",
+        say: "No white edge on the front. Turn the whole cube to look at the other sides.",
         why: ["Turn the whole cube to look at the other sides."],
       });
       cur = applyMoves(cur, ["y"]);
@@ -206,12 +206,28 @@ function cross(s: CubeState): SolveStep[] {
     looks = 0;
     const cols = colorsAt(e);
     const other = cols.find((c) => c !== white)!;
-    const moves: Move[] = [];
-    const why: string[] = [];
+    let moves: Move[] = [];
+    let why: string[] = [];
     const go = (m: Move, w: string) => {
       moves.push(m);
       why.push(w);
       cur = applyMoves(cur, [m]);
+    };
+    const say = `Bring the white–${name(other)} edge up next to the ${yellow} center, white side up.`;
+    /** End the step here. `to` "" lights only the piece: its top spot isn't known in this hold. */
+    const flush = (to: string) => {
+      if (moves.length)
+        out.push({
+          stage: "cross",
+          part: "Part 1: the daisy",
+          moves,
+          why,
+          say,
+          piece: [white, other],
+          to,
+        });
+      moves = [];
+      why = [];
     };
     // "Before you turn any side, turn the top so the spot above that side has no white edge facing up yet."
     const clear = (side: Face) => {
@@ -241,7 +257,10 @@ function cross(s: CubeState): SolveStep[] {
         go(wf, "White faces out to the side: turn that side once. It moves to the middle row.");
       } else if (at === "LF") {
         // "White edge in the middle row: turn the whole cube so it's at front-right."
+        // Its own step, so what's lit before and after the turn names the right squares.
+        flush("");
         go("y'", "White edge in the middle row: turn the whole cube so it's at front-right.");
+        flush("");
       } else {
         // "Its white faces one side; turn the other side it touches, so the edge goes up, white facing up."
         clear(of);
@@ -259,15 +278,7 @@ function cross(s: CubeState): SolveStep[] {
         );
       }
     }
-    out.push({
-      stage: "cross",
-      part: "Part 1: the daisy",
-      moves,
-      why,
-      say: `Bring the white–${name(other)} edge up next to the ${yellow} center, white side up.`,
-      piece: [white, other],
-      to: findEdge(cols),
-    });
+    flush(findEdge(cols));
   }
 
   // Part 2: "turn the top until an edge's other color matches the center below it. Turn the whole
