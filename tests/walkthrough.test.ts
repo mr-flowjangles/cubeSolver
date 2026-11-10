@@ -319,3 +319,40 @@ describe("full solve: Hint mid-twist stays on the twist (kid test, round 5)", ()
     }
   });
 });
+
+describe("Hint after one wrong turn (kid test, round 6)", () => {
+  it.each(STAGE_LEVELS.filter((l) => l.method === "beginner"))(
+    "$title: a wrong turn that breaks an earlier step is turned back, not re-solved",
+    (level) => {
+      const rnd = seeded(level.number * 17 + 3);
+      for (let i = 0; i < 12; i++) {
+        const start = practicePosition(level, rnd);
+        const wrong = ["F", "R'", "L", "B'", "D"][i % 5];
+        const help = helpSteps(level, applyMoves(start, wrong), [wrong]);
+        const end = applyMoves(
+          applyMoves(start, wrong),
+          help.flatMap((h) => h.moves),
+        );
+        expect(METHODS.beginner.done[level.stage!](end)).toBe(true);
+        expect(help[0]?.say ?? "").not.toMatch(/^First fix/);
+      }
+    },
+  );
+
+  it("level 7: a whole-cube turn partway through the twist is turned back", () => {
+    const level = STAGE_LEVELS.find((l) => l.id === "yellowCornersTwist")!;
+    const rnd = seeded(31);
+    for (let i = 0; i < 20; i++) {
+      let s = practicePosition(level, rnd);
+      const step = stageSteps(level, s).find((x) => x.moves.length >= 4 && x.moves[0][0] !== "y");
+      if (!step) continue;
+      s = applyMoves(s, step.moves.slice(0, 4)); // one Twist round: the bottom is messy
+      const recent = [...step.moves.slice(0, 4), "y"];
+      const help = helpSteps(level, applyMoves(s, "y"), recent);
+      expect(help[0].moves).toEqual(["y'"]);
+      // Then the same twist steps as if the cube had never been turned: no trip back to level 1.
+      const twistOnly = helpSteps(level, s, recent.slice(0, -1)).flatMap((h) => h.moves);
+      expect(help.flatMap((h) => h.moves)).toEqual(["y'", ...twistOnly]);
+    }
+  });
+});

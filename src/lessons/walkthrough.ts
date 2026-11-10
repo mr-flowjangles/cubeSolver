@@ -1,7 +1,7 @@
 // The "Show it" and "Walk through it" parts of a level: one fixed demo cube, and the
 // moves that finish the level's stage on it, each with a plain-words reason.
 
-import { type CubeState, type Face, type Move, applyMoves, parseMoves } from "../cube";
+import { type CubeState, type Face, type Move, applyMoves, invertMoves, parseMoves } from "../cube";
 import { swipesFor } from "../render/swipe";
 import type { Level } from "./beginner";
 import { type GuideStep, METHODS } from "./index";
@@ -34,6 +34,13 @@ const lowerWord = (t: string) => (/^[A-Z][a-z]/.test(t) ? t[0].toLowerCase() + t
  * or a tip can undo an earlier stage; those steps come first, labelled "First fix …".
  */
 export function helpSteps(level: Level, pos: CubeState, recent: readonly Move[] = []): GuideStep[] {
+  // A last turn or two that broke an earlier stage: turning back is shorter than re-solving.
+  const back = undoLast(level, pos, recent);
+  if (back)
+    return [
+      back,
+      ...helpSteps(level, applyMoves(pos, back.moves), recent.slice(0, -back.moves.length)),
+    ];
   // Partway through a taught sequence the earlier stages look broken. Finishing it is the help.
   const finish = finishSequence(level, pos, recent);
   if (finish) return [finish, ...planFrom(level, applyMoves(pos, finish.moves))];
@@ -50,6 +57,32 @@ function progress(level: Level, s: CubeState): number {
     n++;
   }
   return n;
+}
+
+/**
+ * If undoing the player's last 1 or 2 moves puts back more of the earlier stages (or lets the
+ * twist steps finish mid-twist), that undo; else null. Never when they started a sequence.
+ */
+export function undoLast(level: Level, pos: CubeState, recent: readonly Move[]): GuideStep | null {
+  if (finishSequence(level, pos, recent)) return null;
+  const base = progress(level, pos);
+  const twisting = level.method === "beginner" && !finishTwist(pos);
+  for (const k of [1, 2]) {
+    if (recent.length < k) break;
+    const moves = invertMoves(recent.slice(-k));
+    const after = applyMoves(pos, moves);
+    if (progress(level, after) > base || (twisting && finishTwist(after)))
+      return {
+        stage: level.stage ?? "full",
+        moves,
+        say:
+          k === 1
+            ? "Your last turn undid an earlier step. Turn it back."
+            : "Your last two turns undid an earlier step. Turn them back.",
+        why: moves.map(() => "Turn back what you just did."),
+      };
+  }
+  return null;
 }
 
 /**

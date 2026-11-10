@@ -16,7 +16,7 @@ import { showPass } from "./reward";
 import type { Screen } from "./shell";
 import { mountControlsLesson } from "./controlsLesson";
 import { mountStageLesson } from "./stageLesson";
-import { finishSequence } from "../lessons/walkthrough";
+import { finishSequence, undoLast } from "../lessons/walkthrough";
 
 const algList = (level: Level) => algButtonsHtml(level.algs);
 
@@ -130,8 +130,9 @@ export function mountLesson(root: HTMLElement, id: string): Screen {
         ? pllSteps(x)
         : method.solve(x, level.kind === "full" ? undefined : level.stage);
     // Stopped partway through a sequence? Finish it first, instead of re-solving from the cross.
-    const finish = finishSequence(level, s, panel.history);
-    const steps = finish ? [finish, ...planOf(applyMoves(s, finish.moves))] : planOf(s);
+    // A last turn that broke an earlier stage? Turn it back first.
+    const first = finishSequence(level, s, panel.history) ?? undoLast(level, s, panel.history);
+    const steps = first ? [first, ...planOf(applyMoves(s, first.moves))] : planOf(s);
     plan = steps.map((step) => {
       const at = toString(s);
       s = applyMoves(s, step.moves);
