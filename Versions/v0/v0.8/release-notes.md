@@ -141,6 +141,18 @@ Round 9 verdict: words alone solve 150 of 150 cubes on every level.
 
 Round 10 verdict: every cube finished in every test. After these fixes, every round 10 repro and sweep passes.
 
+### Kid test round 11: what each finding affects
+
+| Finding | Impact | Affects | Test now |
+|---|---|---|---|
+| Hint pressed every 2 swipes looped when the plan turns and turns back ("F' F", "U U'") | Stops a kid | Try it, levels 3, 4, 8 | `helpPlan.test.ts`: 2 or 3 swipes per press always finishes |
+| After a turn and its undo, the turn-back arrows kept "F' F" and Hint gave them forever | Stops a kid | Try it, levels 2, 4, 5, 7 | `helpPlan.test.ts`: no such pair, never loops |
+| A stray turn inside a Twist step, then the rest from memory: "First fix the white cross" (+96–223 swipes) | Wrong help | Try it, levels 2, 4, 7, 8 | `helpPlan.test.ts`: turned back, within 4 swipes of the best |
+| "That sequence doesn't help here" for a stray inside the right sequence | Wording | Try it | No change: the arrows undo the right moves |
+| Level 2 words don't say to check only after all four moves | Wording | Level 2 | No change: a mid-Corner check costs one top turn, nothing breaks |
+
+Round 11 verdict: words alone finish every level; Hint never undid correct work. After these fixes, every round 11 loop script finishes with 0 loops.
+
 ### Files Changed
 
 | File | Change |
@@ -161,6 +173,8 @@ Round 10 verdict: every cube finished in every test. After these fixes, every ro
 | `CLAUDE.md` | Glossary: removed "See back" |
 | `src/lessons/walkthrough.ts` (`chooseHelp`, `finishSequence`, `wrongStart`) | Undo one sequence too many; turn-backs up to a sequence plus a stray turn |
 | `src/solver/beginner.ts` (`STAGE_PIECES`) | New: pieces in place, per stage |
+| `src/app/helpPlan.ts` | Expects the last point plus swipes made since |
+| `src/lessons/walkthrough.ts` (`dropPairs`, `further`) | Turn-backs without cancelling pairs; look back up to 24 swipes |
 | `src/solver/beginner.ts` (cross) | White cross follows level 1's words: front, top and right only |
 
 ## v0.8.13 — Kid test round 2 (2026-11-09)

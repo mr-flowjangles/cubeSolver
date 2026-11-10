@@ -150,6 +150,9 @@ How the three parts are built (v0.8.4):
 - After a stray turn Hint says "Turn your last move back first". After a tip or turn of the whole cube it says "You turned the whole cube. Turn it back first."
 - A look and look-back (or a turn put right by hand) at the very end of the moves counts as nothing: the cube is as it was.[3]
 - Pressed again partway through its own step (one swipe into "turn the front twice"), Hint gives the rest of that step instead of a new plan.[3]
+- **Where in the plan the player is** comes from the swipes made since the last press, not from matching the cube alone. A plan that turns and turns back ("F' F" between two Yellow crosses) comes back to an earlier cube; matching the cube alone sent Hint back there forever.[3]
+- Turn-back arrows never show a turn and its undo ("R' R"): they cancel out.[3]
+- **A stray turn, then more of the step from memory.** If no short turn-back works, Hint looks back up to 24 swipes for the point with the most stages done and turns back to it, instead of "First fix the white cross".[3]
 - The "hold" step asks only for white on the bottom; no level says which side faces you.[3]
 - A daisy step that turns the whole cube partway is split there, so the lit squares are right before and after the turn.[3]
 - **Show me** plays the next step on the cube.

@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { applyMoves, isSolved } from "../src/cube";
+import { applyMoves, fromString, invertMove, isSolved, parseMoves } from "../src/cube";
 import { swipesFor } from "../src/render/swipe";
 import { solveBeginner } from "../src/solver/beginner";
 import { HelpPlan } from "../src/app/helpPlan";
 import { BEGINNER_LEVELS } from "../src/lessons/beginner";
 import { practicePosition } from "../src/lessons/position";
 import { METHODS } from "../src/lessons/index";
-import { chooseHelp, helpSteps, seeded } from "../src/lessons/walkthrough";
+import { chooseHelp, helpSteps, seeded, stageSteps } from "../src/lessons/walkthrough";
 
 describe("HelpPlan (kid test, round 8)", () => {
   it("one swipe into a half turn, the next Hint is the other swipe, not a new plan", () => {
@@ -99,5 +99,102 @@ describe("press Hint, make one swipe, press Hint again (kid test, round 9)", () 
       }
       expect(isSolved(s)).toBe(true);
     }
+  });
+});
+
+describe("Hint pressed every few swipes (kid test, round 11)", () => {
+  /** Press Hint, make `n` of its swipes, press again, until done. Presses used, or -1. */
+  const press = (
+    help: HelpPlan,
+    start: ReturnType<typeof practicePosition>,
+    n: number,
+    done: (s: ReturnType<typeof practicePosition>) => boolean,
+    hist: string[] = [],
+  ) => {
+    let s = start;
+    for (let presses = 0; presses < 800; presses++) {
+      if (done(s)) return presses;
+      const sw = help
+        .next(s, hist)!
+        .moves.flatMap((m) => swipesFor(m))
+        .slice(0, n);
+      s = applyMoves(s, sw);
+      hist.push(...sw);
+    }
+    return -1;
+  };
+
+  // A plan that turns and turns back ("F' F" between two Yellow crosses, "U U'" before Edge left)
+  // comes back to an earlier cube: Hint must not go back there.
+  it.each(["middle", "yellowCross", "full"])(
+    "%s: two or three swipes per press always finishes",
+    (id) => {
+      const level = BEGINNER_LEVELS.find((l) => l.id === id)!;
+      const done = level.stage ? METHODS.beginner.done[level.stage] : isSolved;
+      const rnd = seeded(1111);
+      for (let i = 0; i < (level.stage ? 30 : 8); i++) {
+        const s0 = practicePosition(level, rnd);
+        for (const n of [2, 3]) {
+          const help = new HelpPlan((c, h) =>
+            level.stage ? helpSteps(level, c, h) : chooseHelp(level, c, h, (x) => solveBeginner(x)),
+          );
+          expect(press(help, s0, n, done)).toBeGreaterThanOrEqual(0);
+        }
+      }
+    },
+  );
+
+  it("level 4: after a turn and its undo, Hint never loops and its turn-back has no such pair", () => {
+    const level = BEGINNER_LEVELS.find((l) => l.id === "yellowCross")!;
+    const rnd = seeded(1112);
+    for (let i = 0; i < 20; i++) {
+      const moves = parseMoves("F' F R U R' U' F'");
+      const s = applyMoves(practicePosition(level, rnd), moves);
+      // Turn-back arrows never hold a turn and its undo. (A plan step may: two Yellow crosses
+      // in a row end and start with F' F, as the words say.)
+      for (const st of helpSteps(level, s, moves).filter((x) => /back first|undo it/.test(x.say)))
+        for (let j = 1; j < st.moves.length; j++)
+          expect(st.moves[j - 1]).not.toBe(invertMove(st.moves[j]));
+      const help = new HelpPlan((c, h) => helpSteps(level, c, h));
+      expect(
+        press(help, s, 2, METHODS.beginner.done.yellowCross, [...moves]),
+      ).toBeGreaterThanOrEqual(0);
+    }
+  });
+
+  // One stray turn inside a long step, then the rest of the step from memory: Hint turns back to
+  // before the stray, not "First fix the white cross" (up to 220 extra swipes before).
+  it("level 7: a stray turn inside a Twist step, then the rest of it, is turned back", () => {
+    const level = BEGINNER_LEVELS.find((l) => l.id === "yellowCornersTwist")!;
+    const rnd = seeded(1113);
+    let checked = 0;
+    for (let i = 0; i < 20; i++) {
+      let s = practicePosition(level, rnd);
+      const steps = stageSteps(level, s);
+      const at = steps.findIndex((x) => x.moves.length >= 8);
+      if (at < 0) continue;
+      const hist = steps.slice(0, at).flatMap((x) => x.moves);
+      s = applyMoves(s, hist);
+      const sw = steps[at].moves;
+      const kid = [...sw.slice(0, 4), "F", ...sw.slice(4)]; // a stray F after the first round
+      // The best there is: undo the stray and what followed, then the plan from before the stray.
+      const before = applyMoves(s, sw.slice(0, 4));
+      const best =
+        kid.length -
+        4 +
+        helpSteps(level, before, [...hist, ...sw.slice(0, 4)]).flatMap((x) => x.moves).length;
+      s = applyMoves(s, kid);
+      hist.push(...kid);
+      const help = helpSteps(level, s, hist);
+      expect(help.some((x) => /^First fix/.test(x.say))).toBe(false);
+      const end = applyMoves(
+        s,
+        help.flatMap((x) => x.moves),
+      );
+      expect(isSolved(end)).toBe(true);
+      expect(help.flatMap((x) => x.moves).length).toBeLessThanOrEqual(best + 4);
+      checked++;
+    }
+    expect(checked).toBeGreaterThan(5);
   });
 });

@@ -12,16 +12,31 @@ export class HelpPlan {
   /** Where in the plan Hint last pointed. Only points from here on count: a top turn can
    *  bring back the cube of an earlier point, and going back there would loop. */
   private at = 0;
+  /** How many swipes the player had made when Hint last pointed. */
+  private made = 0;
 
   constructor(private make: (s: CubeState, history: readonly Move[]) => GuideStep[]) {}
 
   next(state: CubeState, history: readonly Move[]): GuideStep | undefined {
     const now = toString(state);
-    const i = this.marks.findIndex((m, k) => k >= this.at && m.at === now);
+    // 1. Where the player should be: the last point plus the swipes made since. A plan that turns
+    //    and turns back ("F' F") comes back to an earlier cube, so matching the cube alone loops.
+    const made = history.reduce((n, m) => n + swipesFor(m).length, 0); // Show me plays U2 as one move
+    const want = this.at + (made - this.made);
+    this.made = made;
+    if (want >= this.at && this.marks[want]?.at === now) {
+      this.at = want;
+      return this.marks[want].step;
+    }
+    // 2. Else the furthest point on from there with this cube.
+    let i = -1;
+    for (let k = this.marks.length - 1; k >= this.at && i < 0; k--)
+      if (this.marks[k].at === now) i = k;
     if (i >= 0) {
       this.at = i;
       return this.marks[i].step;
     }
+    // 3. Off the plan: a new one.
     this.marks = [];
     this.at = 0;
     let s = state;
@@ -42,5 +57,6 @@ export class HelpPlan {
   clear() {
     this.marks = [];
     this.at = 0;
+    this.made = 0;
   }
 }

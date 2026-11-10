@@ -70,6 +70,9 @@ const swipes = (moves: readonly Move[]) => {
  * 4. A sequence started at the wrong moment, which finishing would lose ground from (one Corner
  *    too many undoes the corner just placed), is undone instead of finished.
  */
+/** The most swipes Hint ever asks to turn back: a long step (Twist four times is 16) and a stray. */
+const FAR = 24;
+
 export function chooseHelp(
   level: Level,
   pos: CubeState,
@@ -98,7 +101,8 @@ export function chooseHelp(
   const longest = Math.max(0, ...level.algs.map((a) => swipes(parseMoves(a.moves)).length));
   /** Turn back the last k swipes of `h`, then carry on. */
   const turnBack = (k: number, h: readonly Move[]): Option => {
-    const moves = invertMoves(h.slice(-k));
+    // A turn and its undo inside it do nothing: leave them out of the arrows.
+    const moves = dropPairs(invertMoves(h.slice(-k)));
     const back: GuideStep = {
       stage: level.stage ?? "full",
       moves,
@@ -118,7 +122,8 @@ export function chooseHelp(
   const backs: Option[] = [];
   // 2. Turn back the last k swipes, for every k up to a sequence plus a stray turn either side.
   for (let k = 1; k <= Math.min(hist.length, longest + 2); k++)
-    if (!wholeAtEnd.some((n) => k < n)) backs.push(turnBack(k, hist));
+    if (!wholeAtEnd.some((n) => k < n) && dropPairs(hist.slice(-k)).length > 0)
+      backs.push(turnBack(k, hist));
   const stages = METHODS[level.method].stages.filter((x) => x !== "hold");
   /** The plan redoes a stage the player had got past (or turns white back down). Top turns only line up. */
   const redoes = (o: Option) =>
@@ -136,7 +141,28 @@ export function chooseHelp(
   const w = here.first.length ? null : wrongStart(level, pos, raw);
   const undo = w ? turnBack(w.p, w.h) : undefined;
   const undoStart = undo && !redoes(undo) ? undo : undefined;
-  const pick = redoes(here) ? (backs.find((b) => !redoes(b)) ?? here) : (undoStart ?? here);
+  /**
+   * Nothing short works: a stray turn, then more of the step done from memory (kid test, round
+   * 11). Look further back, up to FAR swipes, for the point with the most stages done; if that
+   * is more than now and carrying on would redo them, turn back to the nearest such point.
+   */
+  const further = () => {
+    const now = reachedStage(level, pos);
+    let best: { k: number; r: number } | null = null;
+    for (let k = longest + 3; k <= Math.min(hist.length, FAR); k++) {
+      if (wholeAtEnd.some((n) => k < n) || dropPairs(hist.slice(-k)).length === 0) continue;
+      const r = reachedStage(level, applyMoves(pos, invertMoves(hist.slice(-k))));
+      if (r > now && (!best || r > best.r)) best = { k, r };
+    }
+    if (!best) return undefined;
+    reached = Math.max(reached, best.r);
+    if (!redoes(here)) return undefined;
+    const b = turnBack(best.k, hist);
+    return redoes(b) ? undefined : b;
+  };
+  const pick = redoes(here)
+    ? (backs.find((b) => !redoes(b)) ?? further() ?? here)
+    : (undoStart ?? further() ?? here);
   return [...pick.first, ...pick.then];
 }
 
@@ -178,6 +204,15 @@ export function finishSequence(
     if (step) return step;
   }
   return null;
+}
+
+/** Moves with every turn-and-undo pair ("R' R") taken out, until none is left. */
+function dropPairs(moves: readonly Move[]): Move[] {
+  const out: Move[] = [];
+  for (const m of moves)
+    if (out.length && out[out.length - 1] === invertMove(m)) out.pop();
+    else out.push(m);
+  return out;
 }
 
 /**
