@@ -32,19 +32,80 @@ const lowerWord = (t: string) => (/^[A-Z][a-z]/.test(t) ? t[0].toLowerCase() + t
 /**
  * Hint and Show me: every step from the cube as it is to this level's stage done. A wrong turn
  * or a tip can undo an earlier stage; those steps come first, labelled "First fix …".
+ * `recent` is the player's move history (one entry per swipe).
  */
 export function helpSteps(level: Level, pos: CubeState, recent: readonly Move[] = []): GuideStep[] {
-  // A last turn or two that broke an earlier stage: turning back is shorter than re-solving.
-  const back = undoLast(level, pos, recent);
-  if (back)
-    return [
-      back,
-      ...helpSteps(level, applyMoves(pos, back.moves), recent.slice(0, -back.moves.length)),
-    ];
-  // Partway through a taught sequence the earlier stages look broken. Finishing it is the help.
-  const finish = finishSequence(level, pos, recent);
-  if (finish) return [finish, ...planFrom(level, applyMoves(pos, finish.moves))];
-  return planFrom(level, pos);
+  return chooseHelp(level, pos, recent, (s) => planFrom(level, s));
+}
+
+/** One entry per swipe: a half turn is two. */
+const swipes = (moves: readonly Move[]) => moves.flatMap((m) => swipesFor(m));
+
+/**
+ * Which help to give, from three: carry on from here, turn back the last swipe, or turn back the
+ * last two. Each one first finishes a sequence the player started, if any, then follows `plan`.
+ * Carrying on wins unless it would redo a stage the player had finished (a stray turn broke it);
+ * then a turn-back that doesn't, if there is one. Following the plan never redoes a stage, so a
+ * player on the plan is never told to turn back.
+ */
+export function chooseHelp(
+  level: Level,
+  pos: CubeState,
+  recent: readonly Move[],
+  plan: (s: CubeState) => GuideStep[],
+): GuideStep[] {
+  const hist = swipes(recent);
+  let reached = 0; // the most stages the player had got past, here or just before a stray move
+  /** An option: what to do first (turn back, finish a sequence), then the plan from there. */
+  type Option = { first: GuideStep[]; then: GuideStep[] };
+  const carryOn = (s: CubeState, h: readonly Move[], first: GuideStep[] = []): Option => {
+    const f = finishSequence(level, s, h);
+    const from = f ? applyMoves(s, f.moves) : s;
+    reached = Math.max(reached, reachedStage(level, from));
+    return { first: f ? [...first, f] : first, then: plan(from) };
+  };
+  const here = carryOn(pos, hist);
+  const backs: Option[] = [];
+  for (const k of [1, 2]) {
+    if (hist.length < k) break;
+    const moves = invertMoves(hist.slice(-k));
+    const after = applyMoves(pos, moves);
+    const wholeCube = moves.every((m) => "xyz".includes(m[0]));
+    const back: GuideStep = {
+      stage: level.stage ?? "full",
+      moves,
+      say: wholeCube
+        ? "You turned the whole cube. Turn it back first."
+        : k === 1
+          ? "Turn your last move back first."
+          : "Turn your last two moves back first.",
+      why: moves.map(() => "Turn back what you just did."),
+    };
+    backs.push(carryOn(after, hist.slice(0, -k), [back]));
+  }
+  const stages = METHODS[level.method].stages.filter((x) => x !== "hold");
+  /** The plan redoes a stage the player had got past (or turns white back down). Top turns only line up. */
+  const redoes = (o: Option) =>
+    o.then.some(
+      (st) =>
+        st.stage === "hold" ||
+        (stages.includes(st.stage) &&
+          stages.indexOf(st.stage) < reached &&
+          !st.moves.every((m) => m[0] === "U")),
+    );
+  const pick = redoes(here) ? (backs.find((b) => !redoes(b)) ?? here) : here;
+  return [...pick.first, ...pick.then];
+}
+
+/**
+ * How many stages the player has got past at this cube. Partway through the twist the bottom
+ * looks broken, but if the twist steps finish from here, everything before the twist is done.
+ */
+function reachedStage(level: Level, s: CubeState): number {
+  if (level.method === "beginner" && finishTwist(s)) {
+    return METHODS.beginner.stages.filter((x) => x !== "hold").indexOf("yellowCornersTwist");
+  }
+  return progress(level, s);
 }
 
 /** How many of the method's stages are done, in order, from the start. */
@@ -60,69 +121,44 @@ function progress(level: Level, s: CubeState): number {
 }
 
 /**
- * If undoing the player's last 1 or 2 moves puts back more of the earlier stages (or lets the
- * twist steps finish mid-twist), that undo; else null. Never when they started a sequence.
- */
-export function undoLast(level: Level, pos: CubeState, recent: readonly Move[]): GuideStep | null {
-  if (finishSequence(level, pos, recent)) return null;
-  const base = progress(level, pos);
-  const twisting = level.method === "beginner" && !finishTwist(pos);
-  for (const k of [1, 2]) {
-    if (recent.length < k) break;
-    const moves = invertMoves(recent.slice(-k));
-    const after = applyMoves(pos, moves);
-    const helps =
-      progress(level, after) > base ||
-      (twisting && finishTwist(after)) ||
-      // Partway into a sequence, then a stray turn: turn it back, then finish the sequence.
-      finishSequence(level, after, recent.slice(0, -k));
-    if (!helps) continue;
-    const wholeCube = moves.every((m) => "xyz".includes(m[0]));
-    return {
-      stage: level.stage ?? "full",
-      moves,
-      say: wholeCube
-        ? "You turned the whole cube. Turn it back first."
-        : k === 1
-          ? "Turn your last move back first."
-          : "Turn your last two moves back first.",
-      why: moves.map(() => "Turn back what you just did."),
-    };
-  }
-  return null;
-}
-
-/**
- * If the player's last moves (`recent`) are the start of one of this level's sequences, the rest
- * of it, when finishing it puts back more of the earlier stages. The shortest such rest; else null.
+ * If the player's last swipes (`recent`) are the start of one of this level's sequences, the rest
+ * of it, when finishing it puts back more of the earlier stages (or lets the twist steps finish).
+ * The longest such start wins: that's the sequence really under way. Else null.
  */
 export function finishSequence(
   level: Level,
   pos: CubeState,
   recent: readonly Move[],
 ): GuideStep | null {
-  const base = progress(level, pos);
-  // Mid-twist, a whole round can leave the bottom messy; it counts if the twist steps then finish.
-  const twisting = level.method === "beginner" && !finishTwist(pos);
-  const better = (s: CubeState) => progress(level, s) > base || (twisting && !!finishTwist(s));
-  let best: GuideStep | null = null;
+  const hist = swipes(recent);
+  const base = reachedStage(level, pos);
+  let best: { p: number; step: GuideStep } | null = null;
   for (const a of level.algs) {
-    const all = parseMoves(a.moves);
+    const all = swipes(parseMoves(a.moves));
     for (let p = all.length - 1; p >= 1; p--) {
-      // "You started" must be true: the last p moves made are this sequence's first p moves.
-      if (recent.length < p || recent.slice(-p).join(" ") !== all.slice(0, p).join(" ")) continue;
+      if (best && p <= best.p) break;
+      // "You started" must be true: the last p swipes made are this sequence's first p swipes.
+      if (hist.length < p || hist.slice(-p).join(" ") !== all.slice(0, p).join(" ")) continue;
+      // Top turns alone don't count: every step lines up with them, and some sequences end with one.
+      if (all.slice(0, p).every((m) => m[0] === "U")) continue;
       const rest = all.slice(p);
-      if (best && rest.length >= best.moves.length) continue;
-      if (!better(applyMoves(pos, rest))) continue;
+      // Finishing it must put back what the player had before starting it, and more than now.
+      // (Corner and Swap edges both start R U R': only the one really under way passes.)
+      const done = reachedStage(level, applyMoves(pos, rest));
+      const before = reachedStage(level, applyMoves(pos, invertMoves(all.slice(0, p))));
+      if (done <= base || done < before) continue;
       best = {
-        stage: level.stage ?? "full",
-        moves: rest,
-        say: `Finish the ${a.name} sequence you started: ${rest.length} more ${rest.length === 1 ? "move" : "moves"}.`,
-        why: rest.map((_, i) => `${a.name} sequence, move ${p + i + 1} of ${all.length}.`),
+        p,
+        step: {
+          stage: level.stage ?? "full",
+          moves: rest,
+          say: `Finish the ${a.name} sequence you started: ${rest.length} more ${rest.length === 1 ? "move" : "moves"}.`,
+          why: rest.map((_, i) => `${a.name} sequence, move ${p + i + 1} of ${all.length}.`),
+        },
       };
     }
   }
-  return best;
+  return best?.step ?? null;
 }
 
 function planFrom(level: Level, pos: CubeState): GuideStep[] {
@@ -134,7 +170,10 @@ function planFrom(level: Level, pos: CubeState): GuideStep[] {
       // The hold step already says "Hold the cube with white on the bottom…".
       s.stage === level.stage || s.stage === "hold"
         ? s
-        : { ...s, say: `First fix the ${lowerWord(m.stageTitle[s.stage])}: ${s.say}` },
+        : // Only top turns: nothing is broken, the top just needs lining up.
+          s.moves.every((x) => x[0] === "U")
+          ? { ...s, say: "Turn the top to line it up." }
+          : { ...s, say: `First fix the ${lowerWord(m.stageTitle[s.stage])}: ${s.say}` },
     );
 }
 

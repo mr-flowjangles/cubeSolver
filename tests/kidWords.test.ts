@@ -209,8 +209,8 @@ function yellowCornersPlace() {
 // Level 7.
 function twist() {
   const urfYellow = () => cur[slot("URF").stickers[0]] === yellow();
-  // "To start, turn the whole cube so a twisted corner is at front-right."
-  turnCubeUntil(() => !urfYellow());
+  // "To start, turn the top so a twisted corner is at front-right."
+  for (let u = 0; u < 4 && urfYellow(); u++) go("U");
   for (let k = 0; k < 4; k++) {
     // "Turn only the top to bring the next twisted corner to front-right."
     for (let u = 0; u < 4 && urfYellow(); u++) go("U");

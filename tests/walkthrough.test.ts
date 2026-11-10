@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
+  type CubeState,
+  isSolved,
+  type Move,
   CORNER_SLOTS,
   applyMoves,
   center,
@@ -22,6 +25,7 @@ import {
   helpSteps,
   seeded,
   stageSteps,
+  chooseHelp,
 } from "../src/lessons/walkthrough";
 import { allowedSwipes } from "../src/app/cubePanel";
 import { reorient } from "../src/render/swipe";
@@ -244,12 +248,12 @@ describe("Hint recovers after a mistake (kid test, round 4)", () => {
 });
 
 describe("level 7 starts the way the words say", () => {
-  it("turns the whole cube, never the top, to reach the first twisted corner", () => {
+  it("turns the top, never the whole cube, at any point", () => {
     const level = STAGE_LEVELS.find((l) => l.id === "yellowCornersTwist")!;
     const rnd = seeded(77);
     for (let i = 0; i < 40; i++) {
-      const first = stageSteps(level, practicePosition(level, rnd))[0];
-      if (first) expect(first.moves[0][0]).not.toBe("U");
+      for (const st of stageSteps(level, practicePosition(level, rnd)))
+        for (const m of st.moves) expect(m[0]).not.toBe("y");
     }
   });
 });
@@ -401,5 +405,71 @@ describe("kid test, round 6", () => {
     expect(helpSteps(level, s, ["x"])[0].say).toBe(
       "You turned the whole cube. Turn it back first.",
     );
+  });
+});
+
+describe("pressing Hint again and again always finishes (kid test, round 7)", () => {
+  /** Follow Hint's first step, press again, until done. Returns the number of presses. */
+  const pressUntilDone = (level: (typeof STAGE_LEVELS)[number], start: CubeState, hist: Move[]) => {
+    const done = METHODS[level.method].done[level.stage!];
+    let s = start;
+    const h = [...hist];
+    for (let presses = 0; presses < 40; presses++) {
+      if (done(s)) return presses;
+      const first = helpSteps(level, s, h)[0];
+      if (!first) return -1; // "Already done!" on an unfinished cube
+      s = applyMoves(s, first.moves);
+      h.push(...first.moves);
+    }
+    return -2; // looped
+  };
+
+  it.each(STAGE_LEVELS.filter((l) => l.method === "beginner"))(
+    "$title: from every point of a solve, with the full move history",
+    (level) => {
+      const rnd = seeded(level.number * 23 + 9);
+      for (let i = 0; i < 6; i++) {
+        let s = practicePosition(level, rnd);
+        const hist: Move[] = [];
+        for (const st of stageSteps(level, s))
+          for (const m of st.moves) {
+            expect(pressUntilDone(level, s, hist)).toBeGreaterThanOrEqual(0);
+            // Following the plan exactly is never a stray move.
+            expect(helpSteps(level, s, hist)[0]?.say ?? "").not.toMatch(/back first/);
+            s = applyMoves(s, [m]);
+            hist.push(m);
+          }
+      }
+    },
+  );
+});
+
+describe("full solve: pressing Hint again and again always finishes (kid test, round 7)", () => {
+  it("from points along a full solve, with the full move history", () => {
+    const full = BEGINNER_LEVELS.find((l) => l.id === "full")!;
+    // The same choice as lesson.ts: finish a started sequence, else turn a stray move back, else plan.
+    const next = (s: CubeState, h: Move[]) => chooseHelp(full, s, h, (x) => solveBeginner(x))[0];
+    const rnd = seeded(707);
+    for (let i = 0; i < 3; i++) {
+      let s = applyMoves(solved(), scramble(25, rnd));
+      const hist: Move[] = [];
+      const all = solveBeginner(s).flatMap((x) => x.moves);
+      all.forEach((m, j) => {
+        if (j % 4 === 0) {
+          expect(next(s, hist)?.say ?? "").not.toMatch(/back first/);
+          let t = s;
+          const h = [...hist];
+          let presses = 0;
+          for (; presses < 60 && !isSolved(t); presses++) {
+            const st = next(t, h);
+            t = applyMoves(t, st.moves);
+            h.push(...st.moves);
+          }
+          expect(isSolved(t)).toBe(true);
+        }
+        s = applyMoves(s, [m]);
+        hist.push(m);
+      });
+    }
   });
 });

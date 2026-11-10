@@ -70,6 +70,9 @@ How the three parts are built (v0.8.4):
 - Levels 2 and 3 light the piece being placed and its home. Levels 4–7 move many pieces at once, so nothing lights, and Show it doesn't promise it.
 - Each beginner demo cube is the shortest of 200 that plays every sequence the level teaches and shows the level's harder cases: a corner lifted out and Corner repeated (level 2), a stuck edge popped out (level 3), the dot case (level 4).
 - **Third round.**[3] Hint, Show me and the demo for levels 1, 2, 3, 5 and 6 follow the level's words step for step, so they never do what the words don't say.
+- Pieces the camera can't show: level 1 says to tip the cube to look underneath, level 2 to look at the top, then tip it back.[3]
+- Level 7 starts by turning the top, never the whole cube, so Hint never turns the whole cube in the twist stage.[3]
+- A lift-out lights the piece and the top spot it goes to, not its home.[3]
 - Level 1's words keep the daisy to the front, top and right: a middle-row edge is first turned to front-right, and part 2 turns the cube so the edge's side faces you, then turns the front twice.
 - A move's reason and its words are shown separately. The words come from the arrow's move, so they stay right after the player turns the whole cube.
 - A half turn's reason says which of its two swipes it is.
@@ -136,7 +139,9 @@ How the three parts are built (v0.8.4):
 - **Hint partway through a sequence says to finish it.**[3] If the player's last moves are the start of one of the level's sequences, Hint shows the rest of it, not "First fix the white cross". Partway through the twist stage it stays on the twist: the bottom is meant to look messy.
 - Hint's "hold the cube" step uses only turns a swipe can make: up, down, left, right.[3]
 - Try it's three cubes are labelled easiest, a bit harder, fully mixed. They no longer promise a number of steps.[3]
-- After a stray turn, Hint says "Turn your last move back first", then finishes the sequence the player started. After a tip or turn of the whole cube it says "You turned the whole cube. Turn it back first."[3]
+- **How Hint chooses.**[3] It looks at three options: carry on from here, turn back the last move, or turn back the last two. Each first finishes a sequence the player started, if any. It carries on unless that would redo a stage the player had finished; then it turns back. So a player following the plan is never told to turn back.
+- "A sequence you started" means the player's last swipes are its start (a half turn counts as two swipes), it isn't only top turns, and finishing it gets back at least what the player had before starting it. Corner and Swap edges both start the same way; only the one really under way counts.
+- After a stray turn Hint says "Turn your last move back first". After a tip or turn of the whole cube it says "You turned the whole cube. Turn it back first."
 - A daisy step that turns the whole cube partway is split there, so the lit squares are right before and after the turn.[3]
 - **Show me** plays the next step on the cube.
 - **New cube** gives a fresh practice cube.

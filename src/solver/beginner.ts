@@ -16,6 +16,7 @@ import {
   COLOR_NAME,
   EDGE_SLOTS,
   applyMoves,
+  findPiece,
   center,
   isSolved,
   moveTargets,
@@ -191,7 +192,7 @@ function cross(s: CubeState): SolveStep[] {
     if (guard > 24) throw new Error("Daisy failed");
     const e = FRONT_EDGES.find(needsWork);
     if (!e) {
-      // "No white edge on the front? Turn the whole cube to look at the other sides."
+      // "No white edge on the front? Turn the whole cube to look at the other sides. White can face down, out of sight: tip the cube up to look underneath, then tip it back."
       if (looks++ > 3) throw new Error("Daisy: no white edge to work on");
       out.push({
         stage: "cross",
@@ -387,6 +388,45 @@ function planned(
   };
 }
 
+/**
+ * Lifting a stuck piece out, from a cube already turned so it's at `at`: the sequence step lights
+ * the piece and the top spot it goes to (not its home, which comes later).
+ */
+function liftOut(
+  stage: StageId,
+  from: CubeState,
+  alg: keyof typeof ALGS,
+  at: string,
+  say: string,
+): SolveStep {
+  const piece = slot(at).stickers.map((x) => from[x]);
+  const to = findPiece(applyMoves(from, ALGS[alg]), piece).name;
+  return { ...planned(stage, [], [], alg, 1, say, "", "", piece), to };
+}
+
+/**
+ * The whole-cube turn before a lift-out, as its own step, so the lit squares are right before
+ * and after it. Lights only the piece.
+ */
+function turnToStuck(
+  stage: StageId,
+  from: CubeState,
+  y: Move[],
+  at: string,
+  say: string,
+  why: string,
+): SolveStep {
+  const s = applyMoves(from, y);
+  return {
+    stage,
+    moves: y,
+    say,
+    why: y.map(() => why),
+    piece: slot(at).stickers.map((x) => s[x]),
+    to: "",
+  };
+}
+
 /** How many y turns bring side `f` to the front. */
 const Y_TO_FRONT: Record<string, number> = { F: 0, R: 1, B: 2, L: 3 };
 const TOP_EDGE: Record<string, Slot> = {
@@ -439,18 +479,21 @@ function corners(s: CubeState): SolveStep[] {
       // "A white corner on the bottom in the wrong spot, or turned the wrong way? ... lift it out."
       let yk = 0;
       while (slotSolved(applyMoves(cur, turns("y", yk)), slot("DFR"))) yk++;
-      const held = applyMoves(cur, turns("y", yk));
-      step = planned(
-        "corners",
-        [],
-        turns("y", yk),
-        "cornerUp",
-        1,
-        "A white corner is stuck in the bottom. Turn the whole cube so it's at front-right, then do Corner once to lift it out.",
-        "",
-        WHY_CUBE("the stuck corner is at front-right"),
-        slot("DFR").stickers.map((x) => held[x]),
-      );
+      const say =
+        "A white corner is stuck in the bottom. Turn the whole cube so it's at front-right, then do Corner once to lift it out.";
+      if (yk) {
+        const t = turnToStuck(
+          "corners",
+          cur,
+          turns("y", yk),
+          "DFR",
+          say,
+          WHY_CUBE("the stuck corner is at front-right"),
+        );
+        out.push(t);
+        cur = applyMoves(cur, t.moves);
+      }
+      step = liftOut("corners", cur, "cornerUp", "DFR", say);
     }
     out.push(step);
     cur = applyMoves(cur, step.moves);
@@ -494,18 +537,21 @@ function middle(s: CubeState): SolveStep[] {
       // "No edge on top fits? One is stuck in the middle. ... front-right, then do Edge right once."
       let yk = 0;
       while (slotSolved(applyMoves(cur, turns("y", yk)), slot("FR"))) yk++;
-      const held = applyMoves(cur, turns("y", yk));
-      step = planned(
-        "middle",
-        [],
-        turns("y", yk),
-        "middleRight",
-        1,
-        "No top edge fits, so one is stuck in the middle. Turn the whole cube so it's at front-right, then do Edge right once to pop it out.",
-        "",
-        WHY_CUBE("the stuck edge is at front-right"),
-        slot("FR").stickers.map((x) => held[x]),
-      );
+      const say =
+        "No top edge fits, so one is stuck in the middle. Turn the whole cube so it's at front-right, then do Edge right once to pop it out.";
+      if (yk) {
+        const t = turnToStuck(
+          "middle",
+          cur,
+          turns("y", yk),
+          "FR",
+          say,
+          WHY_CUBE("the stuck edge is at front-right"),
+        );
+        out.push(t);
+        cur = applyMoves(cur, t.moves);
+      }
+      step = liftOut("middle", cur, "middleRight", "FR", say);
     }
     out.push(step);
     cur = applyMoves(cur, step.moves);
@@ -531,7 +577,7 @@ function yellowCross(s: CubeState) {
     (n) =>
       n === 0
         ? "Yellow dot: do the sequence."
-        : "Turn the top so the yellow L is at back-left (or the line goes left-to-right), then do the sequence. An L turns into a line: do it again.",
+        : "Turn the top so the yellow L is at the back and the left (or the line goes left-to-right), then do the sequence. An L turns into a line: do it again.",
   );
 }
 
@@ -629,19 +675,8 @@ function yellowCornersTwist(s: CubeState): SolveStep[] {
   let cur = s;
   const urf = slot("URF");
   const yellow = center(cur, "U");
-  // "To start, turn the whole cube so a twisted corner is at front-right." Only before starting:
-  // once the bottom is messy, "never turn the whole cube again".
-  let yk = 0;
-  while (yk < 4 && applyMoves(cur, turns("y", yk))[urf.stickers[0]] === yellow) yk++;
-  if (f2lDone(cur) && yk > 0 && yk < 4) {
-    out.push({
-      stage: "yellowCornersTwist",
-      moves: turns("y", yk),
-      say: "To start, turn the whole cube so a twisted corner is at front-right.",
-      why: turns("y", yk).map(() => "Turn the whole cube so a twisted corner is at front-right."),
-    });
-    cur = applyMoves(cur, turns("y", yk));
-  }
+  // "To start, turn the top so a twisted corner is at front-right." The loop below does that:
+  // this step never turns the whole cube.
   let offset = 0; // top turns made so far
   for (let k = 0; k < 4; k++) {
     const delta = (k - offset + 4) % 4;
@@ -661,7 +696,7 @@ function yellowCornersTwist(s: CubeState): SolveStep[] {
     // "Do the whole sequence, all 4 moves, again and again. Check only after all 4 moves."
     let n = 0;
     while (cur[urf.stickers[0]] !== yellow) {
-      if (n === 5) throw new Error("Twist: corner never turned yellow up");
+      if (n === 6) throw new Error("Twist: corner never turned yellow up"); // 6 rounds = back to start
       cur = applyMoves(cur, seq(ALGS.twist));
       n++;
     }

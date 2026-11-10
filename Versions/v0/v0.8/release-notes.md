@@ -83,6 +83,21 @@ Nothing stopped a kid in round 5 either.
 
 Nothing stopped a kid in round 6 either.
 
+### Kid test round 7: what each finding affects
+
+| Finding | Impact | Affects | Test now |
+|---|---|---|---|
+| Hint right after a finished sequence looped: "turn your last move back", "finish the sequence", forever (round 6's change) | Stops a kid | Try it, levels 2–7; level 8 | `walkthrough.test.ts`: pressing Hint again and again finishes from every point, with the full move history; following the plan is never told to turn back |
+| Level 2 viewed from below hides white-up top corners (28/400 stuck) | Stops a kid | Level 2 | Words: tip to look at the top, then tip back |
+| Level 1 hides white-down bottom edges (6/400 stuck) | Stops a kid | Level 1 | Words: tip to look underneath, then tip back |
+| Lift-out steps lit the piece's home, not where it goes | Wrong help | Levels 2, 3 Show it / Walk | `walkthrough.test.ts` (piece tests skip lift-outs; lights the top spot) |
+| Hint said "To start, turn the whole cube" after twisting had started | Wrong help | Level 7 | `walkthrough.test.ts`: level 7 never turns the whole cube |
+| Corner and Swap edges start alike; Hint mistook one for the other in the full solve | Wrong help | Level 8 | Full-solve press-Hint test |
+| Level 8 recap dropped the yellow cross's top turn | Wording | Level 8 | — |
+| Hint "back-left" vs lesson "the back and the left" | Wording | Level 4 | — |
+
+Two cases in about 10,000 Hint checks still say "First fix the white cross" after a stray on top of an abandoned sequence. That's true (the cross is broken) and the plan finishes.
+
 ### Files Changed
 
 | File | Change |

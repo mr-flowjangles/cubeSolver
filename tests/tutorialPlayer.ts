@@ -156,7 +156,10 @@ const L1 = {
     1,
     "Keep going with that same edge until it's on top, white facing up. Then find the next one.",
   ),
-  look: bullet(1, "No white edge on the front? Turn the whole cube to look at the other sides."),
+  look: bullet(
+    1,
+    "No white edge on the front? Turn the whole cube to look at the other sides. White can face down, out of sight: tip the cube up to look underneath, then tip it back.",
+  ),
   part2: bullet(
     1,
     "<strong>Part 2:</strong> turn the top until an edge's other color matches the center below it. Turn the whole cube so that side faces you, then turn the front twice. The edge drops to the bottom in the right spot.",
@@ -206,7 +209,7 @@ function level1(c: Cube) {
     if (!e) e = FRONT_EDGES.find(needsWork);
     if (e) following = c.colors(e);
     if (!e) {
-      // "No white edge on the front? Turn the whole cube to look at the other sides."
+      // "No white edge on the front? Turn the whole cube to look at the other sides. White can face down, out of sight: tip the cube up to look underneath, then tip it back."
       if (looks++ >= 4)
         c.stop(L1.look, "turned all the way round, no white edge to work on, daisy not done");
       c.turn("y");
@@ -272,7 +275,10 @@ const L2 = {
     2,
     "<strong>Front-right:</strong> the column nearest you on the right. Its top corner sits right above its bottom corner.",
   ),
-  find: bullet(2, "Find a white corner in the top layer, the layer next to yellow."),
+  find: bullet(
+    2,
+    "Find a white corner in the top layer, the layer next to yellow. Its white can face up, out of sight: tip the cube to look at the top, then tip it back.",
+  ),
   spot: bullet(2, "Its spot is the bottom corner between the centers of its other two colors."),
   above: bullet(2, "Turn the top until the corner sits right above its spot."),
   whole: bullet(2, "Turn the whole cube so that corner is at front-right."),
@@ -291,7 +297,7 @@ function level2(c: Cube) {
   let guard = 0;
   for (;;) {
     if (guard++ > CAP) c.fail(L2.find, "corner loop did not finish");
-    // "Find a white corner in the top layer, the layer next to yellow."
+    // "Find a white corner in the top layer, the layer next to yellow. Its white can face up, out of sight: tip the cube to look at the top, then tip it back."
     const top = TOP_CORNERS.find((n) => c.colors(n).includes(WHITE));
     if (top) {
       const colors = c.colors(top);
@@ -555,7 +561,7 @@ function level6(c: Cube) {
 // =====================================================================
 const L7 = {
   def: bullet(7, "A twisted corner has its yellow facing a side, not up."),
-  start: bullet(7, "To start, turn the whole cube so a twisted corner is at front-right."),
+  start: bullet(7, "To start, turn the top so a twisted corner is at front-right."),
   again: bullet(
     7,
     "Do the whole sequence, all 4 moves, again and again. Check only after all 4 moves: stop when that corner's yellow is on top. The bottom gets messy — that's normal.",
@@ -570,11 +576,11 @@ function level7(c: Cube) {
   // "A twisted corner has its yellow facing a side, not up."
   const twisted = (n: string) => c.sticker(n, "U") !== YELLOW;
   if (TOP_CORNERS.some(twisted)) {
-    // "To start, turn the whole cube so a twisted corner is at front-right."
+    // "To start, turn the top so a twisted corner is at front-right."
     let n = 0;
     while (!twisted("URF")) {
       if (n++ >= 4) c.fail(L7.start, "could not bring a twisted corner to front-right");
-      c.turn("y");
+      c.turn("U");
     }
     // "Once you've started, never turn the whole cube again." — no y below this line.
     let guard = 0;
