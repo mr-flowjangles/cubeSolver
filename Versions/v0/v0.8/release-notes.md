@@ -153,6 +153,19 @@ Round 10 verdict: every cube finished in every test. After these fixes, every ro
 
 Round 11 verdict: words alone finish every level; Hint never undid correct work. After these fixes, every round 11 loop script finishes with 0 loops.
 
+### Kid test round 12: what each finding affects
+
+| Finding | Impact | Affects | Test now |
+|---|---|---|---|
+| A stray inside a step: the shortest turn-back landed far back, then a full re-solve (150 swipes vs 43) | Wrong help | Try it, levels 4, 7 | `helpPlan.test.ts`: no more than the best way back |
+| Partway into a step, Hint kept the step's full count ("do Corner 5 times" with 4 left) | Wrong help | Try it, levels 1, 2, 7, 8 | `helpPlan.test.ts`: says how many are left |
+| "Turn your last N moves back" counted moves the arrows left out | Wrong help | Try it, levels 2–8 | `helpPlan.test.ts`: count matches arrows |
+| A turn-back cost far more than fixing from here (78 vs 36) | Wrong help (cost) | Try it, mostly level 2 | `helpPlan.test.ts`: no more than the best way back |
+| A later stage solved by chance counted as the player's | Wrong help | Try it, level 2 | Existing round 10 test |
+| New cube on level 8 doesn't clear Hint's plan | No change | Level 8 | A new cube never matches the old plan, so Hint re-plans |
+
+Round 12 verdict: every cube finished, no loops. After these fixes, every round 12 repro is at or under its best count.
+
 ### Files Changed
 
 | File | Change |
@@ -174,7 +187,8 @@ Round 11 verdict: words alone finish every level; Hint never undid correct work.
 | `src/lessons/walkthrough.ts` (`chooseHelp`, `finishSequence`, `wrongStart`) | Undo one sequence too many; turn-backs up to a sequence plus a stray turn |
 | `src/solver/beginner.ts` (`STAGE_PIECES`) | New: pieces in place, per stage |
 | `src/app/helpPlan.ts` | Expects the last point plus swipes made since |
-| `src/lessons/walkthrough.ts` (`dropPairs`, `further`) | Turn-backs without cancelling pairs; look back up to 24 swipes |
+| `src/lessons/walkthrough.ts` (`dropPairs`) | Turn-backs without cancelling pairs; look back up to 24 swipes; weigh options when a stage would be redone |
+| `src/app/helpPlan.ts` (`keepGoing`) | Partway words say how many moves are left |
 | `src/solver/beginner.ts` (cross) | White cross follows level 1's words: front, top and right only |
 
 ## v0.8.13 — Kid test round 2 (2026-11-09)

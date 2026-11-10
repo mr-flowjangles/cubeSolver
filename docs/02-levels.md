@@ -152,7 +152,12 @@ How the three parts are built (v0.8.4):
 - Pressed again partway through its own step (one swipe into "turn the front twice"), Hint gives the rest of that step instead of a new plan.[3]
 - **Where in the plan the player is** comes from the swipes made since the last press, not from matching the cube alone. A plan that turns and turns back ("F' F" between two Yellow crosses) comes back to an earlier cube; matching the cube alone sent Hint back there forever.[3]
 - Turn-back arrows never show a turn and its undo ("R' R"): they cancel out.[3]
-- **A stray turn, then more of the step from memory.** If no short turn-back works, Hint looks back up to 24 swipes for the point with the most stages done and turns back to it, instead of "First fix the white cross".[3]
+- **A stray turn, then more of the step from memory.** Hint also looks back up to 24 swipes for the point with the most stages done.[3]
+- **When carrying on would redo a stage,** Hint takes the shortest turn-back, unless a longer one, or fixing from here, saves more than 10 swipes. A small saving isn't worth a kid going back a stage instead of turning one move back.[3]
+- When the mistake is known exactly (one sequence too many), Hint undoes just those moves.[3]
+- Only this level's stages count: a later stage done by chance isn't the player's.[3]
+- "Turn back your last N moves" counts the arrows shown.[3]
+- **Partway into a step,** Hint says "Keep going with this step: N more moves." The step's own words would give the whole count ("do Corner 5 times" with 4 left), and a kid who obeys does one too many.[3]
 - The "hold" step asks only for white on the bottom; no level says which side faces you.[3]
 - A daisy step that turns the whole cube partway is split there, so the lit squares are right before and after the turn.[3]
 - **Show me** plays the next step on the cube.

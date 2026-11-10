@@ -70,6 +70,13 @@ const swipes = (moves: readonly Move[]) => {
  * 4. A sequence started at the wrong moment, which finishing would lose ground from (one Corner
  *    too many undoes the corner just placed), is undone instead of finished.
  */
+/** How many swipes a longer turn-back, or fixing from here, must save to beat the shortest turn-back. */
+const SAVES = 10;
+
+/** How many swipes an option takes in all. */
+const cost = (o: { first: GuideStep[]; then: GuideStep[] }) =>
+  [...o.first, ...o.then].reduce((n, st) => n + st.moves.flatMap((m) => swipesFor(m)).length, 0);
+
 /** The most swipes Hint ever asks to turn back: a long step (Twist four times is 16) and a stray. */
 const FAR = 24;
 
@@ -106,15 +113,16 @@ export function chooseHelp(
     const back: GuideStep = {
       stage: level.stage ?? "full",
       moves,
+      // The count is the arrows shown: a turn and its undo inside are left out (round 12).
       say: moves.every((m) => "xyz".includes(m[0]))
         ? "You turned the whole cube. Turn it back first."
-        : k === 1
-          ? "Turn your last move back first."
-          : k === 2
-            ? "Turn your last two moves back first."
-            : isSequence(level, h.slice(-k))
-              ? "That sequence doesn't help here. Follow the arrows to undo it first."
-              : `Turn your last ${k} moves back first.`,
+        : isSequence(level, h.slice(-k))
+          ? "That sequence doesn't help here. Follow the arrows to undo it first."
+          : moves.length === 1
+            ? "Turn your last move back first."
+            : moves.length === 2
+              ? "Turn your last two moves back first."
+              : `Turn back your last ${moves.length} moves first.`,
       why: moves.map(() => "Turn back what you just did."),
     };
     return carryOn(applyMoves(pos, moves), h.slice(0, -k), k, [back]);
@@ -134,35 +142,34 @@ export function chooseHelp(
           stages.indexOf(st.stage) < reached &&
           !st.moves.every((m) => m[0] === "U")),
     );
-  // 3. Carrying on wins, unless it redoes a stage or starts by finishing a sequence (which may
-  //    undo a piece just placed: one sequence too many). Then the cheapest option that redoes
-  //    nothing; carrying on wins a tie.
-  // A sequence started at the wrong moment (finishing it loses ground): undo that start.
+  // 3. A sequence started at the wrong moment (finishing it loses ground): undo that start.
+  //    Only when carrying on doesn't finish a sequence the player really started.
   const w = here.first.length ? null : wrongStart(level, pos, raw);
   const undo = w ? turnBack(w.p, w.h) : undefined;
-  const undoStart = undo && !redoes(undo) ? undo : undefined;
-  /**
-   * Nothing short works: a stray turn, then more of the step done from memory (kid test, round
-   * 11). Look further back, up to FAR swipes, for the point with the most stages done; if that
-   * is more than now and carrying on would redo them, turn back to the nearest such point.
-   */
-  const further = () => {
-    const now = reachedStage(level, pos);
-    let best: { k: number; r: number } | null = null;
-    for (let k = longest + 3; k <= Math.min(hist.length, FAR); k++) {
-      if (wholeAtEnd.some((n) => k < n) || dropPairs(hist.slice(-k)).length === 0) continue;
-      const r = reachedStage(level, applyMoves(pos, invertMoves(hist.slice(-k))));
-      if (r > now && (!best || r > best.r)) best = { k, r };
-    }
-    if (!best) return undefined;
-    reached = Math.max(reached, best.r);
-    if (!redoes(here)) return undefined;
-    const b = turnBack(best.k, hist);
-    return redoes(b) ? undefined : b;
-  };
-  const pick = redoes(here)
-    ? (backs.find((b) => !redoes(b)) ?? further() ?? here)
-    : (undoStart ?? further() ?? here);
+  // 4. Further back, up to FAR swipes: the nearest point with the most stages done (a stray turn,
+  //    then more of the step from memory; kid test, round 11). Counts toward `reached`.
+  const now = reachedStage(level, pos);
+  let far: { k: number; r: number } | null = null;
+  for (let k = longest + 3; k <= Math.min(hist.length, FAR); k++) {
+    if (wholeAtEnd.some((n) => k < n) || dropPairs(hist.slice(-k)).length === 0) continue;
+    const r = reachedStage(level, applyMoves(pos, invertMoves(hist.slice(-k))));
+    if (r > now && (!far || r > far.r)) far = { k, r };
+  }
+  if (far) reached = Math.max(reached, far.r);
+  // 5. Carrying on wins unless it redoes a stage the player had got past (following the plan
+  //    never does, so a player on the plan is never told to turn back). Then the shortest
+  //    turn-back that redoes nothing, unless a longer one, or fixing from here, saves more than
+  //    SAVES swipes (kid test, round 12: the shortest could land far from the most-done point,
+  //    and sometimes fixing from here was much shorter). A small saving isn't worth a kid
+  //    going back a stage instead of turning one move back.
+  let pick = here;
+  // The moves that were the mistake are known (one sequence too many): undo just those.
+  if (undo && !redoes(undo)) pick = undo;
+  else if (redoes(here)) {
+    const options = [...backs, ...(far ? [turnBack(far.k, hist)] : [])].filter((b) => !redoes(b));
+    pick = options[0] ?? here;
+    for (const o of [...options.slice(1), here]) if (cost(o) + SAVES < cost(pick)) pick = o;
+  }
   return [...pick.first, ...pick.then];
 }
 
@@ -171,10 +178,13 @@ export function chooseHelp(
  * looks broken, but if the twist steps finish from here, everything before the twist is done.
  */
 function reachedStage(level: Level, s: CubeState): number {
+  const stages = METHODS[level.method].stages.filter((x) => x !== "hold");
+  // Stages past this level's own don't count: a later stage done by chance isn't the player's.
+  const cap = level.stage ? stages.indexOf(level.stage) + 1 : stages.length;
   if (level.method === "beginner" && finishTwist(s)) {
-    return METHODS.beginner.stages.filter((x) => x !== "hold").indexOf("yellowCornersTwist");
+    return Math.min(cap, stages.indexOf("yellowCornersTwist"));
   }
-  return progress(level, s);
+  return Math.min(cap, progress(level, s));
 }
 
 /** How many of the method's stages are done, in order, from the start. */

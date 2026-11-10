@@ -23,7 +23,10 @@ describe("HelpPlan (kid test, round 8)", () => {
       const done = [...first.moves.slice(0, k), first.moves[k][0]];
       const next = help.next(applyMoves(s0, done), done);
       expect(next?.moves).toEqual([first.moves[k][0], ...first.moves.slice(k + 1)]);
-      expect(next?.say).toBe(first.say);
+      // Partway in, the words say how many are left, not the whole step's count (round 12).
+      expect(next?.say).toBe(
+        `Keep going with this step: ${next!.moves.length} more ${next!.moves.length === 1 ? "move" : "moves"}.`,
+      );
       checked++;
     }
     expect(checked).toBeGreaterThan(0);
@@ -196,5 +199,84 @@ describe("Hint pressed every few swipes (kid test, round 11)", () => {
       checked++;
     }
     expect(checked).toBeGreaterThan(5);
+  });
+});
+
+describe("Hint's counts and long mistakes (kid test, round 12)", () => {
+  const lv = (id: string) => BEGINNER_LEVELS.find((l) => l.id === id)!;
+  const total = (steps: { moves: string[] }[]) => steps.flatMap((x) => x.moves).length;
+
+  // Each start is a real start for its level (earlier stages done); the best totals are round 12's.
+  it.each([
+    [
+      "yellowCornersTwist",
+      "DDBDDDDDBLBRBBBBBBLLDLLLLLLUUUUUUUUUFFFFFFFFFDRRRRRRRR",
+      "R' U D' R D R' D' R D R' D' R D R' D' R D",
+      43,
+    ],
+    [
+      "yellowCross",
+      "FFDRDDBDRBLFFFFFFFLBDRRRRRRUUUUUUUUURDDBBBBBBLDDLLLLLL",
+      "U F' U F R U R' U' F' F R U R' U' F'",
+      25,
+    ],
+    ["corners", "FLLDDRRFLDBURFLDFDFLBDRDDRBFURUUUUUFLFURBBRBRBBUDLFLLB", "L U' R U R' U' R", 36],
+  ] as const)(
+    "%s: a stray inside a step costs no more than the best way back",
+    (id, start, mv, best) => {
+      const level = lv(id);
+      const moves = parseMoves(mv);
+      const s = applyMoves(fromString(start), moves);
+      const help = helpSteps(level, s, moves);
+      expect(total(help)).toBeLessThanOrEqual(best);
+      expect(
+        METHODS.beginner.done[level.stage!](
+          applyMoves(
+            s,
+            help.flatMap((x) => x.moves),
+          ),
+        ),
+      ).toBe(true);
+    },
+  );
+
+  it("'Turn back your last N moves' counts the arrows shown", () => {
+    const SIDE = ["R", "R'", "U", "U'", "F", "F'", "L", "L'", "D", "D'", "B", "B'"];
+    const words: Record<string, number> = { move: 1, two: 2 };
+    let checked = 0;
+    for (const level of BEGINNER_LEVELS.filter((l) => l.kind === "stage" && l.algs.length)) {
+      const rnd = seeded(level.number * 41 + 12);
+      for (let i = 0; i < 20; i++) {
+        const strays = [SIDE[Math.floor(rnd() * 12)], SIDE[Math.floor(rnd() * 12)], "U", "U"];
+        const s = applyMoves(practicePosition(level, rnd), strays);
+        for (const st of helpSteps(level, s, strays)) {
+          const m = /^Turn (?:back )?your last (?:(\d+|two) moves|(move))/.exec(st.say);
+          if (!m) continue;
+          const n = m[2] ? 1 : (words[m[1]] ?? Number(m[1]));
+          expect(st.moves.length).toBe(n);
+          checked++;
+        }
+      }
+    }
+    expect(checked).toBeGreaterThan(10);
+  });
+
+  it("partway into a step, Hint says how many moves are left, as the arrows show", () => {
+    const level = lv("corners");
+    const rnd = seeded(1212);
+    let checked = 0;
+    for (let i = 0; i < 10; i++) {
+      const s0 = practicePosition(level, rnd);
+      const help = new HelpPlan((c, h) => helpSteps(level, c, h));
+      const first = help.next(s0, [])!;
+      const sw = first.moves.flatMap((m) => swipesFor(m));
+      if (sw.length < 6) continue;
+      const done = sw.slice(0, 5);
+      const next = help.next(applyMoves(s0, done), done)!;
+      expect(next.moves).toEqual(sw.slice(5));
+      expect(next.say).toBe(`Keep going with this step: ${sw.length - 5} more moves.`);
+      checked++;
+    }
+    expect(checked).toBeGreaterThan(3);
   });
 });

@@ -45,8 +45,12 @@ export class HelpPlan {
       sw.forEach((_, j) => {
         this.marks.push({
           at: toString(s),
-          // From partway in, the rest of the step; its words still say what the step is for.
-          step: j === 0 ? step : { ...step, moves: sw.slice(j), why: undefined },
+          // From partway in, the rest of the step. Its own words would give the whole count
+          // ("do Corner 5 times" with 4 left), so they say how many are left (kid test, round 12).
+          step:
+            j === 0
+              ? step
+              : { ...step, moves: sw.slice(j), why: undefined, say: keepGoing(sw.length - j) },
         });
         s = applyMoves(s, [sw[j]]);
       });
@@ -59,4 +63,9 @@ export class HelpPlan {
     this.at = 0;
     this.made = 0;
   }
+}
+
+/** What Hint says partway into a step: how many swipes are left, as the arrows show them. */
+function keepGoing(n: number): string {
+  return `Keep going with this step: ${n} more ${n === 1 ? "move" : "moves"}.`;
 }
