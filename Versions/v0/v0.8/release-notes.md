@@ -1,5 +1,39 @@
 # v0.8
 
+## v0.8.15 — Short undo wins (2026-11-12)
+
+### Problem
+
+- After one stray move, Hint sometimes skipped the 1-move undo and said "First fix the white cross" instead.
+- Round 13 found this in 19 of 3,942 level 2 cases and 204 of 18,539 level 8 cases.
+- Cause: fixing from here won when it saved more than 10 swipes, even against a 1-move undo.
+
+### Solution
+
+- A turn-back of 1 or 2 arrows always wins. The 10-swipe comparison only applies to longer turn-backs.
+
+### Changed
+
+| Change | Impact | Affects |
+|--------|--------|---------|
+| A 1–2 move undo always beats fixing from here | WRONG HELP | Hint and Show me, levels 2–8 |
+
+### Verification
+
+- 341 tests pass. The 2 new round 13 cases fail on v0.8.14's code.
+- One stray after following Hint, every point on 20 cubes per level: 0 cases where a 1-move undo existed but Hint showed more than 2 arrows (was 7 on level 2 and 97 on level 8 over 6 cubes).
+- Mixed kid sweep, 200 cubes per level: all finished, 0 loops, 0 on-plan turn-backs.
+- Stray mid-step, not noticed: same finish rate and long-route count as v0.8.14; average extra swipes up 0.2 on level 2 and 0.6 on level 8.
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `src/lessons/walkthrough.ts` | `chooseHelp`: a 1–2 arrow turn-back skips the 10-swipe comparison |
+| `tests/walkthrough.test.ts` | Round 13 tests: level 2 and level 8 slips |
+| `docs/02-levels.md` | Hint rule and footnote [4] |
+| `site/catalog.json` | Regenerated |
+
 ## v0.8.14 — Kid test round 3 (2026-11-10)
 
 ### Problem
