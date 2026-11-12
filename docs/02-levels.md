@@ -154,6 +154,7 @@ How the three parts are built (v0.8.4):
 - Turn-back arrows never show a turn and its undo ("R' R"): they cancel out.[3]
 - **A stray turn, then more of the step from memory.** Hint also looks back up to 24 swipes for the point with the most stages done.[3]
 - **When carrying on would redo a stage,** Hint takes the shortest turn-back, unless a longer one, or fixing from here, saves more than 10 swipes. A small saving isn't worth a kid going back a stage instead of turning one move back.[3]
+- **A slip of 1 or 2 moves is always undone.**[4] When the shortest turn-back shows 1 or 2 arrows, Hint never trades it for a longer fix, even one that saves swipes.
 - When the mistake is known exactly (one sequence too many), Hint undoes just those moves.[3]
 - Only this level's stages count: a later stage done by chance isn't the player's.[3]
 - "Turn back your last N moves" counts the arrows shown.[3]
@@ -178,3 +179,4 @@ How the three parts are built (v0.8.4):
 - [1] Design decision, 2026-11-09.
 - [2] Design decision, 2026-11-06.
 - [3] Design decision, 2026-11-10.
+- [4] Design decision, 2026-11-12.

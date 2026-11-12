@@ -77,6 +77,10 @@ const SAVES = 10;
 const cost = (o: { first: GuideStep[]; then: GuideStep[] }) =>
   [...o.first, ...o.then].reduce((n, st) => n + st.moves.flatMap((m) => swipesFor(m)).length, 0);
 
+/** A turn-back that shows at most SHORT arrows: undoing a slip. */
+const SHORT = 2;
+const short = (o: { first: GuideStep[]; k: number }) => o.k > 0 && o.first[0].moves.length <= SHORT;
+
 /** The most swipes Hint ever asks to turn back: a long step (Twist four times is 16) and a stray. */
 const FAR = 24;
 
@@ -168,7 +172,9 @@ export function chooseHelp(
   else if (redoes(here)) {
     const options = [...backs, ...(far ? [turnBack(far.k, hist)] : [])].filter((b) => !redoes(b));
     pick = options[0] ?? here;
-    for (const o of [...options.slice(1), here]) if (cost(o) + SAVES < cost(pick)) pick = o;
+    // A turn-back of 1 or 2 arrows always wins: a kid undoes a slip, not a long fix (round 13).
+    if (!short(pick))
+      for (const o of [...options.slice(1), here]) if (cost(o) + SAVES < cost(pick)) pick = o;
   }
   return [...pick.first, ...pick.then];
 }

@@ -615,3 +615,32 @@ describe("Hint after one sequence too many, or a turn before one (kid test, roun
     expect(helpSteps(level, s, [...moves, "x", "x'"])[0].moves).toEqual(parseMoves("R U R' U' F'"));
   });
 });
+
+describe("a slip of one move is undone, not fixed the long way (kid test, round 13)", () => {
+  it.each([
+    // Level 2: the kid followed Hint, then turned the top the wrong way.
+    [
+      "corners",
+      "FBFRDFFRBLLDDFDFFULFDLRLDRRRUUUUUBUBDBUFBBUBBRDLRLDLLR",
+      "U U y R U R' U' R U'",
+      "U",
+    ],
+    // Level 8: a stray back turn during the cross.
+    [
+      "full",
+      "BRRUDFRULBDFLRLRUFBBUDBULBUDRFFUFFBLRRDFLLULBDDUBFRDDL",
+      "R U U F' y F F y y F F U U y F F y y F F U y y R B'",
+      "B",
+    ],
+  ])("%s: Hint says turn the last move back", (id, start, hist, undo) => {
+    const level = BEGINNER_LEVELS.find((l) => l.id === id)!;
+    const moves = parseMoves(hist);
+    const s = applyMoves(fromString(start), moves);
+    const first =
+      level.kind === "stage"
+        ? helpSteps(level, s, moves)[0]
+        : chooseHelp(level, s, moves, (x) => solveBeginner(x))[0];
+    expect(first.say).toBe("Turn your last move back first.");
+    expect(first.moves).toEqual([undo]);
+  });
+});
