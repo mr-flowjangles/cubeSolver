@@ -39,6 +39,7 @@
 - Vite + TypeScript, no framework.
 - Three.js for the 3D cube.
 - Hosted on GitHub Pages from `mr-flowjangles/cubeSolver`, public repo.
+- A wrong address under `/cubeSolver/` opens the app's start page instead of GitHub's 404 page.[1]
 - Progress saved on the device only.
 - Camera scan for entering a real cube, with a check-and-fix screen.
 
@@ -64,3 +65,7 @@
 - How the solver works out the moves for a scanned cube.
 - How the camera reads sticker colors.
 - Visual style and sound.
+
+## Footnotes
+
+- [1] Design decision, 2026-11-13.

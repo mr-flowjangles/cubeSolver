@@ -1,0 +1,21 @@
+<!doctype html>
+<!-- GitHub Pages shows this for any address under the site that has no file (a typo, an old
+     link, a path Chrome filled in). It sends the player to the app's start page instead. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cube Solver</title>
+    <script>
+      // 1. The app lives in the first folder of the address (/cubeSolver/) on GitHub Pages,
+      //    and at the site root everywhere else.
+      var seg = location.pathname.split("/")[1];
+      var base = location.hostname.endsWith("github.io") && seg ? "/" + seg + "/" : "/";
+      // 2. Go there, keeping any #/level/... part of the address.
+      location.replace(base + location.hash);
+    </script>
+  </head>
+  <body>
+    <p><a href="./">Open Cube Solver</a></p>
+  </body>
+</html>
