@@ -1,5 +1,37 @@
 # v0.8
 
+## v0.8.16 — Wrong address lands on the app (2026-11-13)
+
+### Problem
+
+- Chrome on Rob's phone showed GitHub's 404 page; Safari opened the app.
+- The site served the app every time from here (iPhone browser, IPv4 and IPv6). The exact address Chrome opened wasn't seen.
+
+### Solution
+
+- A wrong address under `/cubeSolver/` now opens the app's start page instead of the 404 page.
+
+### New
+
+| Change | Impact | Affects |
+|--------|--------|---------|
+| `404.html` sends a wrong address to the app, keeping any `#/` part | STOPS A KID | Anyone opening an old, typed or browser-filled address |
+
+### Verification
+
+- 344 tests pass, including 3 new ones for the 404 page.
+- Built with `BASE_PATH=/cubeSolver/`: `dist/404.html` is there.
+- Not fixed: a lowercase `/cubesolver/` address. GitHub serves that from outside this repo.
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `public/404.html` | New: sends a wrong address to the app |
+| `tests/notFound.test.ts` | New: where the 404 page sends the player |
+| `docs/mission.md` | Hosting rule and footnote [1] |
+| `site/catalog.json` | Regenerated |
+
 ## v0.8.15 — Short undo wins (2026-11-12)
 
 ### Problem
