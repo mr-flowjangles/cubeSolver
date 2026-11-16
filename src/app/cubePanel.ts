@@ -1,5 +1,6 @@
 // A 3D cube you turn by swiping, with a status line. Shared by free play and lessons.
 
+import { lineHtml, setLine } from "./line";
 import { type CubeState, type Face, type Move, applyMove, invertMove } from "../cube";
 import { CubeView } from "../render/cubeView";
 import { loadSettings } from "./settings";
@@ -29,7 +30,8 @@ export interface CubePanel {
   play(moves: readonly Move[], ms?: number): Promise<void>;
   undo(): void;
   setState(s: CubeState): void;
-  say(text: string): void;
+  /** Show words on the status line. In a lesson they're read out unless `speak` is "never". */
+  say(text: string, speak?: "always" | "never"): void;
   view: CubeView;
   dispose(): void;
 }
@@ -40,13 +42,16 @@ export function mountCubePanel(
   opts: {
     turns?: TurnSet;
     onMove?: (m: Move, p: CubePanel) => void;
+    /** Lesson screens read the status line out loud (docs/02-levels.md → The app speaks). */
+    speak?: boolean;
   } = {},
 ): CubePanel {
   const set = opts.turns ?? "beginner";
   root.innerHTML = `
     <div class="stage" aria-label="3D cube. Swipe a row to turn it. Swipe beside the cube to turn the whole cube."></div>
-    <p class="status" role="status"></p>`;
+    ${lineHtml("status")}`;
   const status = root.querySelector<HTMLElement>(".status")!;
+  status.setAttribute("role", "status");
   // A swipe makes only the turns this screen allows, so a lesson never gets one it doesn't teach.
   const allowed = new Set(allowedSwipes(set));
   const view = new CubeView(root.querySelector(".stage")!, start, {
@@ -94,8 +99,8 @@ export function mountCubePanel(
       history.length = 0;
       view.setState(state);
     },
-    say(text) {
-      status.textContent = text;
+    say(text, speak = "always") {
+      setLine(status, text, opts.speak ? speak : "never");
     },
     dispose() {
       window.removeEventListener("keydown", onKey);

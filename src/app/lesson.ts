@@ -14,6 +14,8 @@ import { type CubePanel, mountCubePanel } from "./cubePanel";
 import { HelpPlan } from "./helpPlan";
 import { HintArrows } from "./hintArrows";
 import { showPass } from "./reward";
+import { cardHtml, lineHtml, mountCard } from "./line";
+import { voice } from "./speech";
 import type { Screen } from "./shell";
 import { mountControlsLesson } from "./controlsLesson";
 import { mountStageLesson } from "./stageLesson";
@@ -66,11 +68,8 @@ export function mountLesson(root: HTMLElement, id: string): Screen {
     <main class="lesson">
       <section class="intro">
         <h2><span class="num">${level.number}</span> ${level.title}</h2>
-        <p class="goal">${level.goal}</p>
-        <details ${level.number <= 1 || level.number === 9 || level.kind === "full" ? "open" : ""}>
-          <summary>How it works</summary>
-          <ul>${level.teach.map((t) => `<li>${t}</li>`).join("")}</ul>
-        </details>
+        ${lineHtml("goal", level.goal)}
+        ${cardHtml()}
         ${
           level.algs.length > 4
             ? `<details class="algs" ${level.kind === "full" ? "open" : ""}><summary>Sequences (${level.algs.length})</summary>${algList(level)}</details>`
@@ -109,14 +108,19 @@ export function mountLesson(root: HTMLElement, id: string): Screen {
 
   const panel = mountCubePanel(root.querySelector(".panel")!, practicePosition(level), {
     turns: level.method === "cfop" ? "cfop" : "beginner",
+    speak: true,
     onMove: (m, p) => {
       hints.moved(m);
-      p.say(`Moves: ${p.history.length}`);
+      p.say(`Moves: ${p.history.length}`, "never");
       check(p);
     },
   });
   const hints = new HintArrows(panel.view);
-  panel.say("Hold white on the bottom. Use Hint if you get stuck.");
+  panel.say("Hold white on the bottom. Use Hint if you get stuck.", "never");
+  // On opening, read the goal and How it works line 1 (docs/02-levels.md → The app speaks).
+  const card = mountCard(root, level.teach);
+  voice.say(level.goal);
+  voice.say(card.first);
 
   // Follow one plan while the player stays on it. Re-planning mid-way would go wrong
   // in the twist stage, where the bottom is meant to look broken until it's done.

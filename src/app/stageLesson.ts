@@ -31,6 +31,8 @@ import { type CubePanel, mountCubePanel } from "./cubePanel";
 import { HelpPlan } from "./helpPlan";
 import { HintArrows } from "./hintArrows";
 import { showPass } from "./reward";
+import { cardHtml, lineHtml, mountCard, setLine } from "./line";
+import { voice } from "./speech";
 import type { Screen } from "./shell";
 
 type Phase = "show" | "walk" | "try";
@@ -61,11 +63,8 @@ export function mountStageLesson(root: HTMLElement, level: Level, next?: Level):
     <main class="lesson">
       <section class="intro">
         <h2><span class="num">${level.number}</span> ${level.title}</h2>
-        <p class="goal">${level.goal}</p>
-        <details open>
-          <summary>How it works</summary>
-          <ul>${level.teach.map((t) => `<li>${t}</li>`).join("")}</ul>
-        </details>
+        ${lineHtml("goal", level.goal)}
+        ${cardHtml()}
         ${algButtonsHtml(level.algs)}
       </section>
       <nav class="phases" aria-label="Lesson parts">
@@ -73,11 +72,11 @@ export function mountStageLesson(root: HTMLElement, level: Level, next?: Level):
           .map((p) => `<button data-phase="${p}">${PHASE_TITLE[p]}</button>`)
           .join("")}
       </nav>
-      <p class="phase-help"></p>
+      ${lineHtml("phase-help")}
       <div class="guide" aria-live="polite">
         <p class="guide-part"></p>
-        <p class="guide-say"></p>
-        <p class="guide-move"></p>
+        ${lineHtml("guide-say")}
+        ${lineHtml("guide-move")}
       </div>
       <div class="panel"></div>
       <div class="actions"></div>
@@ -120,17 +119,22 @@ export function mountStageLesson(root: HTMLElement, level: Level, next?: Level):
     panel.view.spotlight(lit);
   };
 
-  /** Say what the next guide move is, light its piece, point the arrow at the swipe. */
-  const present = () => {
+  /** Say what the next guide move is, light its piece, point the arrow at the swipe.
+   *  `say`: read the words if they changed (default), always (a part starts), or never (the
+   *  level just opened). */
+  const present = (say: "changed" | "always" | "never" = "changed") => {
     const g = guide[at];
     guideEl.hidden = false;
     if (!g) {
       $(".guide-part").textContent = "";
-      $(".guide-say").textContent = `Done: ${level.goal}`;
-      $(".guide-move").textContent =
+      setLine($(".guide-say"), `Done: ${level.goal}`, say);
+      setLine(
+        $(".guide-move"),
         phase === "show"
           ? "Now you do it: press Walk through it."
-          : "You did it! Now press Try it.";
+          : "You did it! Now press Try it.",
+        say,
+      );
       panel.view.pointTo(null);
       panel.view.spotlight(null);
       panel.view.lookFrom(lookDone);
@@ -139,21 +143,25 @@ export function mountStageLesson(root: HTMLElement, level: Level, next?: Level):
     $(".guide-part").textContent = g.part
       ? `${g.part} · step ${g.step + 1} of ${g.steps}`
       : `Step ${g.step + 1} of ${g.steps}`;
-    $(".guide-say").textContent = g.say;
+    setLine($(".guide-say"), g.say, say);
     light(g, panel.state);
     if (turned.length) {
-      $(".guide-move").textContent =
-        `Turn the whole cube back to keep going. ${moveWords(turnBack())}`;
+      setLine(
+        $(".guide-move"),
+        `Turn the whole cube back to keep going. ${moveWords(turnBack())}`,
+        say,
+      );
       panel.view.pointTo(turnBack());
       return;
     }
     // The reason, then the words for the arrow's move.
-    $(".guide-move").textContent = [g.why, moveWords(g.move)].filter(Boolean).join(" ");
+    setLine($(".guide-move"), [g.why, moveWords(g.move)].filter(Boolean).join(" "), say);
     panel.view.pointTo(g.move);
   };
 
   const panel: CubePanel = mountCubePanel($(".panel"), demo, {
     turns: cfop ? "cfop" : "beginner",
+    speak: true,
     onMove: (m, p) => {
       if (phase === "show") {
         p.say("Just watch for now. Press Walk through it to do it yourself.");
@@ -178,7 +186,7 @@ export function mountStageLesson(root: HTMLElement, level: Level, next?: Level):
         }
       } else {
         hints.moved(m);
-        p.say(`Moves: ${p.history.length}`);
+        p.say(`Moves: ${p.history.length}`, "never");
         checkCube();
       }
     },
@@ -194,9 +202,12 @@ export function mountStageLesson(root: HTMLElement, level: Level, next?: Level):
     if (at >= guide.length) restartDemo();
     playing = true;
     setActions();
+    let first = true;
     while (playing && at < guide.length) {
-      present();
-      await wait(1400);
+      present(first ? "always" : "changed");
+      first = false;
+      // Let the voice finish the step's words before the move (docs/02-levels.md → The app speaks).
+      await Promise.all([wait(1400), voice.finished()]);
       if (!playing || phase !== "show") break;
       await panel.play([guide[at].move], 550);
       at++;
@@ -208,14 +219,14 @@ export function mountStageLesson(root: HTMLElement, level: Level, next?: Level):
     }
   };
 
-  const restartDemo = () => {
+  const restartDemo = (speak = true) => {
     playing = false;
     at = 0;
     turned = [];
     panel.setState(demo);
     panel.view.lookFrom(lookWork);
     panel.say("");
-    present();
+    present(speak ? "always" : "never");
   };
 
   // ---- Try it ----
@@ -289,7 +300,8 @@ export function mountStageLesson(root: HTMLElement, level: Level, next?: Level):
     }
   };
 
-  const setPhase = (p: Phase) => {
+  /** `speak` false: the level just opened, so only the goal and How it works line 1 are read. */
+  const setPhase = (p: Phase, speak = true) => {
     playing = false;
     phase = p;
     root.querySelectorAll<HTMLElement>(".phases button").forEach((b) => {
@@ -297,14 +309,17 @@ export function mountStageLesson(root: HTMLElement, level: Level, next?: Level):
       b.setAttribute("aria-current", String(b.dataset.phase === p));
     });
     // Only promise lit squares when this level lights a piece (the top-layer stages move many at once).
-    $(".phase-help").textContent =
-      p === "show" && !guide.some((g) => g.piece) ? "Watch the app do it." : PHASE_HELP[p];
+    setLine(
+      $(".phase-help"),
+      p === "show" && !guide.some((g) => g.piece) ? "Watch the app do it." : PHASE_HELP[p],
+      speak ? "always" : "never",
+    );
     if (p === "try") {
       guideEl.hidden = true;
       practice = 0;
       newCube();
     } else {
-      restartDemo();
+      restartDemo(speak);
       setActions();
     }
   };
@@ -349,7 +364,11 @@ export function mountStageLesson(root: HTMLElement, level: Level, next?: Level):
     if (p) setPhase(p as Phase);
   });
 
-  setPhase("show");
+  setPhase("show", false);
+  // On opening, read the goal and How it works line 1.
+  const card = mountCard(root, level.teach);
+  voice.say(level.goal);
+  voice.say(card.first);
 
   // Test hook: ?autoshow=1 does every practice cube instantly with Show me's steps.
   if (new URLSearchParams(location.search).get("autoshow") === "1") {
