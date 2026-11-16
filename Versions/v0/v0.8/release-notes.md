@@ -1,5 +1,53 @@
 # v0.8
 
+## v0.8.17 — The app speaks (2026-11-16)
+
+### Problem
+
+- Lessons had too much text for a 10-year-old: How it works was a list of up to 10 long bullets.
+- Nothing was read out loud.
+
+### Solution
+
+- The phone's own voice reads each lesson line as it appears. Each line has a 🔊 button to hear it again.
+- How it works shows one line at a time, with Back and Next.
+
+### New
+
+| Change | Impact | Affects |
+|--------|--------|---------|
+| Lesson lines read out loud (phone's voice, works offline) | STOPS A KID | Levels 0–8 |
+| 🔊 beside every lesson line says it again | STOPS A KID | Levels 0–8 |
+| How it works: one line at a time, "1 of 6", Back and Next | STOPS A KID | Levels 1–8 |
+| Show it waits for the voice before each move | WRONG HELP | Levels 1–7 |
+| Read aloud switch in the top bar, on by default | WORDING | All screens |
+
+### Verification
+
+- 352 tests pass, including 8 new ones for the voice and the card.
+- Chrome on this Mac, speech recorded instead of played:
+  - The first tap read the goal and How it works line 1.
+  - Next read line 2.
+  - Walk through it, Try it and Hint read their lines.
+  - Show it waited for each line before moving.
+  - Level 0 and level 8 read their opening lines.
+- Found and fixed in that check: the voice called the browser's `queueMicrotask` the wrong way, so no line was read on its own.
+- Not tested here: a real phone's voice (iPhone Safari, Android Chrome). Phones only allow sound after a tap, and that can't be checked from this Mac.
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `src/app/speech.ts` | New: the voice, reading lines in order, first-tap start |
+| `src/app/line.ts` | New: lines with 🔊, How it works card |
+| `src/app/cubePanel.ts` | Status line is a spoken line in lessons |
+| `src/app/stageLesson.ts`, `lesson.ts`, `controlsLesson.ts` | Lines spoken, card instead of the bullet list |
+| `src/app/shell.ts`, `settings.ts` | Read aloud switch, first-tap start, 🔊 handling |
+| `src/app/styles.css` | Line, 🔊 and card styles |
+| `tests/speech.test.ts` | New: voice and card tests |
+| `docs/02-levels.md` | The app speaks, footnote [5] |
+| `site/catalog.json` | Regenerated |
+
 ## v0.8.16 — Wrong address lands on the app (2026-11-13)
 
 ### Problem

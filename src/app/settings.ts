@@ -3,14 +3,15 @@
 
 export interface Settings {
   ada: boolean; // ADA support: shapes on sticker colors
+  readAloud: boolean; // lesson lines read out loud by the phone's voice
 }
 
 const KEY = "cubesolver.settings";
-const DEFAULTS: Settings = { ada: false };
+const DEFAULTS: Settings = { ada: false, readAloud: true };
 
 export function loadSettings(): Settings {
   // Test hook: ?ada=1 turns ADA shapes on for this visit without saving.
-  if (new URLSearchParams(location.search).get("ada") === "1") return { ada: true };
+  if (new URLSearchParams(location.search).get("ada") === "1") return { ...DEFAULTS, ada: true };
   try {
     const raw = localStorage.getItem(KEY);
     return raw ? { ...DEFAULTS, ...(JSON.parse(raw) as Partial<Settings>) } : { ...DEFAULTS };

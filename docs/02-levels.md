@@ -165,6 +165,21 @@ How the three parts are built (v0.8.4):
 - **New cube** gives a fresh practice cube.
 - Levels 1–2 show the cube from below, so the white side is visible.
 
+## The app speaks[5]
+
+- **Every line in a lesson is read out loud** by the phone's own voice (the browser's speech). No sound files; it works offline.
+- **Each line has a 🔊 button** that says it again.
+- **New lines are read as they appear.** Lines that appear together are read in order; a newer line cuts off one still being read.
+- A step's words are read when they change, not again on every move of that step. Feedback ("Good!", Hint) is read every time.
+- **Phones allow sound only after a tap.** Lines that appear before the first tap are read right after it.
+- **How it works shows one line at a time:** "1 of 6", the line, 🔊, then Back and Next. Next reads the next line.
+- On opening a level, the goal and How it works line 1 are read.
+- **Show it waits for the voice** to finish a step's words before making the move.
+- **Not read out:** the move counter ("Moves: 12") and step numbers ("Step 2 of 5"). They still show.
+- Level 0's move list: each line has 🔊 but isn't read out by itself; the next instruction is.
+- **Lesson screens only:** Level 0, How it works, Show it, Walk through it, Try it, Hint. Not Timer, scan or the home screen.
+- **Read aloud** in the top bar turns the voice off and on. On by default; saved on the device.
+
 ## How the guide works out the moves
 
 - Cross: finds the fewest turns for each edge, one edge at a time.
@@ -180,3 +195,4 @@ How the three parts are built (v0.8.4):
 - [2] Design decision, 2026-11-06.
 - [3] Design decision, 2026-11-10.
 - [4] Design decision, 2026-11-12.
+- [5] Design decision, 2026-11-16.

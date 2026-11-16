@@ -4,6 +4,8 @@
 //   Part 2  the trick: the same 4 moves (R U R' U') six times take a solved cube apart and back
 // Every move prints a line in a list under the cube.
 
+import { lineHtml, setLine } from "./line";
+import { voice } from "./speech";
 import { type Move, isSolved, solved } from "../cube";
 import { MAGIC, MAGIC_DID, MAGIC_ROUNDS, NOTATION_STEPS, type Level } from "../lessons/beginner";
 import { mountCubePanel } from "./cubePanel";
@@ -18,9 +20,10 @@ export function mountControlsLesson(root: HTMLElement, level: Level, next?: Leve
     <main class="lesson letters">
       <section class="intro">
         <h2><span class="num">${level.number}</span> ${level.title}</h2>
-        <p class="goal">${level.goal}</p>
+        ${lineHtml("goal", level.goal)}
       </section>
-      <p class="task" aria-live="polite"></p>
+      ${lineHtml("task")}
+      <p class="caption trick-caption" hidden></p>
       <div class="panel"></div>
       <ol class="move-log" aria-label="Moves you made"></ol>
       <div class="actions two">
@@ -35,6 +38,7 @@ export function mountControlsLesson(root: HTMLElement, level: Level, next?: Leve
     </main>`;
 
   const task = root.querySelector<HTMLElement>(".task")!;
+  const caption = root.querySelector<HTMLElement>(".trick-caption")!;
   const log = root.querySelector<HTMLOListElement>(".move-log")!;
   const passedEl = root.querySelector<HTMLElement>(".passed")!;
   let at = 0; // 0..SWIPES-1: the letters; SWIPES..SWIPES+TRICK-1: the trick
@@ -49,25 +53,33 @@ export function mountControlsLesson(root: HTMLElement, level: Level, next?: Leve
         ? MAGIC[(at - SWIPES) % MAGIC.length]
         : undefined;
 
+  /** Show and read the next instruction. Step counts show but aren't read. */
   const prompt = () => {
     const m = wanted();
     panel.view.pointTo(m ?? null);
+    caption.hidden = !!m;
     if (at < SWIPES) {
-      task.textContent = `${NOTATION_STEPS[at].say}  (${at + 1} of ${SWIPES})`;
+      setLine(task, `${NOTATION_STEPS[at].say} <small>(${at + 1} of ${SWIPES})</small>`);
     } else if (m) {
       const k = at - SWIPES;
       const round = Math.floor(k / MAGIC.length) + 1;
-      task.textContent = `Trick, round ${round} of ${MAGIC_ROUNDS}. Follow the arrow. Watch what happens!`;
+      setLine(
+        task,
+        `Trick, round ${round} of ${MAGIC_ROUNDS}. Follow the arrow. Watch what happens!`,
+      );
     } else {
-      task.innerHTML =
-        "It's solved again! The same 4 moves, 6 times, always bring the cube back. That's a sequence: moves you can count on." +
-        ` <small class="caption">Cube books write these 4 moves as ${MAGIC.join(" ")}.</small>`;
+      setLine(
+        task,
+        "It's solved again! The same 4 moves, 6 times, always bring the cube back. That's a sequence: moves you can count on.",
+      );
+      caption.textContent = `Cube books write these 4 moves as ${MAGIC.join(" ")}.`;
     }
   };
 
+  /** Add a line to the move list, with 🔊. Not read by itself: the next instruction is. */
   const print = (text: string) => {
     const li = document.createElement("li");
-    li.textContent = text;
+    li.innerHTML = lineHtml("did", text);
     log.prepend(li);
   };
 
@@ -79,6 +91,7 @@ export function mountControlsLesson(root: HTMLElement, level: Level, next?: Leve
 
   const panel = mountCubePanel(root.querySelector(".panel")!, solved(), {
     turns: "beginner",
+    speak: true,
     onMove: (m, p) => {
       if (done) return;
       if (m !== wanted()) {
@@ -113,7 +126,7 @@ export function mountControlsLesson(root: HTMLElement, level: Level, next?: Leve
     log.innerHTML = "";
     passedEl.hidden = true;
     panel.setState(solved());
-    panel.say("Swipe where the arrow shows.");
+    panel.say("Swipe where the arrow shows.", "never");
     prompt();
   };
 
@@ -128,6 +141,8 @@ export function mountControlsLesson(root: HTMLElement, level: Level, next?: Leve
   });
   root.querySelector("#fresh")!.addEventListener("click", restart);
 
+  // On opening, read the goal, then the first instruction (docs/02-levels.md → The app speaks).
+  voice.say(level.goal);
   restart();
   return panel;
 }

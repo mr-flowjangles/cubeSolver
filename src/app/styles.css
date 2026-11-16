@@ -822,3 +822,68 @@ button.small {
 .guide[hidden] {
   display: none;
 }
+
+/* Spoken lines: the words, then a 🔊 button that says them again (docs/02-levels.md → The app speaks). */
+.line {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.line .words {
+  flex: 1;
+  min-width: 0;
+}
+.line .words small {
+  color: var(--muted);
+  font-weight: 400;
+}
+button.replay {
+  flex: none;
+  min-height: 0;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+.status.line {
+  justify-content: center;
+  align-items: center;
+}
+.status.line .words {
+  flex: 0 1 auto;
+}
+.move-log .line {
+  margin: 0;
+  align-items: center;
+}
+.move-log button.replay {
+  width: 32px;
+  height: 32px;
+  font-size: 0.9rem;
+}
+
+/* How it works, one line at a time. */
+.howto {
+  margin: 8px 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+}
+.howto-count {
+  margin: 0 0 6px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.howto-line {
+  margin: 0 0 10px;
+  min-height: 3em;
+  font-size: 1.05rem;
+}
+.howto-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}

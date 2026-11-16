@@ -1,4 +1,4 @@
-// App frame: header (title, back, ADA support) and a simple hash router.
+// App frame: header (title, back, ADA support, Read aloud) and a simple hash router.
 //   #/            home: level list
 //   #/level/<id>  a lesson
 //   #/play        free play
@@ -14,6 +14,8 @@ import { mountPractice } from "./practice";
 import { mountSolveMine } from "./solveMine";
 import { mountTimer } from "./timer";
 import { loadSettings, saveSettings } from "./settings";
+import { onReplay } from "./line";
+import { voice } from "./speech";
 
 export interface Screen {
   view?: CubeView;
@@ -30,12 +32,31 @@ export function mountShell(root: HTMLElement): void {
         <input type="checkbox" id="ada" ${settings.ada ? "checked" : ""} />
         <span>ADA support</span>
       </label>
+      <label class="toggle" title="Reads lesson lines out loud">
+        <input type="checkbox" id="speak" ${settings.readAloud ? "checked" : ""} />
+        <span>Read aloud</span>
+      </label>
     </header>
     <div class="screen" id="screen"></div>`;
   const screenEl = root.querySelector<HTMLElement>("#screen")!;
   const back = root.querySelector<HTMLElement>(".back")!;
   const ada = root.querySelector<HTMLInputElement>("#ada")!;
   let current: Screen | null = null;
+
+  // Speech (docs/02-levels.md → The app speaks):
+  // 1. Phones allow sound only from a tap, so the first tap anywhere starts the voice.
+  const unlock = () => voice.unlock();
+  document.addEventListener("pointerdown", unlock, { capture: true });
+  document.addEventListener("keydown", unlock, { capture: true });
+  // 2. Every 🔊 says its line again.
+  onReplay(screenEl);
+  // 3. The Read aloud switch.
+  const speak = root.querySelector<HTMLInputElement>("#speak")!;
+  speak.addEventListener("change", () => {
+    settings.readAloud = speak.checked;
+    saveSettings(settings);
+    if (!speak.checked) voice.stop();
+  });
 
   ada.addEventListener("change", () => {
     settings.ada = ada.checked;
@@ -47,6 +68,7 @@ export function mountShell(root: HTMLElement): void {
 
   function route() {
     current?.dispose();
+    voice.stop(); // a new screen: stop reading the old one
     screenEl.innerHTML = "";
     const parts = location.hash.replace(/^#\/?/, "").split("/");
     back.hidden = parts[0] === "";
