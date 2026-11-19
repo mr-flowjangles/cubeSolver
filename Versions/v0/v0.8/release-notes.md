@@ -1,5 +1,52 @@
 # v0.8
 
+## v0.8.18 — Sound on iPhone (2026-11-18)
+
+### Problem
+
+- On Rob's iPhone, no line was read out, and the 🔊 button made no sound either. The ringer was on.
+- Reproduced in part on the iPhone Simulator (iOS 26.5): the lines waiting for the first tap were handed to the voice but never started, with no error.
+  - The first tap started the voice on the touch's start, which an iPhone doesn't count as a tap.
+  - The touch's end didn't work either. Only a click did.
+- Not reproduced: on the Simulator, 🔊 and Next did play in v0.8.17. Why they're silent on Rob's iPhone isn't proven yet.
+
+### Solution
+
+- The first tap starts the voice on the click, so the lines waiting for it play.
+- An empty line is never handed to the voice; a silent one is used instead.
+- The voice is only cut off when it is saying something. New lines after a cut-off go 50 ms later.
+- `?speechdebug=1` shows on screen what the phone's voice does with each line: handed over, started, ended, or failed and why.
+
+### Fixed
+
+| Change | Impact | Affects |
+|--------|--------|---------|
+| The goal and How it works line 1 are read after the first tap on an iPhone | STOPS A KID | Levels 0–8 |
+
+### New
+
+| Change | Impact | Affects |
+|--------|--------|---------|
+| `?speechdebug=1` test hook: the voice's events on screen | none for kids | Testing on a real phone |
+
+### Verification
+
+- 355 tests pass, including 3 new ones (silent first line, 🔊 as the first tap, cut off only while speaking).
+- iPhone Simulator Safari (iOS 26.5), driven by WebDriver with no mouse. The voice reported starting and ending each line:
+  - First tap on plain words: the goal, then How it works line 1.
+  - 🔊: its line.
+  - Next: the next line.
+- Not tested here: Rob's iPhone. If it's still silent, `?speechdebug=1` shows why.
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `src/app/speech.ts` | Silent first line, cut off only while speaking, debug readout |
+| `src/app/shell.ts` | First tap starts the voice on click or key |
+| `tests/speech.test.ts` | 3 new iPhone tests |
+| `CLAUDE.md` | `?speechdebug=1` in the test hooks |
+
 ## v0.8.17 — The app speaks (2026-11-16)
 
 ### Problem
