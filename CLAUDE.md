@@ -8,7 +8,7 @@ Commit identity: Rob Rose <robmrose@me.com>
 
 ## Current state
 
-**Building.** M1–M6 shipped, live at https://mr-flowjangles.github.io/cubeSolver/. Test hooks: `?moves=R%20U&instant=1#/play`, `?ada=1`, `?autoshow=1#/level/<id>`, `?unlock=1#/level/<id>`, `?cube=<54 letters>#/solve`, `?cube=…&finish=1#/solve/guide`, `?autoscan=1#/solve/scan` (with Chrome's fake camera flags).
+**Building.** M1–M6 shipped, live at https://mr-flowjangles.github.io/cubeSolver/. Test hooks: `?moves=R%20U&instant=1#/play`, `?ada=1`, `?autoshow=1#/level/<id>`, `?unlock=1#/level/<id>`, `?cube=<54 letters>#/solve`, `?cube=…&finish=1#/solve/guide`, `?autoscan=1#/solve/scan` (with Chrome's fake camera flags), `?speechdebug=1` (shows what the voice does, on screen).
 
 ## How to read this repo
 

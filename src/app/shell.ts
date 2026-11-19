@@ -44,10 +44,13 @@ export function mountShell(root: HTMLElement): void {
   let current: Screen | null = null;
 
   // Speech (docs/02-levels.md → The app speaks):
-  // 1. Phones allow sound only from a tap, so the first tap anywhere starts the voice.
-  const unlock = () => voice.unlock();
-  document.addEventListener("pointerdown", unlock, { capture: true });
-  document.addEventListener("keydown", unlock, { capture: true });
+  // 1. Phones allow sound only from a tap, so the first tap anywhere starts the voice. On an
+  //    iPhone only a click (or a key) counts: lines started from a touch's start or end are
+  //    dropped without a word (iPhone Simulator, v0.8.18). A tap on 🔊 starts the voice itself.
+  const unlock = (e: Event) => {
+    if (!(e.target as Element | null)?.closest?.(".replay")) voice.unlock();
+  };
+  for (const ev of ["click", "keydown"]) document.addEventListener(ev, unlock, { capture: true });
   // 2. Every 🔊 says its line again.
   onReplay(screenEl);
   // 3. The Read aloud switch.
