@@ -1,5 +1,31 @@
 # v0.8
 
+## v0.8.19 — Quiet Good (2026-11-18)
+
+### Problem
+
+- The voice said "Good!" after every right move in Walk through it and level 0. Rob found it annoying.
+
+### Changed
+
+| Change | Impact | Affects |
+|--------|--------|---------|
+| "Good!" still shows after a right move, but isn't read out | WORDING | Level 0, Walk through it (levels 1–7) |
+
+### Verification
+
+- 356 tests pass, including 1 new one: "Good!" is shown, never read.
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `src/app/stageLesson.ts`, `src/app/controlsLesson.ts` | "Good!" shown, not read |
+| `src/app/line.ts` | Comment |
+| `tests/speech.test.ts` | New test |
+| `docs/02-levels.md` | Rule and footnote [6] |
+| `site/catalog.json` | Regenerated |
+
 ## v0.8.18 — Sound on iPhone (2026-11-18)
 
 ### Problem

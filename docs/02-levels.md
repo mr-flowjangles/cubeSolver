@@ -170,7 +170,8 @@ How the three parts are built (v0.8.4):
 - **Every line in a lesson is read out loud** by the phone's own voice (the browser's speech). No sound files; it works offline.
 - **Each line has a 🔊 button** that says it again.
 - **New lines are read as they appear.** Lines that appear together are read in order; a newer line cuts off one still being read.
-- A step's words are read when they change, not again on every move of that step. Feedback ("Good!", Hint) is read every time.
+- A step's words are read when they change, not again on every move of that step. Hint and warnings are read every time.
+- **"Good!" after each right move shows but isn't read.**[6] Read after every move, it nags.
 - **Phones allow sound only after a tap.** Lines that appear before the first tap are read right after it.
 - **How it works shows one line at a time:** "1 of 6", the line, 🔊, then Back and Next. Next reads the next line.
 - On opening a level, the goal and How it works line 1 are read.
@@ -196,3 +197,4 @@ How the three parts are built (v0.8.4):
 - [3] Design decision, 2026-11-10.
 - [4] Design decision, 2026-11-12.
 - [5] Design decision, 2026-11-16.
+- [6] Design decision, 2026-11-18.

@@ -174,7 +174,7 @@ export function mountStageLesson(root: HTMLElement, level: Level, next?: Level):
           present();
         } else if (!turned.length && g && m === g.move) {
           at++;
-          p.say(at < guide.length ? "Good!" : "");
+          p.say(at < guide.length ? "Good!" : "", "never"); // shown, not said: said every move, it nags
           present();
         } else if (WHOLE_CUBE.includes(m)) {
           turned.push(m);

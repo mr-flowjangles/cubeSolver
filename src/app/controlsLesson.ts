@@ -102,7 +102,7 @@ export function mountControlsLesson(root: HTMLElement, level: Level, next?: Leve
       const did = at < SWIPES ? NOTATION_STEPS[at].did : MAGIC_DID[m];
       print(did);
       at++;
-      p.say(at < SWIPES + TRICK ? "Good!" : "");
+      p.say(at < SWIPES + TRICK ? "Good!" : "", "never"); // shown, not said: said every move, it nags
       if (at === SWIPES) startTrick();
       else if (at > SWIPES && (at - SWIPES) % MAGIC.length === 0 && at < SWIPES + TRICK)
         print(`Round ${(at - SWIPES) / MAGIC.length} of ${MAGIC_ROUNDS} done.`);

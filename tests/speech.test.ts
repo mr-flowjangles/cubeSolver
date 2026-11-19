@@ -170,3 +170,15 @@ describe("How it works, one line at a time (v0.8.17)", () => {
     expect(c.at).toBe(1);
   });
 });
+
+describe('"Good!" is shown, never read (v0.8.19)', () => {
+  it("every Good! on the status line is passed as never-read", async () => {
+    const { readFileSync } = await import("node:fs");
+    for (const f of ["stageLesson", "controlsLesson"]) {
+      const src = readFileSync(new URL(`../src/app/${f}.ts`, import.meta.url), "utf8");
+      const calls = src.match(/\.say\([^;]*"Good!"[^;]*\);/g) ?? [];
+      expect(calls.length).toBeGreaterThan(0);
+      for (const c of calls) expect(c).toContain('"never"');
+    }
+  });
+});
