@@ -12,7 +12,7 @@ export function lineHtml(cls: string, html = ""): string {
  * Show new words on a line.
  * 1. `speak: "changed"` (the default) reads them only if they differ from what was shown,
  *    so a step's words aren't read again on every move of that step.
- * 2. `speak: "always"` reads them every time (feedback such as "Good!").
+ * 2. `speak: "always"` reads them every time (feedback such as Hint).
  * 3. `speak: "never"` only shows them (the move counter).
  */
 export function setLine(
